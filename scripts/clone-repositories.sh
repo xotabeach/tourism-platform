@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 SUPERPROJECT_ROOT="$(cd -- "${PROJECT_ROOT}/.." && pwd)"
 GITLAB_HOST="${GITLAB_HOST:-gitlab.com}"
-GITLAB_NAMESPACE="${GITLAB_NAMESPACE:-xotabeach}"
+GITLAB_NAMESPACE="${GITLAB_NAMESPACE:-travel-platform2}"
 GITLAB_BASE_URL="https://${GITLAB_HOST}/${GITLAB_NAMESPACE}"
 REPOSITORIES=(
   tourism-mobile

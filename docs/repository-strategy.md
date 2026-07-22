@@ -32,7 +32,7 @@ mobile_travel_app/
 - `tourism-infrastructure` — Kubernetes, Helm и environments;
 - `tourism-documentation` — расширенная документация.
 
-Remote repositories размещаются в private GitLab group `travel-platform`.
+Remote repositories размещаются в private GitLab group `travel-platform2`.
 Group создаётся вручную в UI (`https://gitlab.com/groups/new`), после чего
 `scripts/setup-gitlab-group.sh` переносит projects и обновляет remotes.
 `scripts/clone-repositories.sh` добавляет оставшиеся repositories как submodules.

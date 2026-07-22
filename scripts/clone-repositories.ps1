@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $SuperprojectRoot = Split-Path -Parent $ProjectRoot
 $GitLabHost = if ($env:GITLAB_HOST) { $env:GITLAB_HOST } else { "gitlab.com" }
-$GitLabNamespace = if ($env:GITLAB_NAMESPACE) { $env:GITLAB_NAMESPACE } else { "xotabeach" }
+$GitLabNamespace = if ($env:GITLAB_NAMESPACE) { $env:GITLAB_NAMESPACE } else { "travel-platform2" }
 $GitLabBaseUrl = "https://$GitLabHost/$GitLabNamespace"
 $Repositories = @(
     "tourism-mobile",
