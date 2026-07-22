@@ -10,6 +10,6 @@ platform-validate:
   services:
     - docker:27-dind
   before_script:
-    - apk add --no-cache bash git py3-yamllint
+    - apk add --no-cache bash git
   script:
     - ./scripts/validate.sh
