@@ -4,7 +4,7 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 2 — Backend foundation (следующая к выполнению)  
+**Текущая фаза:** Phase 3 — Geography and places (следующая)  
 **Последнее обновление:** 2026-07-22
 
 ## Сводка фаз
@@ -13,8 +13,8 @@
 | --- | --- | --- |
 | 0 | Repository audit and conventions | done |
 | 1 | Local infrastructure | done |
-| 2 | Backend foundation | next |
-| 3 | Geography and places | pending |
+| 2 | Backend foundation | done |
+| 3 | Geography and places | next |
 | 4 | Editorial routes | pending |
 | 5 | Flutter application foundation | pending |
 | 6 | Authentication | pending |
@@ -35,48 +35,44 @@
 - Зафиксирована модель из 4 repos: `workspace`, `tourism-platform`,
   `tourism-backend`, `tourism-mobile` (без отдельных infra/docs repos).
 - Канон документации в `tourism-platform/docs/`; индекс в `workspace/docs/`.
-- Добавлены:
-  - [application-business-logic.md](application-business-logic.md)
-  - [implementation-plan.md](implementation-plan.md)
-  - [development-conventions.md](development-conventions.md)
+- Добавлены business-logic, implementation-plan, development-conventions.
 - Domain model: единый `Route` + `RouteExecution` + sketch Trip/Travel+.
-- Conventions: branches, commits, MR, API `/api/v1`, env naming.
-- GitLab — primary CI; GitHub workflows оставлены как legacy.
+- GitLab — primary CI.
 
 ### Phase 1 — Local infrastructure (2026-07-22)
 
-- Compose в `tourism-platform` подтверждён (PostGIS, Redis, MinIO, Mailpit).
-- Backend: `REDIS_URL`, ready проверяет PostgreSQL + Redis.
-- Health: `/health/live`, `/health/ready` (+ aliases `/health`, `/ready`).
-- Dockerfile + CI image build без push в registry.
-- Mobile: `dart format` в `validate.sh`.
-- Workspace CI: проверка `docs/` index.
-- Запушено в `travel-platform2` (platform `9b2a4e0`, backend `9a19ae3`,
-  mobile `d64cf71`, workspace `9fab546`).
+- Compose (PostGIS, Redis, MinIO, Mailpit); Redis в backend ready.
+- Health `/health/live` + `/health/ready`; Dockerfile + CI image build.
+- Mobile `dart format` в validate; progress log заведён.
+
+### Phase 2 — Backend foundation (2026-07-22)
+
+- SQLAlchemy `Base` + UUID/timestamp mixins + naming convention.
+- Stable JSON error envelope (`AppError`, HTTP, validation handlers).
+- Structured JSON logging.
+- Versioned API root: `GET /api/v1`.
+- Module package markers: `route_execution`, `favorites`, `subscriptions`.
+- Alembic `target_metadata = Base.metadata`.
+- Tests: health + API foundation (8 passed).
+
+### CI fix (2026-07-22)
+
+- Workspace pipeline падал без jobs: unquoted `NOTE:` в `.gitlab-ci.yml`
+  ломал YAML. Исправлено folded scalar; pipeline `2697046789` — success.
 
 ## Что дальше
 
-### Phase 2 — Backend foundation
+### Phase 3 — Geography and places
 
-Цель: pragmatic clean architecture layers, error model, prefix `/api/v1`,
-базовые module packages без полной бизнес-логики.
+Цель: Country/Region/Locality, categories, places catalog + detail API;
+mobile repository interfaces/mocks и экраны каталога/карточки.
 
-Ожидаемо:
-
-- shared DB base / error handlers / structured logging уже частично есть —
-  довести;
-- versioned API router skeleton;
-- не реализовывать auth/places/routes в этой фазе.
-
-После Phase 2 → Phase 3 (geography and places).
+После Phase 3 → Phase 4 (editorial routes) и/или Phase 5 (Flutter shell)
+по приоритету команды.
 
 ## Блокеры и заметки
 
-- Локальный `docker build` backend на машине разработчика не был проверен
-  (Docker daemon был выключен); проверка образа ожидается в GitLab CI job
-  `backend-image`.
-- Auth (JWT vs session) и конкретный routing provider для staging — open
-  decisions, фиксировать ADR при старте соответствующих фаз.
+- Auth (JWT vs session) и routing provider для staging — open decisions (ADR).
 - Не коммитить `.tmp-ref-frames/` в workspace.
 
 ## Как вести этот файл
