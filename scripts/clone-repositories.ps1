@@ -4,8 +4,8 @@ Set-StrictMode -Version Latest
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $SuperprojectRoot = Split-Path -Parent $ProjectRoot
 $GitLabHost = if ($env:GITLAB_HOST) { $env:GITLAB_HOST } else { "gitlab.com" }
-$GitLabGroup = if ($env:GITLAB_GROUP) { $env:GITLAB_GROUP } else { "crimea-travel-platform" }
-$GitLabBaseUrl = "https://$GitLabHost/$GitLabGroup"
+$GitLabNamespace = if ($env:GITLAB_NAMESPACE) { $env:GITLAB_NAMESPACE } else { "xotabeach" }
+$GitLabBaseUrl = "git@${GitLabHost}:$GitLabNamespace"
 $Repositories = @(
     "tourism-mobile",
     "tourism-backend",
@@ -39,7 +39,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "GitLab CLI не авторизован. Выполните 'glab auth login'."
 }
 
-Write-Host "Проверка репозиториев группы $GitLabGroup..."
+Write-Host "Проверка репозиториев namespace $GitLabNamespace..."
 foreach ($Repository in $Repositories) {
     $Target = Join-Path $SuperprojectRoot $Repository
     if (Test-Path -LiteralPath $Target) {
@@ -47,9 +47,9 @@ foreach ($Repository in $Repositories) {
         continue
     }
 
-    & glab api "projects/$GitLabGroup%2F$Repository" *> $null
+    & glab api "projects/$GitLabNamespace%2F$Repository" *> $null
     if ($LASTEXITCODE -ne 0) {
-        throw "Репозиторий $GitLabGroup/$Repository недоступен или ещё не создан."
+        throw "Репозиторий $GitLabNamespace/$Repository недоступен или ещё не создан."
     }
 }
 
@@ -64,7 +64,7 @@ foreach ($Repository in $Repositories) {
         "$GitLabBaseUrl/$Repository.git" `
         $Repository
     if ($LASTEXITCODE -ne 0) {
-        throw "Не удалось добавить submodule $GitLabGroup/$Repository."
+        throw "Не удалось добавить submodule $GitLabNamespace/$Repository."
     }
 }
 

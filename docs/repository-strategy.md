@@ -32,8 +32,8 @@ mobile_travel_app/
 - `tourism-infrastructure` — Kubernetes, Helm и environments;
 - `tourism-documentation` — расширенная документация.
 
-Remote repositories размещаются в private GitLab group
-`crimea-travel-platform`. `scripts/clone-repositories.sh` или его PowerShell-аналог
+Remote repositories размещаются в private GitLab projects namespace
+`xotabeach`. `scripts/clone-repositories.sh` или его PowerShell-аналог
 предварительно проверит доступность projects и добавит их в superproject.
 Существующие каталоги скрипт не перезаписывает.
 

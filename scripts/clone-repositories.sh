@@ -6,8 +6,8 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 SUPERPROJECT_ROOT="$(cd -- "${PROJECT_ROOT}/.." && pwd)"
 GITLAB_HOST="${GITLAB_HOST:-gitlab.com}"
-GITLAB_GROUP="${GITLAB_GROUP:-crimea-travel-platform}"
-GITLAB_BASE_URL="https://${GITLAB_HOST}/${GITLAB_GROUP}"
+GITLAB_NAMESPACE="${GITLAB_NAMESPACE:-xotabeach}"
+GITLAB_BASE_URL="git@${GITLAB_HOST}:${GITLAB_NAMESPACE}"
 REPOSITORIES=(
   tourism-mobile
   tourism-backend
@@ -43,7 +43,7 @@ if ! glab auth status --hostname "${GITLAB_HOST}" >/dev/null 2>&1; then
   exit 1
 fi
 
-printf 'Проверка репозиториев группы %s...\n' "${GITLAB_GROUP}"
+printf 'Проверка репозиториев namespace %s...\n' "${GITLAB_NAMESPACE}"
 for repository in "${REPOSITORIES[@]}"; do
   target="${SUPERPROJECT_ROOT}/${repository}"
   if [[ -e "${target}" ]]; then
@@ -51,9 +51,9 @@ for repository in "${REPOSITORIES[@]}"; do
     continue
   fi
 
-  if ! glab api "projects/${GITLAB_GROUP}%2F${repository}" >/dev/null 2>&1; then
+  if ! glab api "projects/${GITLAB_NAMESPACE}%2F${repository}" >/dev/null 2>&1; then
     printf 'Ошибка: репозиторий %s/%s недоступен или ещё не создан.\n' \
-      "${GITLAB_GROUP}" "${repository}" >&2
+      "${GITLAB_NAMESPACE}" "${repository}" >&2
     exit 1
   fi
 done
@@ -69,7 +69,7 @@ for repository in "${REPOSITORIES[@]}"; do
     "${GITLAB_BASE_URL}/${repository}.git" \
     "${repository}"; then
     printf 'Ошибка: не удалось добавить submodule %s/%s.\n' \
-      "${GITLAB_GROUP}" "${repository}" >&2
+      "${GITLAB_NAMESPACE}" "${repository}" >&2
     exit 1
   fi
 done
