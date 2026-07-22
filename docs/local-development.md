@@ -78,6 +78,9 @@ make clean CONFIRM=yes
 ## Submodules implementation repositories
 
 `tourism-backend` и `tourism-mobile` уже доступны как private Git submodules
+superproject. Канонические docs: [application-business-logic.md](application-business-logic.md),
+[implementation-plan.md](implementation-plan.md),
+[development-conventions.md](development-conventions.md).
 superproject. Для `tourism-infrastructure` и `tourism-documentation` команда
 `make clone-repositories` проверит `git`, `gh`, authorization, superproject и
 доступность всех remotes, затем добавит их как Git submodules рядом с

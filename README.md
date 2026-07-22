@@ -20,26 +20,29 @@ Crimea Travel Platform — рабочее название новой мобил
 - Python 3.13, FastAPI и modular monolith на первом этапе.
 - PostgreSQL с PostGIS для географических данных.
 - Чёткие границы `identity`, `users`, `geography`, `places`, `routes`,
-  `route_builder` и `media`.
+  `route_builder`, `route_execution`, `favorites`, `subscriptions` и `media`.
 - Независимая от поставщика абстракция `RoutingProvider`.
 - Kafka как планируемый conditional event backbone для будущих services.
 - Возможность последующего выделения модулей в микросервисы.
 
 Ключевые решения описаны в [docs/decisions](docs/decisions).
 
+Продуктовая логика и план:
+[application-business-logic.md](docs/application-business-logic.md),
+[implementation-plan.md](docs/implementation-plan.md),
+[development-conventions.md](docs/development-conventions.md).
+
 ## Репозитории
 
 | Repository | Назначение |
 | --- | --- |
-| `tourism-platform` | Управление workspace, документация и локальный запуск |
+| `workspace` | Git superproject, Makefile, submodule pointers |
+| `tourism-platform` | Документация, local Compose, будущие Helm/K8s |
 | `tourism-mobile` | Flutter-приложение для Android и iOS |
 | `tourism-backend` | Модульный Python backend |
-| `tourism-infrastructure` | Kubernetes, Helm и конфигурации окружений |
-| `tourism-documentation` | Расширенная продуктовая и архитектурная документация |
 
-После создания GitLab projects остальные repositories клонируются рядом с
-`tourism-platform` как Git submodules общего superproject. Каждый repository
-сохраняет собственную историю, а superproject фиксирует совместимые commits.
+Дополнительные repositories не создаются. Infra и расширенная документация
+живут здесь. Superproject фиксирует совместимые commits submodules.
 
 ## Требования
 
@@ -102,19 +105,17 @@ make ps
 └── README.md
 ```
 
-Ожидаемая локальная структура уровнем выше:
+Ожидаемая локальная структура уровнем выше (`workspace`):
 
 ```text
-mobile_travel_app/
+workspace/
+├── docs/
 ├── tourism-platform/
 ├── tourism-mobile/
-├── tourism-backend/
-├── tourism-infrastructure/
-└── tourism-documentation/
+└── tourism-backend/
 ```
 
-Корневая папка `mobile_travel_app` является отдельным Git superproject.
-Каталоги внутри неё регистрируются в `.gitmodules`.
+Корневая папка — Git superproject; каталоги регистрируются в `.gitmodules`.
 
 ## Legacy reference
 
@@ -129,9 +130,12 @@ mobile_travel_app/
 
 ## Документация
 
+- [Business logic](docs/application-business-logic.md)
+- [Implementation plan](docs/implementation-plan.md)
+- [Development conventions](docs/development-conventions.md)
 - [Product vision](docs/product-vision.md)
 - [System context](docs/system-context.md)
-- [Preliminary domain model](docs/domain-model.md)
+- [Domain model](docs/domain-model.md)
 - [Repository strategy](docs/repository-strategy.md)
 - [Local development](docs/local-development.md)
 - [Architecture decisions](docs/decisions)
@@ -141,9 +145,8 @@ mobile_travel_app/
 
 ## Дальнейшие шаги
 
-1. Создать приватные remote-репозитории.
-2. Добавить repositories в superproject как submodules.
-3. Сформировать skeleton модульного backend.
-4. Сформировать foundation Flutter-приложения.
-5. Подготовить инфраструктурный репозиторий и окружение `dev`.
-6. Уточнить MVP-контент, источники данных и правила актуализации.
+1. Завершить Phase 1 foundation gaps (Redis ready, Dockerfile) — в работе.
+2. Phase 2–3: backend layers, geography и places.
+3. Editorial routes и Flutter shell.
+4. Auth, favorites, route builder, route execution.
+5. Staging manifests в этом repository (без отдельного infra repo).

@@ -2,87 +2,45 @@
 
 ## Назначение
 
-`tourism-platform` — главный репозиторий платформы и единая точка входа
-для разработки. Он содержит общие инженерные соглашения, верхнеуровневую
-документацию и локальное инфраструктурное окружение, но не application source.
-Он и остальные repositories подключаются как Git submodules общего
-superproject.
+`tourism-platform` — канонический repository документации, локальной
+инфраструктуры и будущих staging/production assets (Kubernetes/Helm). Он не
+содержит application source backend/mobile. Подключается как submodule
+superproject `workspace`.
 
 ## Ответственность
 
 - Описывать границы модулей, contracts и правила зависимостей.
 - Предоставлять единые команды запуска, проверки и локальной разработки.
 - Содержать local Compose для PostgreSQL/PostGIS, Redis, MinIO и Mailpit.
-- Предоставлять tooling для local multi-repository superproject.
-- Служить местом интеграционной проверки всей платформы.
+- Хранить продуктовую документацию, ADR и implementation plan.
+- В будущем: Helm charts, env configs, observability wiring.
+- Предоставлять tooling для multi-repository workspace.
 
 ## Вне целей
 
 - Создание отдельных микросервисов до появления критериев извлечения.
-- Хранение backend, Flutter source, Kubernetes manifests или Helm charts.
+- Хранение backend или Flutter source.
 - Прямая зависимость одного модуля от ORM-моделей другого.
 - Выдача платформы за официальное государственное приложение.
-- Создание публичных удалённых репозиториев.
+- Хранение production secrets в Git.
 
 ## Будущая реализация и стек
 
-- Markdown и Mermaid для верхнеуровневой документации.
-- Docker Compose для общих local dependencies.
+- Markdown и Mermaid для документации.
+- Docker Compose для local dependencies.
 - Bash, PowerShell и Make для developer workflow.
 - GitLab CI для validation без deployment.
-- Submodule scripts для repositories `tourism-mobile`,
-  `tourism-backend`, `tourism-infrastructure` и `tourism-documentation`.
+- Kubernetes/Helm позже **в этом** repository (отдельный
+  `tourism-infrastructure` repo не создаётся).
 
 ## Интеграции
 
-- `tourism-backend` — серверная реализация modular monolith.
-- `tourism-mobile` — потребитель публичного программного интерфейса.
-- `tourism-infrastructure` — окружения, доставка и эксплуатация.
-- `tourism-documentation` — архитектурная и продуктовая документация.
-- Внешние картографические, геокодинговые и медиа-провайдеры подключаются
-  через адаптеры.
+- `tourism-backend` — modular monolith.
+- `tourism-mobile` — потребитель API.
+- Внешние routing/geo/media провайдеры через адаптеры.
 
 ## Результаты
 
 - Документированные границы и architecture decisions.
 - Воспроизводимое локальное окружение.
 - Validation конфигурации и управляющих файлов.
-- Описанный порядок подключения private repositories как submodules.
-- Базовые эксплуатационные метрики, журналы и трассировка.
-
-## Поэтапный план
-
-### Этап 1. Основа
-
-- [x] Описать правила зависимостей и владения данными.
-- [x] Подготовить local dependencies и единые команды.
-- [x] Добавить repository и service profiles.
-- [ ] Создать private remote для `tourism-platform`.
-
-### Этап 2. Минимальный продукт
-
-- [ ] Создать четыре private дочерних repositories.
-- [ ] Добавить их в superproject как Git submodules.
-- [ ] Зафиксировать совместимый набор commits.
-- [ ] Добавить integration contract checks после появления приложений.
-
-### Этап 3. Качество и эксплуатация
-
-- [ ] Добавить интеграционные и контрактные проверки.
-- [ ] Ввести аудит, метрики, трассировку и оповещения.
-- [ ] Проверить резервное копирование и восстановление данных.
-- [ ] Задокументировать ограничения производительности.
-
-### Этап 4. Multi-repository workspace
-
-- [ ] Создать приватные удалённые репозитории отдельным процессом.
-- [ ] Согласовать версии и права доступа.
-- [ ] Проверить submodule workflow и независимость Git histories.
-- [ ] Настроить сквозные проверки без дублирования ответственности.
-
-### Этап 5. Эволюция
-
-- [ ] Собирать фактические показатели нагрузки и связанности модулей.
-- [ ] Проверять критерии извлечения каждого домена.
-- [ ] Выделять сервисы только при измеримой организационной или
-  эксплуатационной пользе.

@@ -27,6 +27,9 @@ REQUIRED_FILES=(
   docs/domain-model.md
   docs/repository-strategy.md
   docs/local-development.md
+  docs/application-business-logic.md
+  docs/implementation-plan.md
+  docs/development-conventions.md
   docs/decisions/ADR-001-modular-monolith-first.md
   docs/decisions/ADR-002-separate-mobile-backend-infrastructure-repositories.md
   docs/decisions/ADR-003-postgresql-postgis.md

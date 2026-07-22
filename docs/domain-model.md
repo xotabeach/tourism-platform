@@ -199,97 +199,60 @@ Invariants:
 
 ## Routes
 
-### PreparedRoute
+Целевая модель — единый `Route` с дискриминатором источника. Исторические имена
+`PreparedRoute` / `GeneratedRoute` в ранних черновиках считаются синонимами
+`Route(source=editorial)` и `Route(source=generated)`.
 
-Назначение: редакционный, заранее проверенный маршрут.
+### Route
 
-Поля:
-
-- `id`, `regionId`, `name`, `slug`, `description`;
-- `estimatedDurationMinutes`, `distanceMeters`, `difficulty`;
-- `routeScope`, `transportMode`, `isRoundTrip`, `geometry`;
-- `recommendedEquipment`, `seasonality`, `safetyWarnings`;
-- `publicationStatus`, source и freshness fields, timestamps.
-
-Связи: принадлежит `Region`, содержит `PreparedRouteStop`.
-
-Module owner: `routes`.
-
-Invariants:
-
-- опубликованный маршрут имеет минимум две активные остановки;
-- все остановки относятся к совместимой географии;
-- агрегированные safety, equipment и seasonality не скрывают более строгие
-  требования остановок;
-- stale маршрут отмечается или снимается с генерации.
-
-### PreparedRouteStop
-
-Назначение: упорядоченная остановка редакционного маршрута.
+Назначение: упорядоченный набор точек и геометрия перемещения между ними.
 
 Поля:
 
-- `id`, `preparedRouteId`, `placeId`, опциональный `placeEntranceId`;
-- `position`, `plannedArrivalOffsetMinutes`, `visitDurationMinutes`;
-- `note`, `isOptional`, timestamps.
+- `id`, `regionId`, опциональный `ownerUserId`;
+- `name`, `slug`, `shortDescription`, `description`;
+- `source`: `editorial` | `generated` | `user_created`;
+- `visibility`: `private` | `unlisted` | `public`;
+- `lifecycleStatus`: `draft` | `active` | `archived`;
+- `moderationStatus` (будущее): `not_submitted` | `pending` | `approved` |
+  `rejected` | `changes_requested`;
+- `estimatedDurationMinutes`, `distanceMeters`, `difficulty`, `budgetNotes`;
+- `seasonality`, `transportMode`, `isRoundTrip`;
+- `suitableForChildren`, `petsAllowed`, `accessibility`;
+- `geometry`, `authorLabel`, `sourceName`, `sourceUrl`;
+- category links, source/freshness fields для editorial, timestamps.
 
-Связи: принадлежит `PreparedRoute`, ссылается на `Place` и entrance по ID.
+Связи: принадлежит `Region`, содержит `RouteStop`; может иметь
+`RouteExecution`; в будущем ссылается из `TripItem`.
 
-Module owner: `routes`.
+Module owner: `routes` (editorial/user_created persistence); `route_builder`
+создаёт `source=generated`.
 
 Invariants:
 
-- `position` уникальна и непрерывна в маршруте;
-- entrance принадлежит выбранному place;
-- duration положительна;
-- закрытая обязательная остановка блокирует публикацию без редакционного решения.
+- active public editorial имеет минимум две остановки;
+- generated и user_created в MVP — private;
+- прогресс прохождения не меняет `lifecycleStatus` маршрута;
+- stale editorial отмечается или снимается с выдачи.
 
-### GeneratedRoute
+### RouteStop
 
-Назначение: снимок результата route builder для конкретного запроса.
+Назначение: упорядоченная остановка маршрута.
 
 Поля:
 
-- `id`, опциональный `userId`, `requestId`;
-- `regionId`, `status`, `transportMode`, `providerCode`, `providerRequestId`;
-- `startedAt`, `finishedAt`, `totalDurationMinutes`, `distanceMeters`;
-- `geometry`, `warnings`, `failureCode`;
-- `algorithmVersion`, `dataSnapshotAt`, timestamps.
+- `id`, `routeId`, `placeId`, опциональный `placeEntranceId`;
+- `position`, `visitDurationMinutes`, `note`, `isOptional`;
+- для generated: `arrivalAt`, `departureAt`, leg metrics, `selectionReason`;
+- timestamps.
 
-Связи: создаётся из `RouteGenerationRequest`, содержит `GeneratedRouteStop`,
-может быть сохранён как `SavedRoute`.
-
-Module owner: `route_builder`.
+Module owner: тот же, что у родительского `Route` write-path.
 
 Invariants:
 
-- успешный маршрут содержит остановки и не содержит `failureCode`;
-- результат неизменяем после завершения;
-- сохраняются версия алгоритма и время data snapshot;
-- пользователь видит provider и предупреждения, влияющие на поездку.
-
-### GeneratedRouteStop
-
-Назначение: вычисленная остановка с расписанием и routing metadata.
-
-Поля:
-
-- `id`, `generatedRouteId`, `placeId`, опциональный `placeEntranceId`;
-- `position`, `arrivalAt`, `departureAt`, `visitDurationMinutes`;
-- `legDistanceMeters`, `legDurationSeconds`, `legGeometry`;
-- `selectionReason`, `warnings`, timestamps.
-
-Связи: принадлежит `GeneratedRoute`, ссылается на place и entrance по ID.
-
-Module owner: `route_builder`.
-
-Invariants:
-
-- позиции уникальны и непрерывны;
-- arrival не позже departure;
-- выбранный entrance принадлежит place;
-- остановка не пересекает подтверждённое закрытие или недоступное расписание;
-- route leg после первой остановки имеет duration и distance.
+- `position` уникальна и непрерывна;
+- entrance принадлежит place;
+- закрытая обязательная остановка блокирует публикацию editorial.
 
 ### RouteGenerationRequest
 
@@ -302,25 +265,63 @@ Invariants:
 - `startsAt`, `minDurationMinutes`, `maxDurationMinutes`;
 - `maxDistanceMeters`, `minPlaceCount`, `maxPlaceCount`, `transportMode`;
 - `categoryIds`, `requiredPlaceIds`, `excludedPlaceIds`, `priorityPlaceIds`;
-- `pricePreference`, `withChildren`, `accessibilityNeeds`;
+- `pricePreference`, `withChildren`, `petsAllowed`, `accessibilityNeeds`;
 - `equipmentAvailable`, `difficulty`, `season`, `preferences`;
-- `status`, timestamps.
+- `status`, `failureCode`, timestamps.
 
-Связи: инициируется пользователем и порождает ноль или несколько попыток
-`GeneratedRoute`.
+Связи: порождает ноль или несколько `Route(source=generated)`.
 
 Module owner: `route_builder`.
 
 Invariants:
 
-- minimum values не превышают соответствующие maximum values;
-- duration, distance и place count положительны;
-- required и excluded sets не пересекаются;
-- locality IDs принадлежат выбранному region;
-- при `returnToOrigin=true` отдельный destination не задаётся;
-- origin и destination валидны для поддерживаемой географии;
-- запрос не ослабляет safety restrictions;
-- повторная обработка идемпотентна по request ID.
+- min ≤ max для duration/distance/place count;
+- required и excluded не пересекаются;
+- при `returnToOrigin=true` destination не задаётся;
+- идемпотентность по request ID;
+- `failureCode` примеры: `no_candidates`, `constraints_too_strict`,
+  `routing_provider_error`, `route_too_long`, `invalid_start_point`,
+  `quota_exceeded`.
+
+## Route execution
+
+### RouteExecution
+
+Назначение: конкретное прохождение маршрута пользователем.
+
+Поля:
+
+- `id`, `userId`, `routeId` и/или immutable `routeSnapshot`;
+- `status`: `planned` | `in_progress` | `paused` | `completed` | `cancelled`;
+- `startedAt`, `completedAt`;
+- `currentStopIndex`, `visitedStops`, `skippedStops`, `progressPercent`;
+- опционально `lastKnownPosition`;
+- `createdAt`, `updatedAt`.
+
+Module owner: `route_execution`.
+
+Invariants:
+
+- статусы маршрута и execution независимы;
+- доступ только у владельца execution;
+- completed имеет `completedAt` и progress 100% либо явный partial-complete
+  policy (зафиксировать в API).
+
+## Trip (будущий модуль)
+
+Таблицы и API Trip в MVP не создаются. Целевая структура:
+
+- `Trip` → `TripDay` → `TripItem`;
+- `TripItem` может ссылаться на `Route`, `Place`, Accommodation, Transport,
+  Restaurant, Note, CustomEvent.
+
+`Route.id` должен оставаться стабильной ссылкой для будущего `TripItem`.
+
+## Subscriptions / Travel+ (foundation)
+
+Концепты (без billing в MVP): `Plan`, `Subscription`, `Entitlement`,
+`UsageCounter`, `QuotaPolicy`. Бизнес-код обращается к `EntitlementService`,
+а не к `user.is_premium`. Лимиты — только в конфигурации политики.
 
 ## Identity и users
 
@@ -385,22 +386,19 @@ Invariants:
 
 ### SavedRoute
 
-Назначение: пользовательское сохранение подготовленного или сгенерированного
-маршрута с названием и snapshot важных данных.
+Назначение: пользовательское сохранение маршрута с названием и snapshot.
 
 Поля:
 
-- `id`, `userId`, `routeType`, `routeId`;
+- `id`, `userId`, `routeId`;
 - `name`, `snapshot`, `savedAt`, `updatedAt`.
 
-Связи: принадлежит `User`; ссылается либо на `PreparedRoute`, либо на
-`GeneratedRoute`.
+Связи: принадлежит `User`; ссылается на `Route` по ID.
 
-Module owner: `users`.
+Module owner: `favorites` / `users`.
 
 Invariants:
 
-- задан ровно один допустимый route reference согласно `routeType`;
 - snapshot неизменяем и не содержит credentials;
 - изменения исходного маршрута не переписывают пользовательскую историю;
 - доступ имеет только владелец.
@@ -408,11 +406,14 @@ Invariants:
 ## Границы modules
 
 - `identity`: credentials, sessions и account lifecycle.
-- `users`: profile, favorites и saved routes.
+- `users`: profile.
 - `geography`: country, region и locality.
 - `places`: category, place, entrance, schedule и image metadata.
-- `routes`: editorial prepared routes.
-- `route_builder`: generation requests, generated routes и provider orchestration.
+- `routes`: route persistence (editorial/user_created) и read models.
+- `route_builder`: generation requests, generated routes, RoutingProvider.
+- `route_execution`: прохождения маршрутов.
+- `favorites`: favorite places и saved routes.
+- `subscriptions`: plans, entitlements, usage counters.
 - `media`: binary assets, storage и transformations.
 
 Каждый module владеет своей persistence model и публикует application API,
