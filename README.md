@@ -130,6 +130,7 @@ workspace/
 
 ## Документация
 
+- [Progress — что сделано / дальше](docs/progress.md)
 - [Business logic](docs/application-business-logic.md)
 - [Implementation plan](docs/implementation-plan.md)
 - [Development conventions](docs/development-conventions.md)

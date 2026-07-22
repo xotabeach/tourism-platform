@@ -4,7 +4,8 @@
 принятия предыдущих acceptance criteria. Backlog в конце файла.
 
 См. также: [application-business-logic.md](application-business-logic.md),
-[development-conventions.md](development-conventions.md).
+[development-conventions.md](development-conventions.md),
+[progress.md](progress.md) (живой статус: что сделано / что дальше).
 
 ## Phase 0 — Repository audit and conventions
 

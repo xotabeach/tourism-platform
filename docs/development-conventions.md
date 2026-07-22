@@ -99,6 +99,12 @@ versioned staging release.
 Не использовать production secrets локально. `.env.example` — только safe local
 defaults.
 
+## Progress log
+
+После завершения фазы обновляй [progress.md](progress.md): статус таблицы,
+блок «Что сделано», «Что дальше», блокеры. Это короткий статус для команды;
+детальный backlog остаётся в [implementation-plan.md](implementation-plan.md).
+
 ## Язык и стиль кода
 
 - Backend: Python 3.13, Ruff, MyPy strict, Pytest.
