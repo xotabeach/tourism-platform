@@ -11,7 +11,7 @@ security hardening, backup или scaling policy.
 - macOS или Linux;
 - Git и Make;
 - Docker Desktop с Compose v2;
-- GitHub CLI для будущего подключения private submodules;
+- GitLab CLI для подключения private submodules;
 - PowerShell 7 только для запуска `.ps1` scripts.
 
 ## Base services

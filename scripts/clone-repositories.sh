@@ -5,7 +5,9 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 SUPERPROJECT_ROOT="$(cd -- "${PROJECT_ROOT}/.." && pwd)"
-GITHUB_ORG="${GITHUB_ORG:-crimea-travel-platform}"
+GITLAB_HOST="${GITLAB_HOST:-gitlab.com}"
+GITLAB_GROUP="${GITLAB_GROUP:-crimea-travel-platform}"
+GITLAB_BASE_URL="https://${GITLAB_HOST}/${GITLAB_GROUP}"
 REPOSITORIES=(
   tourism-mobile
   tourism-backend
@@ -23,7 +25,7 @@ require_command() {
 }
 
 require_command git
-require_command gh
+require_command glab
 
 if ! git -C "${PROJECT_ROOT}" rev-parse --show-toplevel >/dev/null 2>&1; then
   printf 'Ошибка: %s не является Git-репозиторием.\n' "${PROJECT_ROOT}" >&2
@@ -36,12 +38,12 @@ if [[ "$(git -C "${SUPERPROJECT_ROOT}" rev-parse --show-toplevel 2>/dev/null)" !
   exit 1
 fi
 
-if ! gh auth status >/dev/null 2>&1; then
-  printf 'Ошибка: GitHub CLI не авторизован. Выполните "gh auth login".\n' >&2
+if ! glab auth status --hostname "${GITLAB_HOST}" >/dev/null 2>&1; then
+  printf 'Ошибка: GitLab CLI не авторизован. Выполните "glab auth login".\n' >&2
   exit 1
 fi
 
-printf 'Проверка репозиториев организации %s...\n' "${GITHUB_ORG}"
+printf 'Проверка репозиториев группы %s...\n' "${GITLAB_GROUP}"
 for repository in "${REPOSITORIES[@]}"; do
   target="${SUPERPROJECT_ROOT}/${repository}"
   if [[ -e "${target}" ]]; then
@@ -49,9 +51,9 @@ for repository in "${REPOSITORIES[@]}"; do
     continue
   fi
 
-  if ! gh repo view "${GITHUB_ORG}/${repository}" >/dev/null 2>&1; then
+  if ! glab api "projects/${GITLAB_GROUP}%2F${repository}" >/dev/null 2>&1; then
     printf 'Ошибка: репозиторий %s/%s недоступен или ещё не создан.\n' \
-      "${GITHUB_ORG}" "${repository}" >&2
+      "${GITLAB_GROUP}" "${repository}" >&2
     exit 1
   fi
 done
@@ -64,10 +66,10 @@ for repository in "${REPOSITORIES[@]}"; do
 
   printf 'Добавление submodule %s...\n' "${repository}"
   if ! git -C "${SUPERPROJECT_ROOT}" submodule add \
-    "https://github.com/${GITHUB_ORG}/${repository}.git" \
+    "${GITLAB_BASE_URL}/${repository}.git" \
     "${repository}"; then
     printf 'Ошибка: не удалось добавить submodule %s/%s.\n' \
-      "${GITHUB_ORG}" "${repository}" >&2
+      "${GITLAB_GROUP}" "${repository}" >&2
     exit 1
   fi
 done

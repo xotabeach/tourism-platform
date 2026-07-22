@@ -14,7 +14,7 @@ REQUIRED_FILES=(
   .github/ISSUE_TEMPLATE/bug_report.yml
   .github/ISSUE_TEMPLATE/feature_request.yml
   .github/pull_request_template.md
-  .github/workflows/validate.yml
+  .gitlab-ci.yml
   README.md
   CONTRIBUTING.md
   SECURITY.md
@@ -85,7 +85,7 @@ else
 fi
 
 if command -v yamllint >/dev/null 2>&1; then
-  yamllint .github compose.yaml
+  yamllint .gitlab-ci.yml .github compose.yaml
   printf 'YAML lint: OK\n'
 else
   printf 'YAML lint: SKIP (yamllint не установлен)\n'

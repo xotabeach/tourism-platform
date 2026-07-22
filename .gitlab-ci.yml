@@ -1,0 +1,17 @@
+stages:
+  - validate
+
+platform-validate:
+  stage: validate
+  image: docker:27-cli
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - apk add --no-cache bash python3 py3-pip git
+    - pip install --disable-pip-version-check yamllint==1.37.1
+  script:
+    - ./scripts/validate.sh

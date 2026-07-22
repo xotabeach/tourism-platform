@@ -29,7 +29,7 @@ superproject.
 - Markdown и Mermaid для верхнеуровневой документации.
 - Docker Compose для общих local dependencies.
 - Bash, PowerShell и Make для developer workflow.
-- GitHub Actions для validation без deployment.
+- GitLab CI для validation без deployment.
 - Submodule scripts для repositories `tourism-mobile`,
   `tourism-backend`, `tourism-infrastructure` и `tourism-documentation`.
 

@@ -3,7 +3,9 @@ Set-StrictMode -Version Latest
 
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $SuperprojectRoot = Split-Path -Parent $ProjectRoot
-$GitHubOrg = if ($env:GITHUB_ORG) { $env:GITHUB_ORG } else { "crimea-travel-platform" }
+$GitLabHost = if ($env:GITLAB_HOST) { $env:GITLAB_HOST } else { "gitlab.com" }
+$GitLabGroup = if ($env:GITLAB_GROUP) { $env:GITLAB_GROUP } else { "crimea-travel-platform" }
+$GitLabBaseUrl = "https://$GitLabHost/$GitLabGroup"
 $Repositories = @(
     "tourism-mobile",
     "tourism-backend",
@@ -20,7 +22,7 @@ function Assert-Command {
 }
 
 Assert-Command -Name "git"
-Assert-Command -Name "gh"
+Assert-Command -Name "glab"
 
 & git -C $ProjectRoot rev-parse --show-toplevel *> $null
 if ($LASTEXITCODE -ne 0) {
@@ -32,12 +34,12 @@ if ($LASTEXITCODE -ne 0 -or $DetectedSuperprojectRoot -ne $SuperprojectRoot) {
     throw "'$SuperprojectRoot' не является Git superproject."
 }
 
-& gh auth status *> $null
+& glab auth status --hostname $GitLabHost *> $null
 if ($LASTEXITCODE -ne 0) {
-    throw "GitHub CLI не авторизован. Выполните 'gh auth login'."
+    throw "GitLab CLI не авторизован. Выполните 'glab auth login'."
 }
 
-Write-Host "Проверка репозиториев организации $GitHubOrg..."
+Write-Host "Проверка репозиториев группы $GitLabGroup..."
 foreach ($Repository in $Repositories) {
     $Target = Join-Path $SuperprojectRoot $Repository
     if (Test-Path -LiteralPath $Target) {
@@ -45,9 +47,9 @@ foreach ($Repository in $Repositories) {
         continue
     }
 
-    & gh repo view "$GitHubOrg/$Repository" *> $null
+    & glab api "projects/$GitLabGroup%2F$Repository" *> $null
     if ($LASTEXITCODE -ne 0) {
-        throw "Репозиторий $GitHubOrg/$Repository недоступен или ещё не создан."
+        throw "Репозиторий $GitLabGroup/$Repository недоступен или ещё не создан."
     }
 }
 
@@ -59,10 +61,10 @@ foreach ($Repository in $Repositories) {
 
     Write-Host "Добавление submodule $Repository..."
     & git -C $SuperprojectRoot submodule add `
-        "https://github.com/$GitHubOrg/$Repository.git" `
+        "$GitLabBaseUrl/$Repository.git" `
         $Repository
     if ($LASTEXITCODE -ne 0) {
-        throw "Не удалось добавить submodule $GitHubOrg/$Repository."
+        throw "Не удалось добавить submodule $GitLabGroup/$Repository."
     }
 }
 

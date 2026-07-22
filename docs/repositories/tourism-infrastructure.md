@@ -30,7 +30,7 @@ superproject.
 
 - Kubernetes и Helm для `dev`, `staging` и `production`.
 - Kubernetes Ingress как API entry point.
-- GitHub Actions для validation и контролируемой доставки.
+- GitLab CI для validation и контролируемой доставки.
 - PostgreSQL/PostGIS, Redis и S3-compatible object storage.
 - Kafka в KRaft mode как conditional event backbone после approval ADR
   активации; конкретный provider или operator пока не выбран.

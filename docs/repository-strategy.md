@@ -32,10 +32,9 @@ mobile_travel_app/
 - `tourism-infrastructure` — Kubernetes, Helm и environments;
 - `tourism-documentation` — расширенная документация.
 
-Remote repositories пока не существуют. Пустые repositories сейчас не
-создаются. После появления private remotes
-`scripts/clone-repositories.sh` или его PowerShell-аналог предварительно
-проверит доступность всех repositories и добавит их в superproject.
+Remote repositories размещаются в private GitLab group
+`crimea-travel-platform`. `scripts/clone-repositories.sh` или его PowerShell-аналог
+предварительно проверит доступность projects и добавит их в superproject.
 Существующие каталоги скрипт не перезаписывает.
 
 Local Compose остаётся в `tourism-platform`, поскольку обеспечивает общий

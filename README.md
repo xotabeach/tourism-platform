@@ -11,8 +11,8 @@ Crimea Travel Platform — рабочее название новой мобил
 
 Репозиторий находится на стадии foundation. Здесь размещены верхнеуровневая
 документация, решения об архитектуре, локальная инфраструктура и инструменты
-управления будущими репозиториями. Backend и Flutter-приложение ещё не
-реализуются.
+управления репозиториями workspace. Skeleton `tourism-backend` и
+`tourism-mobile` уже подключены как submodules superproject.
 
 ## Архитектурное направление
 
@@ -37,7 +37,7 @@ Crimea Travel Platform — рабочее название новой мобил
 | `tourism-infrastructure` | Kubernetes, Helm и конфигурации окружений |
 | `tourism-documentation` | Расширенная продуктовая и архитектурная документация |
 
-После создания private remotes остальные repositories клонируются рядом с
+После создания GitLab projects остальные repositories клонируются рядом с
 `tourism-platform` как Git submodules общего superproject. Каждый repository
 сохраняет собственную историю, а superproject фиксирует совместимые commits.
 
@@ -45,7 +45,7 @@ Crimea Travel Platform — рабочее название новой мобил
 
 - macOS или Linux;
 - Git;
-- GitHub CLI (`gh`) для будущего подключения submodules;
+- GitLab CLI (`glab`) для подключения submodules;
 - Docker Desktop или Docker Engine с Compose v2;
 - GNU Make;
 - PowerShell 7 — только для запуска PowerShell-вариантов скриптов.
@@ -93,7 +93,8 @@ make ps
 
 ```text
 .
-├── .github/          # Issue forms, PR template и CI validation
+├── .gitlab-ci.yml    # CI validation
+├── .github/          # Issue forms и PR template
 ├── docs/             # Видение, модель, ADR, диаграммы и паспорта
 ├── scripts/          # Bootstrap, validation и управление submodules
 ├── compose.yaml      # Только локальные инфраструктурные зависимости
