@@ -5,7 +5,7 @@ $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $SuperprojectRoot = Split-Path -Parent $ProjectRoot
 $GitLabHost = if ($env:GITLAB_HOST) { $env:GITLAB_HOST } else { "gitlab.com" }
 $GitLabNamespace = if ($env:GITLAB_NAMESPACE) { $env:GITLAB_NAMESPACE } else { "xotabeach" }
-$GitLabBaseUrl = "git@${GitLabHost}:$GitLabNamespace"
+$GitLabBaseUrl = "https://$GitLabHost/$GitLabNamespace"
 $Repositories = @(
     "tourism-mobile",
     "tourism-backend",

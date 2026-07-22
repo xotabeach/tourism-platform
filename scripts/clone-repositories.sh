@@ -7,7 +7,7 @@ PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 SUPERPROJECT_ROOT="$(cd -- "${PROJECT_ROOT}/.." && pwd)"
 GITLAB_HOST="${GITLAB_HOST:-gitlab.com}"
 GITLAB_NAMESPACE="${GITLAB_NAMESPACE:-xotabeach}"
-GITLAB_BASE_URL="git@${GITLAB_HOST}:${GITLAB_NAMESPACE}"
+GITLAB_BASE_URL="https://${GITLAB_HOST}/${GITLAB_NAMESPACE}"
 REPOSITORIES=(
   tourism-mobile
   tourism-backend
