@@ -68,6 +68,8 @@ editorial-first, form/chat → `NormalizedRouteRequest`, MCP отложен.
 - Auth (JWT vs session) и routing provider — open decisions.
 - Не коммитить `.tmp-ref-frames/` и локальные `.env`.
 - AI architecture documented only; no Gemini/Gemma/MCP code yet.
+- DX: style guides + Cursor workspace settings — see
+  [development-environment.md](development-environment.md).
 
 ## Как вести этот файл
 

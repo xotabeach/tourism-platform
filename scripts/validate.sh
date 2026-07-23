@@ -33,6 +33,11 @@ REQUIRED_FILES=(
   docs/progress.md
   docs/data-model-geography-places.md
   docs/ai-route-planning-architecture.md
+  docs/python-code-style.md
+  docs/python-testing-guide.md
+  docs/flutter-code-style.md
+  docs/flutter-testing-guide.md
+  docs/development-environment.md
   docs/decisions/ADR-001-modular-monolith-first.md
   docs/decisions/ADR-002-separate-mobile-backend-infrastructure-repositories.md
   docs/decisions/ADR-003-postgresql-postgis.md

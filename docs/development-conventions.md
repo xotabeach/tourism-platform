@@ -107,8 +107,13 @@ defaults.
 
 ## Язык и стиль кода
 
-- Backend: Python 3.13, Ruff, MyPy strict, Pytest.
-- Mobile: Dart/Flutter, `flutter analyze`, tests; format via `dart format`.
+- Backend: Python 3.13, Ruff, MyPy strict, Pytest —
+  [python-code-style.md](python-code-style.md),
+  [python-testing-guide.md](python-testing-guide.md).
+- Mobile: Dart/Flutter, `flutter analyze`, tests —
+  [flutter-code-style.md](flutter-code-style.md),
+  [flutter-testing-guide.md](flutter-testing-guide.md).
+- DX setup (uv, Cursor, Make): [development-environment.md](development-environment.md).
 - Docs: Markdown, markdownlint где подключён; yamllint для CI/compose YAML.
 
 ## Архитектурные ограничения
