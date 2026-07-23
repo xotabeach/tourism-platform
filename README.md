@@ -67,11 +67,13 @@ make ps
 
 После запуска:
 
-- PostgreSQL: `localhost:5432`;
-- Redis: `localhost:6379`;
+- PostgreSQL: `localhost:5433` (см. `.env.example`; избегает конфликтов);
+- Redis: `localhost:6380`;
 - MinIO API: `http://localhost:9000`;
 - MinIO Console: `http://localhost:9001`;
 - Mailpit: `http://localhost:8025`.
+
+Image Postgres: `postgis/postgis:16-3.4` (linux/arm64 + amd64).
 
 Все порты настраиваются через `.env`.
 

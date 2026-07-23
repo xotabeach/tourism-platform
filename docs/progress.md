@@ -4,8 +4,8 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 3 — Geography and places (следующая)  
-**Последнее обновление:** 2026-07-22
+**Текущая фаза:** Phase 4 — Editorial routes (следующая)  
+**Последнее обновление:** 2026-07-23
 
 ## Сводка фаз
 
@@ -14,8 +14,8 @@
 | 0 | Repository audit and conventions | done |
 | 1 | Local infrastructure | done |
 | 2 | Backend foundation | done |
-| 3 | Geography and places | next |
-| 4 | Editorial routes | pending |
+| 3 | Geography and places | done |
+| 4 | Editorial routes | next |
 | 5 | Flutter application foundation | pending |
 | 6 | Authentication | pending |
 | 7 | Favorites and profile | pending |
@@ -30,55 +30,39 @@
 
 ## Что сделано
 
-### Phase 0 — Repository audit and conventions (2026-07-22)
+### Phase 0–2
 
-- Зафиксирована модель из 4 repos: `workspace`, `tourism-platform`,
-  `tourism-backend`, `tourism-mobile` (без отдельных infra/docs repos).
-- Канон документации в `tourism-platform/docs/`; индекс в `workspace/docs/`.
-- Добавлены business-logic, implementation-plan, development-conventions.
-- Domain model: единый `Route` + `RouteExecution` + sketch Trip/Travel+.
-- GitLab — primary CI.
+См. историю выше / git log: docs, Compose, Redis ready, `/api/v1`, error
+envelope, JSON logs.
 
-### Phase 1 — Local infrastructure (2026-07-22)
+### Phase 3 — Geography and places (2026-07-23)
 
-- Compose (PostGIS, Redis, MinIO, Mailpit); Redis в backend ready.
-- Health `/health/live` + `/health/ready`; Dockerfile + CI image build.
-- Mobile `dart format` в validate; progress log заведён.
-
-### Phase 2 — Backend foundation (2026-07-22)
-
-- SQLAlchemy `Base` + UUID/timestamp mixins + naming convention.
-- Stable JSON error envelope (`AppError`, HTTP, validation handlers).
-- Structured JSON logging.
-- Versioned API root: `GET /api/v1`.
-- Module package markers: `route_execution`, `favorites`, `subscriptions`.
-- Alembic `target_metadata = Base.metadata`.
-- Tests: health + API foundation (8 passed).
-
-### CI fix (2026-07-22)
-
-- Workspace pipeline падал без jobs: unquoted `NOTE:` в `.gitlab-ci.yml`
-  ломал YAML. Исправлено folded scalar; pipeline `2697046789` — success.
+- Миграция `0002_geography_and_places`: countries/regions/localities,
+  categories/places/M2M/entrances/schedules/images; FK + GIST/btree/partial
+  unique indexes.
+- Документ схемы: [data-model-geography-places.md](data-model-geography-places.md).
+- Seed `data/crimea_seed.json` + `scripts/seed_crimea.py` (idempotent, bulk
+  `--file` / `--places-only`) — 20 мест Крыма.
+- Read API: geography + categories + places list/detail.
+- Integration tests против PostGIS/Redis; CI services postgis+redis.
+- Mobile: Places catalog/detail, repository interface, mock + API
+  implementations (`useMockData` в AppConfig). Freezed отложен на Phase 5.
+- Compose `.env.example`: PostGIS `16-3.4` (multi-arch), ports `5433`/`6380`.
 
 ## Что дальше
 
-### Phase 3 — Geography and places
+### Phase 4 — Editorial routes
 
-Цель: Country/Region/Locality, categories, places catalog + detail API;
-mobile repository interfaces/mocks и экраны каталога/карточки.
-
-После Phase 3 → Phase 4 (editorial routes) и/или Phase 5 (Flutter shell)
-по приоритету команды.
+Публичные editorial routes, фильтры, карточка маршрута со stops.
 
 ## Блокеры и заметки
 
-- Auth (JWT vs session) и routing provider для staging — open decisions (ADR).
-- Не коммитить `.tmp-ref-frames/` в workspace.
+- Auth (JWT vs session) и routing provider — open decisions.
+- Не коммитить `.tmp-ref-frames/` и локальные `.env`.
 
 ## Как вести этот файл
 
-1. При старте фазы: статус → `in_progress`, кратко цель в «Что дальше».
-2. При завершении: перенести итог в «Что сделано», дату, ключевые SHA/MR.
-3. Таблицу сводки обновить (`done` / `next`).
-4. Блокеры писать сразу, не ждать конца фазы.
-5. Не дублировать весь backlog — ссылаться на implementation-plan.
+1. При старте фазы: статус → `in_progress`.
+2. При завершении: итог в «Что сделано», таблицу обновить.
+3. Блокеры писать сразу.
+4. Детальный backlog — в implementation-plan.
