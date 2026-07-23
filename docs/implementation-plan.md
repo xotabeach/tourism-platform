@@ -5,7 +5,25 @@
 
 См. также: [application-business-logic.md](application-business-logic.md),
 [development-conventions.md](development-conventions.md),
-[progress.md](progress.md) (живой статус: что сделано / что дальше).
+[progress.md](progress.md) (живой статус: что сделано / что дальше),
+[security/security-baseline.md](security/security-baseline.md).
+
+## Security Baseline (cross-cutting)
+
+**Цель:** security docs, threat model, secrets policy, secure defaults, Cursor
+security skill/rule, CI foundation. **Не** считать security «done» только из-за
+документации.
+
+| Область | Задачи |
+| --- | --- |
+| Docs | `docs/security/*`, ADR-007 auth strategy |
+| Tooling | Ruff security rules, pip-audit, security pytest, optional secret/image scan |
+| Cursor | `.cursor/rules/security-baseline.mdc`, Skill, `/security-audit` command |
+| Defaults | refuse local placeholder secrets in staging/production; input limits |
+| Acceptance | Docs + skill present; local security tests green; CI job documented |
+| Не входит | Full auth implementation, prod NetworkPolicy, DAST vs production |
+
+Статус: documented + foundation checks; auth/authZ implementation — later phases.
 
 ## Phase 0 — Repository audit and conventions
 
@@ -88,6 +106,7 @@ prefix, базовые module packages без полной бизнес-логи
 | API | `/api/v1/routes` |
 | Database | routes, route_stops |
 | Tests | Filter + publication invariants |
+| Security | Authorization/publication invariants; safe user-facing content fields; route data validation/limits |
 | Acceptance | Каталог и карточка редакционного маршрута |
 | Dependencies | Phase 3 |
 | Не входит | Generation, execution |
@@ -105,6 +124,7 @@ repository pattern ready for real API.
 | API | Consume existing |
 | Database | Нет |
 | Tests | Widget/golden smoke |
+| Security | Secure storage foundation wiring; HTTPS-only non-dev; deep-link policy stub; no debug secrets in release |
 | Acceptance | Навигация по mock data без привязки UI к mocks |
 | Dependencies | Phase 3–4 contracts желательны |
 | Не входит | Pixel-perfect design |
@@ -115,14 +135,15 @@ repository pattern ready for real API.
 
 | Область | Задачи |
 | --- | --- |
-| Backend | identity + users; sessions/JWT (решение в ADR) |
+| Backend | identity + users per ADR-007 (JWT access + opaque refresh) |
 | Mobile | Sign In/Up, Profile, secure storage |
 | Infrastructure | Mailpit для email verify (local) |
 | API | `/api/v1/auth/*`, `/api/v1/me` |
 | Database | users, credentials, sessions |
 | Tests | Auth flows |
+| Security | Argon2id; refresh rotation/reuse detection; revocation; rate limiting; auth security tests |
 | Acceptance | Пользователь регистрируется и видит профиль |
-| Dependencies | Phase 2 |
+| Dependencies | Phase 2; Security Baseline; ADR-007 |
 | Не входит | OAuth providers (можно позже), SSO |
 
 ## Phase 7 — Favorites and profile
@@ -136,6 +157,7 @@ repository pattern ready for real API.
 | API | `/api/v1/favorites/*` |
 | Database | favorite_places, saved_routes |
 | Tests | Ownership invariants |
+| Security | Object ownership; BOLA negative tests; private favorites authZ |
 | Acceptance | Save/unsave place and route |
 | Dependencies | Phase 4, Phase 6 |
 | Не входит | Social sharing |
@@ -156,6 +178,7 @@ foundation для fallback (без LLM).
 | Tests | Pipeline unit + quota + failure codes |
 | Acceptance | Генерация private route или понятный `failure_code` |
 | Dependencies | Phase 3–4, Phase 6; entitlements stub |
+| Security | Generation quotas; external provider timeouts/limits |
 | Не входит | LLM/Gemini, conversational chat, paid plans |
 
 См. [ai-route-planning-architecture.md](ai-route-planning-architecture.md),
@@ -174,6 +197,7 @@ deterministic fallback, metrics, feature flag. **Без production SLA.**
 | Infrastructure | Env placeholders only; no GPU |
 | API | Тот же route-builder; AI за flag, не отдельные mobile AI endpoints |
 | Tests | Mock provider contract + invalid output → fallback |
+| Security | AI/RAG security; prompt/tool validation; no PII in prompts; tool allowlists |
 | Acceptance | Flag on: AI proposal проходит validation или fallback; flag off: 8A |
 | Dependencies | Phase 8A |
 | Не входит | Gemma deploy, RAG prod, MCP, billing, chat dialogue |
@@ -194,6 +218,7 @@ experimental.
 | API | `/api/v1/route-executions/*` |
 | Database | route_executions |
 | Tests | Status transitions |
+| Security | Location privacy; route-execution authorization; retention |
 | Acceptance | Пройти маршрут и увидеть history |
 | Dependencies | Phase 4, Phase 6 |
 | Не входит | Live GPS tracking productization |
@@ -207,6 +232,7 @@ experimental.
 | Backend | Seed scripts, perf smoke |
 | Mobile | Point to staging API |
 | Infrastructure | Helm/manifests draft; no production deploy |
+| Security | Staging DAST (allowed env only); container scanning; secrets validation; security release checklist |
 | Acceptance | Staging smoke пройден |
 | Dependencies | Phases 6–9 |
 | Не входит | Production cutover |
@@ -260,6 +286,11 @@ migration/canary; optional MCP adapter для тех же tools.
 
 | Type | ID | Title | Priority | Repository | Dependency | Acceptance criteria |
 | --- | --- | --- | --- | --- | --- | --- |
+| EPIC | E-SEC | Security Baseline | P0 | tourism-platform, all | — | docs/security + ADR-007 + skill/CI foundation |
+| technical task | SEC-1 | Security docs + threat model | P0 | tourism-platform | — | docs/security present |
+| technical task | SEC-2 | Auth ADR-007 | P0 | tourism-platform | SEC-1 | Hybrid Bearer + future cookies chosen |
+| technical task | SEC-3 | Security skill/rule/command | P0 | workspace | SEC-1 | Cursor artifacts present |
+| technical task | SEC-4 | Backend security tests + pip-audit | P0 | tourism-backend | SEC-1 | tests/security + CI job |
 | EPIC | E0 | Foundation docs and conventions | P0 | tourism-platform | — | Docs merged; 4-repo model documented |
 | technical task | T0.1 | Business logic + implementation plan | P0 | tourism-platform | — | Files present; validate.sh lists them |
 | technical task | T0.2 | Development conventions | P0 | tourism-platform | — | Branches/commits/MR/API versioning documented |

@@ -65,11 +65,22 @@ editorial-first, form/chat → `NormalizedRouteRequest`, MCP отложен.
 
 ## Блокеры и заметки
 
-- Auth (JWT vs session) и routing provider — open decisions.
+- Auth strategy: **ADR-007** (JWT access + opaque refresh for mobile; cookies
+  later for web/admin). Implementation still Phase 6.
+- Routing provider — open decision (ADR-004).
 - Не коммитить `.tmp-ref-frames/` и локальные `.env`.
 - AI architecture documented only; no Gemini/Gemma/MCP code yet.
 - DX: style guides + Cursor workspace settings — see
   [development-environment.md](development-environment.md).
+- Security: docs + Cursor skill/rule documented under
+  [security/security-baseline.md](security/security-baseline.md). **Not**
+  claimed complete; auth/Redis ACL/prod hardening still open.
+
+## Документировано (не реализовано): Security Baseline
+
+Threat model, data classification, API/mobile/storage security docs, ADR-007,
+incident response, CI recommendations. Foundation code: input limits, prod
+placeholder-secret guard, security pytest, pip-audit job. Full auth — Phase 6.
 
 ## Как вести этот файл
 

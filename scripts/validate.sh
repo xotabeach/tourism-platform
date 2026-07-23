@@ -44,6 +44,22 @@ REQUIRED_FILES=(
   docs/decisions/ADR-004-routing-provider-abstraction.md
   docs/decisions/ADR-005-kafka-as-planned-event-backbone.md
   docs/decisions/ADR-006-ai-assisted-route-planning.md
+  docs/decisions/ADR-007-authentication-and-session-strategy.md
+  docs/security/security-baseline.md
+  docs/security/threat-model.md
+  docs/security/data-classification-and-retention.md
+  docs/security/authentication-and-token-security.md
+  docs/security/backend-api-security.md
+  docs/security/mobile-security.md
+  docs/security/database-cache-storage-security.md
+  docs/security/file-and-media-security.md
+  docs/security/secrets-management.md
+  docs/security/secure-development-lifecycle.md
+  docs/security/security-testing-guide.md
+  docs/security/security-incident-response.md
+  docs/security/security-checklist.md
+  docs/security/exceptions/README.md
+  docs/security/audits/2026-07-23-security-audit.md
   docs/diagrams/container-diagram.md
   docs/diagrams/future-domain-services.md
   docs/diagrams/route-generation-flow.md

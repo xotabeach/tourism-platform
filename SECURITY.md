@@ -5,6 +5,12 @@
 Проект находится на стадии foundation и пока не имеет production-релизов.
 Исправления безопасности применяются только к актуальной ветке `main`.
 
+## Канонические security docs
+
+Политики, threat model, checklists и incident response:
+
+[docs/security/security-baseline.md](docs/security/security-baseline.md)
+
 ## Сообщение об уязвимости
 
 Не публикуйте сведения об уязвимости, токены, персональные данные или шаги
@@ -30,9 +36,10 @@
 - Обнаруженный секрет должен быть немедленно отозван; удаления строки из Git
   недостаточно.
 - Legacy API keys не должны использоваться или переноситься.
+- См. [docs/security/secrets-management.md](docs/security/secrets-management.md).
 
-## Scope будущих проверок
+## Scope проверок
 
-До production-запуска должны появиться dependency scanning, secret scanning,
-SAST, image scanning, threat model для identity и route sharing, а также
-процедура обработки инцидентов.
+Security Baseline (docs + foundation CI) существует; full auth, RLS, prod
+NetworkPolicy, staging DAST — по фазам в implementation-plan. Не считать
+проект «полностью защищённым» на основании только документации.
