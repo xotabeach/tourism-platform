@@ -47,6 +47,7 @@ REQUIRED_FILES=(
   docs/diagrams/container-diagram.md
   docs/diagrams/future-domain-services.md
   docs/diagrams/route-generation-flow.md
+  docs/diagrams/phase-and-screens-map.md
   docs/events/event-catalog.md
   docs/repositories/tourism-platform.md
   docs/repositories/tourism-mobile.md

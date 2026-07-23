@@ -53,14 +53,29 @@ uv lock / uv sync          # refresh lock; commit uv.lock
 
 ## 9–10. Cursor extensions and interpreter
 
-Открой `mobile_travel_app.code-workspace`. Cursor предложит Recommended
-Extensions из `.vscode/extensions.json` — установи через UI.
+Расширения **не устанавливались автоматически** (в agent-окружении нет
+`cursor --install-extension`). В репозитории только **recommendations**.
 
-Extensions **не** ставятся этим документом автоматически (CLI install в agent
-окружении недоступен).
+### Как поставить у себя (один раз)
 
-Python: Command Palette → “Python: Select Interpreter” →
-`./tourism-backend/.venv/bin/python`.
+1. Открой файл `mobile_travel_app.code-workspace` через **File → Open Workspace from File…**
+2. Cursor покажет баннер *“This workspace has extension recommendations”* → **Install All**
+   или: Extensions → фильтр `@recommended` → Install.
+3. Список:
+   - Python, Pylance, Ruff
+   - Dart, Flutter
+   - Even Better TOML, YAML, EditorConfig
+4. Python interpreter: Command Palette → **Python: Select Interpreter** →
+   `tourism-backend/.venv/bin/python` (сначала `cd tourism-backend && uv sync --all-extras --dev`).
+
+Подробнее: этот же файл, разделы ниже.
+
+### Ложная ошибка `flutter_lldb_helper.py` / `import lldb`
+
+Это **не баг проекта**. Файл генерирует Flutter в `ios/Flutter/ephemeral/`
+(в `.gitignore`) для отладки iOS в Xcode. Модуль `lldb` есть только внутри
+LLDB Xcode, не в обычном Python. Workspace исключает `ephemeral` из
+Pylance/поиска — после Reload Window ошибка должна пропасть.
 
 ## 11–14. Ruff, Pylance, MyPy, Pytest
 
