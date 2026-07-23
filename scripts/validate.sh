@@ -32,6 +32,7 @@ REQUIRED_FILES=(
   docs/development-conventions.md
   docs/progress.md
   docs/data-model-geography-places.md
+  docs/data-model-routes.md
   docs/ai-route-planning-architecture.md
   docs/python-code-style.md
   docs/python-testing-guide.md

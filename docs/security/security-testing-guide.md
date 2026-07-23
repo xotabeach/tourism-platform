@@ -12,13 +12,21 @@ uv run pip-audit
 uv run ruff check .
 ```
 
+**Required** when changing any endpoint that accepts client/query/body input
+or returns text later shown in mobile/admin: run `pytest tests/security`
+before claiming the change is done.
+
 ### Mobile
 
 ```bash
 cd tourism-mobile
 ./scripts/validate.sh
-# flutter test test/security/ when present
+flutter test test/security/
 ```
+
+**Required** when changing UI that shows API/user text, networking, or storage:
+run `flutter test test/security/` plus relevant widget tests. Render untrusted
+strings as text only (no HTML/WebView).
 
 ### Platform docs / compose
 

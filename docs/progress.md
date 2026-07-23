@@ -4,8 +4,7 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 4 — Editorial routes (следующая); Phase 5 foundation
-структуры mobile — in progress  
+**Текущая фаза:** Phase 5 — Flutter foundation (после Phase 4)  
 **Последнее обновление:** 2026-07-23
 
 ## Сводка фаз
@@ -16,7 +15,7 @@
 | 1 | Local infrastructure | done |
 | 2 | Backend foundation | done |
 | 3 | Geography and places | done |
-| 4 | Editorial routes | next |
+| 4 | Editorial routes | done |
 | 5 | Flutter application foundation | in_progress |
 | 6 | Authentication | pending |
 | 7 | Favorites and profile | pending |
@@ -51,26 +50,23 @@ envelope, JSON logs.
   implementations (`useMockData` в AppConfig). Freezed отложен на Phase 5.
 - Compose `.env.example`: PostGIS `16-3.4` (multi-arch), ports `5433`/`6380`.
 
+### Phase 4 — Editorial routes (2026-07-23)
+
+- Миграция `0003_editorial_routes`: `routes`, `route_stops`, checks/indexes,
+  LINESTRING geometry.
+- Документ: [data-model-routes.md](data-model-routes.md).
+- Seed: 3 editorial routes в `crimea_seed.json` + upsert в `seed_crimea.py`.
+- Read API: `GET /api/v1/routes`, `GET /api/v1/routes/{id}` (только public
+  editorial/active); фильтры region/transport/difficulty/q.
+- Mobile: routes feature (domain/data/application/presentation), catalog +
+  detail, вкладка «Маршруты» в shell.
+
 ## Что дальше
 
-### Phase 4 — Editorial routes
+### Phase 5 — Flutter foundation (продолжение)
 
-Публичные editorial routes, фильтры, карточка маршрута со stops.
-
-### Phase 5 — Flutter foundation (структура уточнена / частично сделана)
-
-Целевая раскладка: [flutter-app-architecture.md](flutter-app-architecture.md).
-Riverpod остаётся; из референса друга — shell/theme/storage/errors, не BLoC.
-
-Сделано в mobile:
-
-- `StatefulShellRoute` + bottom nav (Home / Places / Routes / Favorites / Profile);
-- `core/theme`, `core/errors`, `core/storage` (secure storage port);
-- placeholder tabs для Routes/Favorites/Profile;
-- place detail на root navigator (без bottom bar).
-
-Осталось в Phase 5: Freezed (опционально), splash/welcome polish, deep-link
-policy stub, Routes tab content после Phase 4.
+Welcome/auth UI по дизайну, Freezed, polish theme; shell/theme/storage уже
+частично сделаны. См. [flutter-app-architecture.md](flutter-app-architecture.md).
 
 ### Документировано (не реализовано): AI route planning
 
