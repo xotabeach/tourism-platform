@@ -4,7 +4,8 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 4 — Editorial routes (следующая)  
+**Текущая фаза:** Phase 4 — Editorial routes (следующая); Phase 5 foundation
+структуры mobile — in progress  
 **Последнее обновление:** 2026-07-23
 
 ## Сводка фаз
@@ -16,7 +17,7 @@
 | 2 | Backend foundation | done |
 | 3 | Geography and places | done |
 | 4 | Editorial routes | next |
-| 5 | Flutter application foundation | pending |
+| 5 | Flutter application foundation | in_progress |
 | 6 | Authentication | pending |
 | 7 | Favorites and profile | pending |
 | 8A | Deterministic Route Builder | pending |
@@ -55,6 +56,21 @@ envelope, JSON logs.
 ### Phase 4 — Editorial routes
 
 Публичные editorial routes, фильтры, карточка маршрута со stops.
+
+### Phase 5 — Flutter foundation (структура уточнена / частично сделана)
+
+Целевая раскладка: [flutter-app-architecture.md](flutter-app-architecture.md).
+Riverpod остаётся; из референса друга — shell/theme/storage/errors, не BLoC.
+
+Сделано в mobile:
+
+- `StatefulShellRoute` + bottom nav (Home / Places / Routes / Favorites / Profile);
+- `core/theme`, `core/errors`, `core/storage` (secure storage port);
+- placeholder tabs для Routes/Favorites/Profile;
+- place detail на root navigator (без bottom bar).
+
+Осталось в Phase 5: Freezed (опционально), splash/welcome polish, deep-link
+policy stub, Routes tab content после Phase 4.
 
 ### Документировано (не реализовано): AI route planning
 

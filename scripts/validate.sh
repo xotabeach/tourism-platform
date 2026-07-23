@@ -37,6 +37,7 @@ REQUIRED_FILES=(
   docs/python-testing-guide.md
   docs/flutter-code-style.md
   docs/flutter-testing-guide.md
+  docs/flutter-app-architecture.md
   docs/development-environment.md
   docs/decisions/ADR-001-modular-monolith-first.md
   docs/decisions/ADR-002-separate-mobile-backend-infrastructure-repositories.md

@@ -113,21 +113,23 @@ prefix, базовые module packages без полной бизнес-логи
 
 ## Phase 5 — Flutter application foundation
 
-**Цель:** navigation shell, themes Material 3, Dio client, env flavors,
-repository pattern ready for real API.
+**Цель:** navigation shell, theme tokens, Dio/network foundation, secure
+storage adapter, feature-first layout ready for Phase 4–7 screens.
+Стек: **Riverpod** (не BLoC). Детали:
+[flutter-app-architecture.md](flutter-app-architecture.md).
 
 | Область | Задачи |
 | --- | --- |
 | Backend | Нет (contracts already) |
-| Mobile | Splash/Welcome/Home shell; GoRouter; Dio; Freezed models |
+| Mobile | `StatefulShellRoute` + bottom nav; `core/theme`, `core/storage`, `core/errors`; placeholder Routes/Favorites/Profile; Freezed optional after shell |
 | Infrastructure | Нет |
-| API | Consume existing |
-| Database | Нет |
-| Tests | Widget/golden smoke |
-| Security | Secure storage foundation wiring; HTTPS-only non-dev; deep-link policy stub; no debug secrets in release |
-| Acceptance | Навигация по mock data без привязки UI к mocks |
-| Dependencies | Phase 3–4 contracts желательны |
-| Не входит | Pixel-perfect design |
+| API | Consume existing places; routes when Phase 4 ready |
+| Database | Нет (offline spike later) |
+| Tests | Widget smoke through shell; secure-storage provider smoke; HTTPS flavor tests |
+| Security | Secure storage wiring; HTTPS-only non-dev; deep-link policy stub; no debug secrets |
+| Acceptance | Tabs работают; Places catalog inside shell; detail opens full-screen; no BLoC migration |
+| Dependencies | Phase 3 done; Phase 4 contracts желательны для Routes tab content |
+| Не входит | Pixel-perfect design; auth UI; BLoC; Sentry/slang mandatory; Drift/Isar |
 
 ## Phase 6 — Authentication
 
@@ -304,6 +306,9 @@ migration/canary; optional MCP adapter для тех же tools.
 | EPIC | E4 | Editorial routes catalog | P0 | tourism-backend, tourism-mobile | E3 | Filter + detail |
 | user story | US4.1 | As a traveler I open a prepared route | P0 | tourism-mobile | E4 | See stops and metadata |
 | EPIC | E5 | Flutter app shell | P0 | tourism-mobile | E2 | Navigation + Dio ready |
+| technical task | T5.1 | Shell + theme + secure storage foundation | P0 | tourism-mobile | E5 | Tabs + AppTheme + SecureStorage port |
+| technical task | T5.2 | Align layout with flutter-app-architecture.md | P0 | tourism-mobile | T5.1 | core/ + feature presentation/widgets |
+| user story | US5.1 | As a traveler I switch main tabs | P0 | tourism-mobile | T5.1 | Bottom nav to Home/Places/Routes/… |
 | EPIC | E6 | Authentication | P0 | tourism-backend, tourism-mobile | E2 | Register/login/profile |
 | user story | US6.1 | As a user I create an account | P0 | tourism-mobile | E6 | Session persisted securely |
 | EPIC | E7 | Favorites | P0 | tourism-backend, tourism-mobile | E4, E6 | Save place/route |

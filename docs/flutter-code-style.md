@@ -1,22 +1,30 @@
 # Flutter code style
 
 Для `tourism-mobile`. Freezed / `json_serializable` / `build_runner` —
-**Phase 5**; до этого — immutable hand-written models с `fromJson`.
+опционально в Phase 5 после shell; до этого — immutable hand-written models с
+`fromJson`.
 
-См. [flutter-testing-guide.md](flutter-testing-guide.md),
+См. [flutter-app-architecture.md](flutter-app-architecture.md),
+[flutter-testing-guide.md](flutter-testing-guide.md),
 [development-environment.md](development-environment.md).
 
 ## Feature-first layout
 
 ```text
-lib/features/<feature>/
-  application/   # providers
-  domain/        # models, repository interfaces
-  data/          # API / mock implementations
-  presentation/  # screens, widgets
+lib/
+  core/            # config, theme, network, errors, storage
+  routing/         # GoRouter + shell
+  features/<feature>/
+    application/   # Riverpod providers / notifiers
+    domain/        # models, repository interfaces
+    data/          # API / mock implementations
+    presentation/
+      screens/
+      widgets/
 ```
 
-Shared: `lib/core/` (config, network), `lib/routing/`.
+Shared cross-feature code lives in `lib/core/`, not inside a random feature.
+Do not introduce a parallel BLoC stack.
 
 ## Naming
 
@@ -26,6 +34,7 @@ Shared: `lib/core/` (config, network), `lib/routing/`.
 | Classes | `PascalCase` |
 | Providers | `fooProvider` / `fooListProvider` |
 | Private | `_leadingUnderscore` |
+| Route name constants | `*RouteNames` / screen `routePath` |
 
 ## Imports
 
@@ -35,9 +44,10 @@ Shared: `lib/core/` (config, network), `lib/routing/`.
 
 ## Riverpod / state
 
-- Providers рядом с feature (`application/`).
+- Providers рядом с feature (`application/`) или в `core/` for shared ports.
 - Immutable state; UI читает через `ref.watch`.
 - Async screens: loading / error / empty / success (`AsyncValue.when`).
+- Prefer typed failures over untyped `Object?` in UI.
 
 ## Boundaries
 
@@ -53,21 +63,30 @@ final places = ref.watch(placesListProvider);
 - Repository interface не зависит от mock/API impl.
 - DTO/JSON mapping в data layer; domain models отдельно (или shared immutable
   classes до Freezed).
+- Secure credentials only via `core/storage` (Keychain/Keystore-backed).
 
 ## Navigation
 
-- GoRouter routes в `app_router.dart`; path constants на screens.
+- GoRouter with `StatefulShellRoute` for main tabs.
+- Path/name constants on screens or `*RouteNames`.
+- Full-screen flows (details, auth): `parentNavigatorKey` on root navigator.
 - Не хранить `BuildContext` в services.
 - После `await` — проверять `mounted` / context safety.
+
+## Theme
+
+- Raw palette in `core/theme` (`AppColors`).
+- Wire Material 3 via `AppTheme.light` / dark later.
+- Prefer semantic tokens over hard-coded `Color(0x…)` in widgets.
 
 ## Widgets
 
 - `const` где возможно.
 - Не `dynamic` без причины.
-- User-facing strings готовить к локализации (пока допустимы литералы с пометкой
-  к Phase localization).
+- User-facing strings готовить к локализации (пока допустимы литералы; slang
+  optional later).
 
-## Generated files (Phase 5+)
+## Generated files (when Freezed lands)
 
 - `*.freezed.dart` / `*.g.dart` не править вручную.
 - Не коммитить конфликты build_runner вслепую — перегенерировать.
@@ -75,3 +94,4 @@ final places = ref.watch(placesListProvider);
 ## Errors
 
 - Преобразовывать в typed UI state; не глотать exceptions молча.
+- Не логировать tokens/passwords.
