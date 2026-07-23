@@ -140,22 +140,48 @@ repository pattern ready for real API.
 | Dependencies | Phase 4, Phase 6 |
 | Не входит | Social sharing |
 
-## Phase 8 — Route builder
+## Phase 8A — Deterministic Route Builder
 
-**Цель:** простая генерация маршрута с pipeline стадий, mock RoutingProvider,
-entitlement/quota hooks (config free plan).
+**Цель:** нормализованный запрос, editorial matching, candidate selection,
+constraints, scoring, mock `RoutingProvider`, persistence, failure codes,
+foundation для fallback (без LLM).
 
 | Область | Задачи |
 | --- | --- |
-| Backend | Validation→…→Persistence pipeline; failure codes; UsageCounter |
+| Backend | Validation→editorial match→candidates→score→RoutingProvider→persist; UsageCounter stub |
 | Mobile | Builder form + result |
 | Infrastructure | Нет production routing keys |
 | API | `/api/v1/route-builder/*` |
-| Database | generation requests, generated routes as `Route(source=generated)` |
-| Tests | Pipeline unit + quota |
-| Acceptance | Генерация private route или понятный failure_code |
+| Database | generation requests, `Route(source=generated)` |
+| Tests | Pipeline unit + quota + failure codes |
+| Acceptance | Генерация private route или понятный `failure_code` |
 | Dependencies | Phase 3–4, Phase 6; entitlements stub |
-| Не входит | ML, paid plans, multi alternatives (кроме stub entitlement) |
+| Не входит | LLM/Gemini, conversational chat, paid plans |
+
+См. [ai-route-planning-architecture.md](ai-route-planning-architecture.md),
+[ADR-006](decisions/ADR-006-ai-assisted-route-planning.md).
+
+## Phase 8B — AI-assisted Route Planning (experimental)
+
+**Цель:** provider-neutral AI ports, mock + Gemini adapter, structured output,
+tool calling через internal ToolRegistry, validation, bounded repair,
+deterministic fallback, metrics, feature flag. **Без production SLA.**
+
+| Область | Задачи |
+| --- | --- |
+| Backend | `AIPlanningProvider`, schemas, validator/repair, usage metadata |
+| Mobile | Нет отдельного AI UI (тот же builder result + warnings) |
+| Infrastructure | Env placeholders only; no GPU |
+| API | Тот же route-builder; AI за flag, не отдельные mobile AI endpoints |
+| Tests | Mock provider contract + invalid output → fallback |
+| Acceptance | Flag on: AI proposal проходит validation или fallback; flag off: 8A |
+| Dependencies | Phase 8A |
+| Не входит | Gemma deploy, RAG prod, MCP, billing, chat dialogue |
+
+## Phase 8 — Route builder (umbrella)
+
+Phase 8 в progress/backlog = **8A + 8B**. MVP P0 требует 8A; 8B — P1
+experimental.
 
 ## Phase 9 — Route execution
 
@@ -196,10 +222,11 @@ entitlement/quota hooks (config free plan).
 ## Phase 12 — Travel+ foundations
 
 **Цель:** Plan/Subscription/EntitlementService config; feature flags; без оплаты.
+Включает AI generation limits / model-feature policy (после 8B), без chat UI.
 
-| Acceptance | Free quotas enforced via service; Travel+ flag в dev |
-| Dependencies | Phase 8 |
-| Не входит | Store billing |
+| Acceptance | Free quotas enforced via service; Travel+ flag в dev; AI quotas config |
+| Dependencies | Phase 8A (8B optional for AI-specific entitlements) |
+| Не входит | Store billing; conversational planner product UI |
 
 ## Phase 13 — Trip Planner
 
@@ -208,6 +235,22 @@ entitlement/quota hooks (config free plan).
 | Acceptance | Создать поездку и прикрепить route |
 | Dependencies | Phase 12 entitlements `trip_planner_enabled` |
 | Не входит | Collaborative trips, hotel booking |
+
+## Future — Conversational Route Planner
+
+**Цель:** NL interpretation, clarifying dialogue, `NormalizedRouteRequest`,
+iterative edits; тот же `RouteBuilderPipeline`.
+
+| Dependencies | Phase 8B, Phase 12 |
+| Не входит | Отдельный chat-only generation engine |
+
+## Future — Self-hosted Tourism AI
+
+**Цель:** Gemma-family inference, RAG, evaluation, optional tuning, provider
+migration/canary; optional MCP adapter для тех же tools.
+
+| Dependencies | Phase 8B stable experimental + eval gold set |
+| Не входит | Treating model weights as Crimea factual DB |
 
 ---
 
@@ -233,9 +276,23 @@ entitlement/quota hooks (config free plan).
 | EPIC | E6 | Authentication | P0 | tourism-backend, tourism-mobile | E2 | Register/login/profile |
 | user story | US6.1 | As a user I create an account | P0 | tourism-mobile | E6 | Session persisted securely |
 | EPIC | E7 | Favorites | P0 | tourism-backend, tourism-mobile | E4, E6 | Save place/route |
-| EPIC | E8 | Route builder | P0 | tourism-backend, tourism-mobile | E3, E6 | Generate or failure_code |
+| EPIC | E8 | Route builder (8A deterministic) | P0 | tourism-backend, tourism-mobile | E3, E6 | Generate or failure_code |
 | technical task | T8.1 | RoutingProvider mock | P0 | tourism-backend | E8 | Swap-ready interface |
 | technical task | T8.2 | EntitlementService config free plan | P1 | tourism-backend | E8 | Quotas from config |
+| EPIC | E8B | AI-assisted route planning experimental | P1 | tourism-backend | E8 | Flag + mock/Gemini + fallback |
+| technical task | AI-ARCH-1 | Provider-neutral AI contracts | P1 | tourism-backend | E8B | Ports without SDK imports |
+| technical task | AI-ARCH-2 | NormalizedRouteRequest shared by form and chat | P1 | tourism-backend | E8 | Single DTO |
+| technical task | AI-ARCH-3 | Structured output schemas | P1 | tourism-backend | E8B | Interpreted + Proposal |
+| technical task | AI-ARCH-4 | ToolRegistry design | P1 | tourism-backend | E8B | Allowlisted tools |
+| technical task | AI-ARCH-5 | Gemini adapter | P1 | tourism-backend | AI-ARCH-1 | Env model id |
+| technical task | AI-ARCH-6 | AI proposal validator | P0 | tourism-backend | E8B | Candidate allowlist |
+| technical task | AI-ARCH-7 | AI repair and deterministic fallback | P0 | tourism-backend | AI-ARCH-6 | Bounded repair |
+| technical task | AI-ARCH-8 | Prompt versioning | P1 | tourism-backend | E8B | Version in usage metadata |
+| technical task | AI-ARCH-9 | AI observability | P1 | tourism-backend | E8B | AIUsageRecorder |
+| technical task | AI-ARCH-10 | Evaluation dataset and runner | P2 | tourism-backend | E8B | Gold set metrics |
+| technical task | AI-ARCH-11 | Gemma inference adapter | Future | tourism-backend | AI-ARCH-1 | Self-hosted HTTP |
+| technical task | AI-ARCH-12 | Tourism RAG | Future | tourism-backend | AI-ARCH-11 | Docs retrieval |
+| technical task | AI-ARCH-13 | Optional MCP adapter | Future | tourism-backend | AI-ARCH-4 | Same tools, MCP transport |
 | EPIC | E9 | Route execution | P0 | tourism-backend, tourism-mobile | E4, E6 | Start/complete/history |
 | user story | US9.1 | As a traveler I mark visited stops | P0 | tourism-mobile | E9 | Progress updates |
 | EPIC | E10 | Staging stabilization | P1 | tourism-platform, all | E6–E9 | Staging smoke |
@@ -244,6 +301,7 @@ entitlement/quota hooks (config free plan).
 | EPIC | E13 | Trip Planner | Future | tourism-backend, tourism-mobile | E12 | Trip with Route items |
 | user story | US-F1 | Publish route for moderation | Future | all | E11 | ModerationStatus flow |
 | user story | US-F2 | Subscribe to Travel+ | Future | all | E12 | Store purchase |
+| user story | US-F3 | Conversational route planner | Future | all | E8B, E12 | NL → NormalizedRouteRequest |
 | technical task | T-F1 | Kafka activation | Future | tourism-platform | ADR-005 | Only with real consumers |
 
 ### MVP scope (сводка)
@@ -252,7 +310,13 @@ P0 epics E0–E9 + необходимые technical tasks. UI — техниче
 
 ### Travel+ scope (будущее)
 
-E12 + billing/store + расширенные quotas/alternatives/offline/export.
+E12 + billing/store + расширенные quotas/alternatives/offline/export +
+conversational planner (US-F3) + AI generation limits.
+
+### AI route planning scope (будущее)
+
+Документ: [ai-route-planning-architecture.md](ai-route-planning-architecture.md),
+ADR-006. Реализация: E8B + AI-ARCH-* ; self-host/RAG/MCP — Future.
 
 ### Trip Planner scope (будущее)
 

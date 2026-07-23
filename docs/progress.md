@@ -19,7 +19,8 @@
 | 5 | Flutter application foundation | pending |
 | 6 | Authentication | pending |
 | 7 | Favorites and profile | pending |
-| 8 | Route builder | pending |
+| 8A | Deterministic Route Builder | pending |
+| 8B | AI-assisted Route Planning (experimental) | pending |
 | 9 | Route execution | pending |
 | 10 | Stabilization and staging | pending |
 | 11 | User-created routes | pending |
@@ -55,10 +56,18 @@ envelope, JSON logs.
 
 Публичные editorial routes, фильтры, карточка маршрута со stops.
 
+### Документировано (не реализовано): AI route planning
+
+Архитектура и ADR-006: provider-neutral AI, Gemini experimental → Gemma + RAG,
+editorial-first, form/chat → `NormalizedRouteRequest`, MCP отложен.
+См. [ai-route-planning-architecture.md](ai-route-planning-architecture.md).
+Реализация — Phase 8B+, не часть Phase 3/4.
+
 ## Блокеры и заметки
 
 - Auth (JWT vs session) и routing provider — open decisions.
 - Не коммитить `.tmp-ref-frames/` и локальные `.env`.
+- AI architecture documented only; no Gemini/Gemma/MCP code yet.
 
 ## Как вести этот файл
 

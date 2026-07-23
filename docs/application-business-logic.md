@@ -231,9 +231,15 @@ config-реализация, бесплатный план по умолчани
 - до 10–15 точек;
 - несколько вариантов;
 - расширенные параметры и оптимизация (время, расстояние, бюджет);
+- conversational route planner (NL → тот же pipeline; Future после Phase 8B);
+- объяснения trade-offs и iterative refine (Future);
 - Trip Planner;
 - расширенный офлайн-режим;
 - экспорт и совместное планирование (позже).
+
+Бесплатный form-based builder должен оставаться корректным; намеренная
+деградация качества free-маршрутов запрещена.
+См. [ai-route-planning-architecture.md](ai-route-planning-architecture.md).
 
 ## 17. Будущий модуль поездок
 
@@ -281,7 +287,9 @@ flowchart TD
 - совместные поездки;
 - бронирование гостиниц и билетов;
 - полноценные офлайн-карты;
-- ML-рекомендации и AI-генерация текста;
+- production AI Route Builder / conversational planner в MVP (архитектура
+  задокументирована; реализация — Phase 8B+ / Future, см. ADR-006);
+- ML-рекомендации ленты и AI-генерация маркетингового текста;
 - рекламная система.
 
 ## 20. Основные продуктовые риски
@@ -307,8 +315,9 @@ flowchart TD
 1. Foundation (local infra, health, docs) — текущий этап.
 2. Content MVP: geography, places, editorial routes.
 3. Auth + favorites + profile.
-4. Route builder + execution.
+4. Route builder deterministic (Phase 8A); AI-assisted experimental — позже
+   (8B).
 5. Soft launch / staging с редакционным контентом Крыма.
 6. User-created private routes.
-7. Travel+ foundations (без оплаты).
-8. Trip Planner и публичная модерация — отдельные релизы.
+7. Travel+ foundations (без оплаты), включая AI quotas policy.
+8. Trip Planner, conversational planner, self-hosted AI — отдельные релизы.

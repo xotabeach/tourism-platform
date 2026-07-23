@@ -45,3 +45,17 @@ uv run python scripts/seed_crimea.py --file data/extra_places.json --places-only
 `region=crimea`, localities и categories).
 
 `media_asset_id` в `place_images` — UUID без FK на media module (пока).
+
+## Feasibility fields (уже есть / планируется)
+
+Уже в Phase 3: `seasonality`, `accessibility`, `is_suitable_for_children`,
+`is_paid`, `price_notes`, `difficulty`, schedules, entrances.
+
+Планируется отдельной миграцией ближе к Phase 8A (не в AI-docs сессии):
+
+- `recommended_visit_minutes` — оценка длительности визита для builder;
+- `is_suitable_for_pets` — фильтр «с животными».
+
+Route / RouteStop (Phase 4): `source` ∈ {editorial, generated, user_created};
+stable `place_id`; provider-neutral geometry и порядок stops.
+
