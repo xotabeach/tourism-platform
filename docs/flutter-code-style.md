@@ -5,6 +5,7 @@
 `fromJson`.
 
 См. [flutter-app-architecture.md](flutter-app-architecture.md),
+[flutter-design-system.md](flutter-design-system.md),
 [flutter-testing-guide.md](flutter-testing-guide.md),
 [development-environment.md](development-environment.md).
 
@@ -12,7 +13,7 @@
 
 ```text
 lib/
-  core/            # config, theme, network, errors, storage
+  core/            # config, design, theme, network, errors, storage
   routing/         # GoRouter + shell
   features/<feature>/
     application/   # Riverpod providers / notifiers
@@ -75,12 +76,17 @@ final places = ref.watch(placesListProvider);
 
 ## Theme
 
-- Raw palette in `core/theme` (`AppColors`).
+- Semantic palette, spacing, radii, shadows, typography and motion live in
+  `core/design`.
 - Brand typeface: **Rubik** (`AppFonts.rubik`, bundled
   `assets/fonts/Rubik-VariableFont_wght.ttf`). Logo wordmark via
   `AppTextStyles.logo`.
 - Wire Material 3 via `AppTheme.light` / dark later.
 - Prefer semantic tokens over hard-coded `Color(0x…)` in widgets.
+- Reuse `AppGlassSurface` / pill / circle / icon button; do not stack multiple
+  backdrop blurs when a parent already provides one.
+- Respect `MediaQuery.disableAnimationsOf`; reduced motion uses short
+  slide/crossfade without stretch or overshoot.
 
 ## Widgets
 
@@ -88,6 +94,10 @@ final places = ref.watch(placesListProvider);
 - Не `dynamic` без причины.
 - User-facing strings готовить к локализации (пока допустимы литералы; slang
   optional later).
+- Interactive targets are at least `48×48`; add labels and selected/toggled
+  state to semantics.
+- Keep image-heavy animated subtrees inside `RepaintBoundary` and precache
+  deterministic local deck images.
 
 ## Generated files (when Freezed lands)
 

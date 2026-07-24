@@ -59,7 +59,8 @@
 - [x] Создать Flutter project и feature-first boundaries.
 - [x] Зафиксировать навигацию и управление состоянием (GoRouter, Riverpod).
 - [x] Shell + theme + secure storage foundation (Phase 5 structure).
-- [ ] Зафиксировать дизайн-систему (pixel / brand tokens with design).
+- [x] Зафиксировать screenshot-aligned design tokens, glass and motion system.
+- [ ] Сверить approximate tokens и SVG с исходным Figma Dev Mode.
 - [ ] Выбрать Drift или Isar по измеримому offline-storage spike.
 
 ### Этап 2. Минимальный продукт

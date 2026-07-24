@@ -121,15 +121,15 @@ storage adapter, feature-first layout ready for Phase 4–7 screens.
 | Область | Задачи |
 | --- | --- |
 | Backend | Нет (contracts already) |
-| Mobile | `StatefulShellRoute` + bottom nav; `core/theme`, `core/storage`, `core/errors`; placeholder Routes/Favorites/Profile; Freezed optional after shell |
+| Mobile | `StatefulShellRoute`; segmented animated nav; `core/design`, `core/theme`, `core/storage`, `core/errors`; Welcome/Home/route cards/swipe onboarding; Freezed optional after shell |
 | Infrastructure | Нет |
 | API | Consume existing places; routes when Phase 4 ready |
 | Database | Нет (offline spike later) |
-| Tests | Widget smoke through shell; secure-storage provider smoke; HTTPS flavor tests |
+| Tests | Widget smoke through shell; secure-storage/HTTPS tests; deterministic UI goldens and responsive/reduced-motion checks |
 | Security | Secure storage wiring; HTTPS-only non-dev; deep-link policy stub; no debug secrets |
-| Acceptance | Tabs работают; Places catalog inside shell; detail opens full-screen; no BLoC migration |
+| Acceptance | Tabs and segmented nav work; catalogs stay in shell; details open above shell; swipe onboarding stays inside the first route card; accepted 393×852 goldens; no BLoC migration |
 | Dependencies | Phase 3 done; Phase 4 contracts желательны для Routes tab content |
-| Не входит | Pixel-perfect design; auth UI; BLoC; Sentry/slang mandatory; Drift/Isar |
+| Не входит | Pixel-perfect claim without Figma/device diff; real auth; BLoC; Sentry/slang mandatory; Drift/Isar |
 
 ## Phase 6 — Authentication
 

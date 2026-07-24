@@ -5,6 +5,7 @@
 router, theme tokens, secure storage, error facade) **без** миграции на BLoC.
 
 См. также: [flutter-code-style.md](flutter-code-style.md),
+[flutter-design-system.md](flutter-design-system.md),
 [security/mobile-security.md](security/mobile-security.md),
 [repositories/tourism-mobile.md](repositories/tourism-mobile.md).
 
@@ -16,7 +17,8 @@ lib/
 ├── app.dart                          # MaterialApp.router + theme
 ├── core/
 │   ├── config/                       # AppFlavor, AppConfig
-│   ├── theme/                        # palette, ThemeExtension, AppTheme
+│   ├── design/                       # semantic tokens, glass, controls, motion
+│   ├── theme/                        # Material ThemeData + compatibility exports
 │   ├── network/                      # Dio + interceptors (auth later)
 │   ├── errors/                       # AppFailure, mapping helpers
 │   └── storage/                      # SecureStorage port + Keychain/Keystore impl
@@ -50,7 +52,7 @@ features/<name>/
 | --- | --- |
 | Feature-first folders | Keep; already in use |
 | `common/services` | As `core/` (config, theme, network, storage, errors) |
-| Theme layers | `AppColors` → semantic tokens → `ThemeData` |
+| Theme layers | semantic `core/design` tokens → `ThemeData` |
 | Shell + tabs | `StatefulShellRoute.indexedStack` |
 | Full-screen details | nested route + `parentNavigatorKey` |
 | Secure storage wrapper | Riverpod provider over `flutter_secure_storage` |
@@ -74,14 +76,15 @@ Onboarding (вне shell): `/welcome` → `/auth/identity` → `/auth/otp` (mock
 | Index | Branch | Path | Phase content |
 | --- | --- | --- | --- |
 | 0 | Home | `/` | Home feed (design) |
-| 1 | Places | `/places` | Catalog (Phase 3) |
-| 2 | Routes | `/routes` | Editorial slider (Phase 4) |
-| 3 | Favorites | `/favorites` | Placeholder → Phase 7 |
+| 1 | Routes | `/routes` | Editorial swipe slider (Phase 4/5) |
+| 2 | Route Builder | `/favorites` | Placeholder → Phase 8A |
+| 3 | Map / Places | `/places` | Catalog (Phase 3) |
 | 4 | Profile | `/profile` | Placeholder → Phase 6 |
 
-Figma nav (Home / Explore / + / Map / Profile) пока **не** скопирован 1:1 —
-текущие табы покрывают готовый домен. Place/route detail и onboarding —
-**root** navigator (без bottom bar).
+Nav follows the Figma segmented model: leading inactive glass segment, active
+dark droplet, trailing inactive glass segment. Place/route detail use the
+**root** navigator. Swipe onboarding is local to the first route card, so its
+blur and interaction lock do not cover search, filters or bottom navigation.
 
 ## Security hooks (Phase 5 foundation)
 

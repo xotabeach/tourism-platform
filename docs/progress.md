@@ -5,7 +5,7 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
-**Последнее обновление:** 2026-07-23
+**Последнее обновление:** 2026-07-24
 
 ## Сводка фаз
 
@@ -65,16 +65,31 @@ envelope, JSON logs.
 
 ### Phase 5 — Flutter foundation (продолжение)
 
-Сделано по скринам Figma (MCP к агенту пока не достучался):
-- Theme: светлая поверхность, тёмные CTA, glass bottom nav
+Сделано по comparison screenshots Figma:
+- `core/design`: semantic colors, typography, spacing, radii, shadows, motion
+- Reusable glass surfaces/pills/circles/icon buttons; full Rubik variable font
 - Welcome → mock auth (имя/телефон → OTP + согласия) → Home
-- Home: приветствие, поиск, баннер «Построй маршрут», топ
-  путешественников (mock), чипы, карточки маршрутов из API/mock
-- Routes tab: PageView-слайдер крупных карточек
+- Welcome/Home: исправлены crop, scrim, typography, search, hero, travelers
+- Route card: Figma hierarchy (author/tags/rating/locality/distance/difficulty)
+- Routes: responsive stacked swipe deck, vertical onboarding, green/burgundy
+  drag states, restrained rotation/translation, fixed compact indicators,
+  spring-back and committed-swipe haptics
+- Swipe onboarding is clipped to the first card; search/filter/nav stay
+  outside its blur. Shared outlined search/filter geometry is `58 px`.
+- Segmented floating nav: leading/trailing glass + interrupt-safe liquid
+  droplet, semantics, 48 px targets, reduced motion
+- Figma-exported SVG icon set integrated through central `AppIconography`;
+  transparent 128 px white/ink/muted runtime assets, no new dependency
+- 10 reviewed goldens at `393×852`; responsive checks at `412×915` and
+  `360×740` with text scale `1.3`
 - Auth — UI only; реальный OTP/токены — Phase 6
+- **Mock-first DX:** dev `useMockData: true` по умолчанию (8 places /
+  3 routes + local assets). Docker/backend не нужны для UI.
+  API: `flutter run --dart-define=USE_MOCK_DATA=false`.
 
-Остаётся: фото-ассеты из Figma, pixel-perfect polish, Freezed optional,
-сверка nav с макетом (Home/Explore/+/Map/Profile vs текущие табы).
+Остаётся: сверка approximate values и original SVG через Figma Dev Mode,
+device screenshot diff, performance profile на mid-range Android; Freezed
+optional. Pixel-perfect статус не заявлен без этих проверок.
 См. [flutter-app-architecture.md](flutter-app-architecture.md).
 
 ### Документировано (не реализовано): AI route planning
