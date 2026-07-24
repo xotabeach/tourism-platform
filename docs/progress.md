@@ -74,8 +74,9 @@ envelope, JSON logs.
 - Routes: responsive stacked swipe deck, vertical onboarding, green/burgundy
   drag states, restrained rotation/translation, fixed compact indicators,
   spring-back and committed-swipe haptics
-- Swipe onboarding is clipped to the first card; search/filter/nav stay
-  outside its blur. Shared outlined search/filter geometry is `58 px`.
+- Swipe onboarding is a standalone first deck card with route cards behind it;
+  search/filter/nav stay outside its blur. Shared outlined search/filter
+  geometry is `58 px`.
 - Segmented floating nav: leading/trailing glass + interrupt-safe liquid
   droplet, semantics, 48 px targets, reduced motion
 - Figma-exported SVG icon set integrated through central `AppIconography`;

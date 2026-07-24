@@ -83,8 +83,9 @@ Onboarding (вне shell): `/welcome` → `/auth/identity` → `/auth/otp` (mock
 
 Nav follows the Figma segmented model: leading inactive glass segment, active
 dark droplet, trailing inactive glass segment. Place/route detail use the
-**root** navigator. Swipe onboarding is local to the first route card, so its
-blur and interaction lock do not cover search, filters or bottom navigation.
+**root** navigator. Swipe onboarding is a standalone first card in the route
+deck, so its blur and interaction lock do not cover search, filters or bottom
+navigation.
 
 ## Security hooks (Phase 5 foundation)
 

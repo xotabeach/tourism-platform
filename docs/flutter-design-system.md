@@ -89,9 +89,10 @@ Swipe indicators stay at `42 px` and do not scale with progress. A committed
 swipe triggers haptic feedback and fly-out; an uncommitted swipe springs back
 without data changes.
 
-The first-visit swipe coach is rendered inside the front route card. Its blur,
-dark surface and border are clipped to card geometry; search, filters and the
-floating navigation remain outside the overlay.
+The first-visit swipe coach is a standalone front card in the deck, not an
+overlay inside `RouteHeroCard`. The first and second route cards remain visible
+behind it as the next stack items. Its blur, dark surface and border use the
+same card geometry; search, filters and navigation remain outside the blur.
 
 ## Golden review
 
