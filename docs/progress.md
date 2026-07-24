@@ -4,7 +4,7 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 5 — Flutter foundation (после Phase 4)  
+**Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
 **Последнее обновление:** 2026-07-23
 
 ## Сводка фаз
@@ -65,8 +65,17 @@ envelope, JSON logs.
 
 ### Phase 5 — Flutter foundation (продолжение)
 
-Welcome/auth UI по дизайну, Freezed, polish theme; shell/theme/storage уже
-частично сделаны. См. [flutter-app-architecture.md](flutter-app-architecture.md).
+Сделано по скринам Figma (MCP к агенту пока не достучался):
+- Theme: светлая поверхность, тёмные CTA, glass bottom nav
+- Welcome → mock auth (имя/телефон → OTP + согласия) → Home
+- Home: приветствие, поиск, баннер «Построй маршрут», топ
+  путешественников (mock), чипы, карточки маршрутов из API/mock
+- Routes tab: PageView-слайдер крупных карточек
+- Auth — UI only; реальный OTP/токены — Phase 6
+
+Остаётся: фото-ассеты из Figma, pixel-perfect polish, Freezed optional,
+сверка nav с макетом (Home/Explore/+/Map/Profile vs текущие табы).
+См. [flutter-app-architecture.md](flutter-app-architecture.md).
 
 ### Документировано (не реализовано): AI route planning
 

@@ -76,6 +76,9 @@ final places = ref.watch(placesListProvider);
 ## Theme
 
 - Raw palette in `core/theme` (`AppColors`).
+- Brand typeface: **Rubik** (`AppFonts.rubik`, bundled
+  `assets/fonts/Rubik-VariableFont_wght.ttf`). Logo wordmark via
+  `AppTextStyles.logo`.
 - Wire Material 3 via `AppTheme.light` / dark later.
 - Prefer semantic tokens over hard-coded `Color(0x…)` in widgets.
 

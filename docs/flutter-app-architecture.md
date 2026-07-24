@@ -68,16 +68,20 @@ features/<name>/
 
 ## Navigation shell (MVP tabs)
 
+Onboarding (вне shell): `/welcome` → `/auth/identity` → `/auth/otp` (mock UI;
+реальный auth — Phase 6). После `onboardingCompleted` — shell.
+
 | Index | Branch | Path | Phase content |
 | --- | --- | --- | --- |
-| 0 | Home | `/` | Welcome / entry |
+| 0 | Home | `/` | Home feed (design) |
 | 1 | Places | `/places` | Catalog (Phase 3) |
-| 2 | Routes | `/routes` | Editorial catalog (Phase 4) |
+| 2 | Routes | `/routes` | Editorial slider (Phase 4) |
 | 3 | Favorites | `/favorites` | Placeholder → Phase 7 |
 | 4 | Profile | `/profile` | Placeholder → Phase 6 |
 
-Place detail and future auth screens use the **root** navigator so the bottom
-bar is hidden.
+Figma nav (Home / Explore / + / Map / Profile) пока **не** скопирован 1:1 —
+текущие табы покрывают готовый домен. Place/route detail и onboarding —
+**root** navigator (без bottom bar).
 
 ## Security hooks (Phase 5 foundation)
 
