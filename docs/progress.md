@@ -74,9 +74,19 @@ envelope, JSON logs.
 - Routes: responsive stacked swipe deck, vertical onboarding, green/burgundy
   drag states, restrained rotation/translation, fixed compact indicators,
   spring-back and committed-swipe haptics
-- Swipe onboarding is a standalone first deck card with route cards behind it;
-  search/filter/nav stay outside its blur. Shared outlined search/filter
-  geometry is `58 px`.
+- Swipe onboarding живёт внутри первой карточки колоды: полупрозрачный тёмный
+  слой с блюром поверх контента карточки, стопка карточек видна за ним;
+  search/filter/nav остаются вне блюра.
+- Экраны сверены со свежими Figma-скринами: главная (48 px серые контролы,
+  баннер 246, ритм), подтверждение номера (серые поля кода + плавная анимация
+  ввода цифры, согласия в две строки), карточка свайпа (заголовок 24, тёмные
+  пилюли, контурные молнии, веерная стопка).
+- Route details переписан по дизайну: медиа-шапка с пагинацией и стеклянной
+  кнопкой «Пройти маршрут», белый лист с автором, заголовком, описанием,
+  аудиогидом, тегами, параметрами, картой, остановками, рейтингом и отзывами.
+  Свайп вверх/тап раскрывает галерею на `0.66` высоты экрана с листанием медиа;
+  точки на карте и список остановок подсвечивают друг друга и скроллят к паре;
+  стрелка у остановки открывает экран места.
 - Segmented floating nav: leading/trailing glass + interrupt-safe liquid
   droplet, semantics, 48 px targets, reduced motion
 - Figma-exported SVG icon set integrated through central `AppIconography`;
