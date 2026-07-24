@@ -30,11 +30,27 @@ For `tourism-mobile`.
 - Review generated PNGs before accepting `--update-goldens`; never update
   baselines only to make CI green.
 
+## Where pixel goldens run
+
+Baselines are recorded on **macOS**. The Linux CI image renders text and blur
+differently enough to fail every baseline by `1.5–7.6 %` of pixels, so a
+tolerance large enough to pass would no longer catch real regressions.
+Therefore `matchesGoldenFile` tests are skipped when the host is not macOS, and
+CI keeps the host-independent expectations from the same file: responsive
+overflow at `412×915` and `360×740` with text scale `1.3`, restrained swipe
+travel with fixed `42×42` indicator, standalone onboarding deck card, reduced
+motion and minimum `48×48` nav targets.
+
+Consequence: **pixel regressions are caught locally, not by CI.** Run the
+goldens on macOS before pushing UI changes. Revisit this when the UI stabilises
+(Phase 10) — the strict option is recording baselines inside the CI image.
+
 ## Commands
 
 ```bash
 flutter test
 flutter test test/golden/ui_golden_test.dart
+SKIP_PIXEL_GOLDENS=1 flutter test   # reproduce what CI runs
 flutter analyze --fatal-infos
 dart format --set-exit-if-changed lib test
 ./scripts/validate.sh

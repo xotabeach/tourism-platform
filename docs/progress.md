@@ -83,6 +83,10 @@ envelope, JSON logs.
   transparent 128 px white/ink/muted runtime assets, no new dependency
 - 10 reviewed goldens at `393×852`; responsive checks at `412×915` and
   `360×740` with text scale `1.3`
+- Pixel goldens run on macOS only: Linux CI differs by `1.5–7.6 %` of pixels,
+  so CI keeps the host-independent checks and visual regressions are caught
+  locally. Reproduce CI with `SKIP_PIXEL_GOLDENS=1 flutter test`.
+  See [flutter-testing-guide.md](flutter-testing-guide.md).
 - Auth — UI only; реальный OTP/токены — Phase 6
 - **Mock-first DX:** dev `useMockData: true` по умолчанию (8 places /
   3 routes + local assets). Docker/backend не нужны для UI.
