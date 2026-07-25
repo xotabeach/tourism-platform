@@ -131,6 +131,43 @@ storage adapter, feature-first layout ready for Phase 4–7 screens.
 | Dependencies | Phase 3 done; Phase 4 contracts желательны для Routes tab content |
 | Не входит | Pixel-perfect claim without Figma/device diff; real auth; BLoC; Sentry/slang mandatory; Drift/Isar |
 
+## Phase 5.5 — Environment foundation
+
+**Цель:** единый типизированный контракт `local/test/staging/production` для
+mobile, backend, CI и будущих AI providers.
+
+| Область | Задачи |
+| --- | --- |
+| Backend | Typed `APP_ENV`; environment validation; separate DB/Redis/storage URLs |
+| Mobile | `APP_ENV` + `DATA_SOURCE=mock\|api`; mock разрешён только local/tests |
+| Infrastructure | Environment-scoped CI variables and safe config examples |
+| AI | Provider policy documented independently from environment; automated tests use mock |
+| Security | Reject local credentials and unsafe endpoints outside local |
+| Acceptance | Configuration matrix covered by tests; `gamma` maps to staging deployment |
+| Dependencies | Phase 5 foundation |
+| Не входит | Real AI adapter; production secrets; server deployment |
+
+См. [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
+
+## Phase 5.6 — First backend server deployment
+
+**Цель:** развернуть `gamma` как первый staging backend на существующем
+одиночном сервере без AI inference.
+
+| Область | Задачи |
+| --- | --- |
+| Backend | Immutable container image; migration and API smoke jobs |
+| Mobile | Staging build points to deployed HTTPS API |
+| Infrastructure | Server Compose, reverse proxy/TLS, protected deploy, rollback |
+| Data | Isolated PostGIS/Redis/object storage; encrypted off-host backups |
+| Operations | Health, logs, resource/certificate alerts, restore exercise |
+| Security | Private data ports; key-only SSH; non-root deploy; secret isolation |
+| Acceptance | Deploy and rollback pass; staging API works from mobile; backup restore verified |
+| Dependencies | Phase 5.5; server inventory, domain and deployment access |
+| Не входит | Production cutover; Kubernetes; self-hosted AI |
+
+См. [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
+
 ## Phase 6 — Authentication
 
 **Цель:** регистрация, вход, secure token storage, профиль read/update.
@@ -225,17 +262,18 @@ experimental.
 | Dependencies | Phase 4, Phase 6 |
 | Не входит | Live GPS tracking productization |
 
-## Phase 10 — Stabilization and staging
+## Phase 10 — Production readiness and stabilization
 
-**Цель:** seed контент, staging deploy prep в tourism-platform, CI hardening.
+**Цель:** усилить уже работающий staging-контур и подготовить контролируемый
+production cutover.
 
 | Область | Задачи |
 | --- | --- |
 | Backend | Seed scripts, perf smoke |
 | Mobile | Point to staging API |
-| Infrastructure | Helm/manifests draft; no production deploy |
+| Infrastructure | Capacity/rollback/backup hardening; Helm only if justified |
 | Security | Staging DAST (allowed env only); container scanning; secrets validation; security release checklist |
-| Acceptance | Staging smoke пройден |
+| Acceptance | Production readiness review and staging smoke passed |
 | Dependencies | Phases 6–9 |
 | Не входит | Production cutover |
 
@@ -309,6 +347,12 @@ migration/canary; optional MCP adapter для тех же tools.
 | technical task | T5.1 | Shell + theme + secure storage foundation | P0 | tourism-mobile | E5 | Tabs + AppTheme + SecureStorage port |
 | technical task | T5.2 | Align layout with flutter-app-architecture.md | P0 | tourism-mobile | T5.1 | core/ + feature presentation/widgets |
 | user story | US5.1 | As a traveler I switch main tabs | P0 | tourism-mobile | T5.1 | Bottom nav to Home/Places/Routes/… |
+| EPIC | E5.5 | Environment foundation | P0 | tourism-platform, backend, mobile | E5 | Typed env matrix and policy tests |
+| technical task | T5.5.1 | Backend/mobile environment contract | P0 | tourism-backend, tourism-mobile | E5.5 | Local/test/staging/production validated |
+| technical task | T5.5.2 | Environment-scoped CI configuration | P0 | tourism-platform | E5.5 | No shared secrets or mock data outside local/tests |
+| EPIC | E5.6 | First backend server deployment | P0 | tourism-platform, tourism-backend | E5.5 | Gamma staging deploy and rollback pass |
+| technical task | T5.6.1 | Single-server staging stack | P0 | tourism-platform | E5.6 | HTTPS API and private data services healthy |
+| technical task | T5.6.2 | Backup and restore smoke | P0 | tourism-platform | T5.6.1 | Encrypted off-host backup restored successfully |
 | EPIC | E6 | Authentication | P0 | tourism-backend, tourism-mobile | E2 | Register/login/profile |
 | user story | US6.1 | As a user I create an account | P0 | tourism-mobile | E6 | Session persisted securely |
 | EPIC | E7 | Favorites | P0 | tourism-backend, tourism-mobile | E4, E6 | Save place/route |
@@ -331,7 +375,7 @@ migration/canary; optional MCP adapter для тех же tools.
 | technical task | AI-ARCH-13 | Optional MCP adapter | Future | tourism-backend | AI-ARCH-4 | Same tools, MCP transport |
 | EPIC | E9 | Route execution | P0 | tourism-backend, tourism-mobile | E4, E6 | Start/complete/history |
 | user story | US9.1 | As a traveler I mark visited stops | P0 | tourism-mobile | E9 | Progress updates |
-| EPIC | E10 | Staging stabilization | P1 | tourism-platform, all | E6–E9 | Staging smoke |
+| EPIC | E10 | Production readiness | P1 | tourism-platform, all | E5.6, E6–E9 | Production readiness review |
 | EPIC | E11 | User-created private routes | P1 | tourism-backend, tourism-mobile | E8 | Private CRUD |
 | EPIC | E12 | Travel+ foundations | P2 | tourism-backend | E8 | Entitlements without billing |
 | EPIC | E13 | Trip Planner | Future | tourism-backend, tourism-mobile | E12 | Trip with Route items |

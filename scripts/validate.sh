@@ -40,6 +40,7 @@ REQUIRED_FILES=(
   docs/flutter-testing-guide.md
   docs/flutter-app-architecture.md
   docs/development-environment.md
+  docs/environment-and-backend-deployment.md
   docs/decisions/ADR-001-modular-monolith-first.md
   docs/decisions/ADR-002-separate-mobile-backend-infrastructure-repositories.md
   docs/decisions/ADR-003-postgresql-postgis.md

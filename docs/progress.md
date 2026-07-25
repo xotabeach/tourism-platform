@@ -17,6 +17,8 @@
 | 3 | Geography and places | done |
 | 4 | Editorial routes | done |
 | 5 | Flutter application foundation | in_progress |
+| 5.5 | Environment foundation | pending |
+| 5.6 | First backend server deployment | pending |
 | 6 | Authentication | pending |
 | 7 | Favorites and profile | pending |
 | 8A | Deterministic Route Builder | pending |
@@ -152,6 +154,18 @@ envelope, JSON logs.
 device screenshot diff, performance profile на mid-range Android; Freezed
 optional. Pixel-perfect статус не заявлен без этих проверок.
 См. [flutter-app-architecture.md](flutter-app-architecture.md).
+
+### Phase 5.5–5.6 — Environments and first staging server
+
+До Phase 6 нужно унифицировать `local/test/staging/production`, отделить
+mobile data source и AI provider от runtime environment, затем развернуть
+`gamma` как staging backend на существующем сервере. Первый rollout использует
+single-server Compose, HTTPS reverse proxy, закрытые data ports, миграционный
+job, health/smoke checks, rollback и off-host backup. Self-hosted AI в этот
+контур пока не входит.
+
+См.
+[environment-and-backend-deployment.md](environment-and-backend-deployment.md).
 
 ### Документировано (не реализовано): AI route planning
 

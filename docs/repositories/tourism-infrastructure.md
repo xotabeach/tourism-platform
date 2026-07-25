@@ -23,11 +23,14 @@
 - Владение пользовательскими/географическими данными.
 - Ручное создание неописанных ресурсов.
 
-## Будущий стек
+## Эволюция стека
 
-- Kubernetes и Helm для `staging` / `production`.
-- Ingress как API entry point.
-- GitLab CI без uncontrolled production deploy на foundation.
+- Первый `staging`: deployment-specific Docker Compose на одном сервере,
+  HTTPS reverse proxy и private data network.
+- GitLab CI с protected deploy job, immutable image, migration, smoke и
+  rollback.
+- Kubernetes и Helm только после появления подтверждённой потребности в
+  multi-node scheduling или независимом scaling.
 - PostgreSQL/PostGIS, Redis, S3-compatible storage.
 - Kafka только после ADR-005 activation.
 - Точки Prometheus/Grafana/Loki/Sentry.
@@ -37,3 +40,6 @@
 
 Local Compose в корне `tourism-platform` остаётся developer-only и не копирует
 production topology один в один.
+
+Первый server rollout описан в
+[environment-and-backend-deployment.md](../environment-and-backend-deployment.md).

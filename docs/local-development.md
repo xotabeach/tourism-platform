@@ -113,5 +113,6 @@ flutter run
 - Local Kafka profile не создаётся заранее. При активации он должен повторять
   production-relevant KRaft и security assumptions в разумных для developer
   machine пределах.
-- Production deployment, certificates, secret management и backups описываются
-  отдельно в infrastructure repository.
+- Server deployment, certificates, secret management и backups описываются в
+  [environment-and-backend-deployment.md](environment-and-backend-deployment.md)
+  и security-разделе этого repository.
