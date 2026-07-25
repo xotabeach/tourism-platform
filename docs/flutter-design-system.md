@@ -82,25 +82,55 @@ The droplet uses a local `CustomPainter`, a 360 ms interrupt-safe controller
 and selection haptics. Reduced-motion mode removes bridge/stretch and uses a
 150 ms slide/crossfade.
 
+Route details use the same keyed shell nav instance as the catalogs. Its detail
+mode moves the active droplet from Routes to a compact Home circle, contracts
+the inactive glass segments and places the route CTA in the released right
+slot. Tapping the compact droplet reverses the same geometry: the CTA moves
+above the full bar and stretches briefly while inactive destinations emerge
+from the active center. The 560 ms inward morph uses the shared emphasized
+curve; reduced-motion mode substitutes the existing 150 ms simple transition.
+The controllers and existing `StatefulShellRoute` branch state survive route
+rebuilds. Place catalog/details use this same shell instance and keep Map
+selected.
+
+Primary and circular command controls are platform-adaptive. iOS composes
+them from `AppGlassSurface`/`AppGlassCircle` with blur, translucent fill,
+highlight, border and restrained shadow. Android retains the Material
+`FilledButton` and solid circular control styles.
+
 Route swipe progress is `horizontalDrag / threshold`, clamped to `-1...1`.
 Rotation is limited to about 9 degrees. Raw drag drives threshold and visual
 state, while pre-commit card translation is restrained to about `42 px`.
 Swipe indicators stay at `42 px` and do not scale with progress. A committed
 swipe triggers haptic feedback and fly-out; an uncommitted swipe springs back
-without data changes.
+without data changes. Back cards use route-id keys and explicit resting,
+promoted and settling geometry. After commit the previous back card animates
+from its promoted coordinates into the front slot while the following layers
+advance separately; a new drag is disabled until settle completes.
 
 The first-visit swipe coach is a standalone front card in the deck, not an
 overlay inside `RouteHeroCard`. The first and second route cards remain visible
 behind it as the next stack items. Its blur, dark surface and border use the
 same card geometry; search, filters and navigation remain outside the blur.
+Its swipe/tap glyphs follow the Figma vertical icon set. The CTA uses stronger
+blur, highlight and border on iOS, while Android keeps the neutral surface.
 
 ## Golden review
 
 Primary deterministic frame: iOS `393×852`, device pixel ratio `1`,
 text scale `1.0`, local images only. The golden suite covers Welcome, Home,
-route list card, slider resting, onboarding, both swipe directions and three
-nav states. It also checks `412×915`, a `360×740` frame at text scale `1.3`,
-48 px nav targets and reduced motion.
+route list card, slider resting, Android/iOS onboarding, both swipe directions
+and three nav states, plus the route-details top chrome. It also checks
+`412×915`, a `360×740` frame at text scale `1.3`, 48 px nav targets and reduced
+motion.
+
+## Native launch
+
+iOS uses adaptive asset-catalog colors and light/dark wordmark appearances.
+Android uses density-specific day/night drawables and Android 12 splash theme
+resources. The tracked wordmark is pre-rendered from the bundled Rubik
+SemiBold font, so startup does not depend on Flutter font loading or a system
+fallback.
 
 Run:
 

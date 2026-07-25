@@ -127,7 +127,7 @@ storage adapter, feature-first layout ready for Phase 4–7 screens.
 | Database | Нет (offline spike later) |
 | Tests | Widget smoke through shell; secure-storage/HTTPS tests; deterministic UI goldens and responsive/reduced-motion checks |
 | Security | Secure storage wiring; HTTPS-only non-dev; deep-link policy stub; no debug secrets |
-| Acceptance | Tabs and segmented nav work; catalogs stay in shell; details open above shell; swipe onboarding is the standalone first deck card; accepted 393×852 goldens; no BLoC migration |
+| Acceptance | Tabs and segmented nav work; catalogs and route details keep one stateful shell nav; detail mode morphs the route CTA into the compact nav; native day/night launch is branded; swipe onboarding is the standalone first deck card; accepted 393×852 goldens; no BLoC migration |
 | Dependencies | Phase 3 done; Phase 4 contracts желательны для Routes tab content |
 | Не входит | Pixel-perfect claim without Figma/device diff; real auth; BLoC; Sentry/slang mandatory; Drift/Isar |
 

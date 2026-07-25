@@ -5,7 +5,7 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
-**Последнее обновление:** 2026-07-24
+**Последнее обновление:** 2026-07-25
 
 ## Сводка фаз
 
@@ -69,32 +69,46 @@ envelope, JSON logs.
 - `core/design`: semantic colors, typography, spacing, radii, shadows, motion
 - Reusable glass surfaces/pills/circles/icon buttons; full Rubik variable font
 - Welcome → mock auth (имя/телефон → OTP + согласия) → Home
+- Native launch screen: адаптивные iOS/Android day/night resources с
+  `КРЫМТРИП`, заранее отрисованным из локального Rubik; Android 12 splash
+  настроен без новой зависимости.
 - Welcome/Home: исправлены crop, scrim, typography, search, hero, travelers
 - Route card: Figma hierarchy (author/tags/rating/locality/distance/difficulty)
 - Routes: responsive stacked swipe deck, vertical onboarding, green/burgundy
   drag states, restrained rotation/translation, fixed compact indicators,
-  spring-back and committed-swipe haptics
-- Swipe onboarding живёт внутри первой карточки колоды: полупрозрачный тёмный
-  слой с блюром поверх контента карточки, стопка карточек видна за ним;
+  spring-back, committed-swipe haptics и непрерывное продвижение
+  `back → front` без скачка геометрии.
+- Swipe onboarding — самостоятельная первая карточка колоды, а не overlay
+  внутри `RouteHeroCard`; две маршрутные карточки остаются видны за ней,
   search/filter/nav остаются вне блюра.
 - Экраны сверены со свежими Figma-скринами: главная (48 px серые контролы,
   баннер 246, ритм), подтверждение номера (серые поля кода: заполненное поле
   плавно вырастает с 58 до 70 px и остаётся высоким, при стирании возвращается;
   согласия в две строки), карточка свайпа (заголовок 24, тёмные
   пилюли, контурные молнии, веерная стопка).
-- Route details переписан по дизайну: медиа-шапка с пагинацией и стеклянной
-  кнопкой «Пройти маршрут», белый лист с автором, заголовком, описанием,
-  аудиогидом, тегами, параметрами, картой, остановками, блоком «Похожие
-  маршруты», рейтингом и отзывами.
-  Свайп вверх/тап раскрывает галерею на `0.66` высоты экрана с листанием медиа;
-  точки на карте и список остановок подсвечивают друг друга и скроллят к паре;
-  стрелка у остановки открывает экран места; похожие маршруты — горизонтальная
-  лента из каталога без текущего маршрута, тап открывает детали.
+- Route details переписан по дизайну: медиа-шапка с пагинацией, белый лист с
+  автором, заголовком, описанием, аудиогидом, тегами, параметрами, картой,
+  остановками, full-bleed блоком «Похожие маршруты», рейтингом и отзывами.
+  Тап по фото плавно раскрывает и закрывает галерею на `0.66` высоты экрана;
+  вертикальные жесты всегда остаются обычным scroll контента и не меняют
+  галерею. Выбор точки только синхронно подсвечивает карту и остановку, без
+  reposition страницы. Рекомендации открываются через Hero/reveal.
+- Route details остаётся внутри Routes branch и использует тот же keyed shell
+  navbar: за 560 мс сегменты схлопываются внутрь до home-капли, а «Пройти
+  маршрут» занимает освободившийся правый слот. При раскрытии CTA уезжает
+  наверх и кратко растягивается, а пункты navbar выходят из центра капли;
+  состояние branch сохраняется.
+- Каталог мест и подробности точки также используют общий shell navbar.
+  Переход из остановки маршрута переключает его на Map branch, а возврат к
+  каталогу не пересоздаёт navbar.
+- Основные и круглые команды на iOS используют reusable blur-glass surface;
+  Android сохраняет текущие Material-кнопки.
 - Segmented floating nav: leading/trailing glass + interrupt-safe liquid
   droplet, semantics, 48 px targets, reduced motion
 - Figma-exported SVG icon set integrated through central `AppIconography`;
   transparent 128 px white/ink/muted runtime assets, no new dependency
-- 10 reviewed goldens at `393×852`; responsive checks at `412×915` and
+- 12 reviewed goldens at `393×852`, включая верх route details и отдельный iOS
+  glass coach; responsive checks at `412×915` and
   `360×740` with text scale `1.3`
 - Pixel goldens run on macOS only: Linux CI differs by `1.5–7.6 %` of pixels,
   so CI keeps the host-independent checks and visual regressions are caught
