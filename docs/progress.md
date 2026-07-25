@@ -73,7 +73,8 @@ envelope, JSON logs.
   `КРЫМТРИП`, заранее отрисованным из локального Rubik; Android 12 splash
   настроен без новой зависимости.
 - Welcome/Home: исправлены crop, scrim, typography, search, hero, travelers
-- Route card: Figma hierarchy (author/tags/rating/locality/distance/difficulty)
+- Route card: Figma hierarchy (author/tags/rating/locality/distance);
+  difficulty остаётся только в swipe deck и route details, но не в Home list
 - Routes: responsive stacked swipe deck, vertical onboarding, green/burgundy
   drag states, restrained rotation/translation, fixed compact indicators,
   spring-back, committed-swipe haptics и непрерывное продвижение
