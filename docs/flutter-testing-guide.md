@@ -46,6 +46,11 @@ Consequence: **pixel regressions are caught locally, not by CI.** Run the
 goldens on macOS before pushing UI changes. Revisit this when the UI stabilises
 (Phase 10) — the strict option is recording baselines inside the CI image.
 
+The 2026-07-25 remediation run passed format, strict analysis, all 54 tests and
+the macOS pixel goldens. Five compositor-related baselines were accepted only
+after comparing their master/test images. The iOS Simulator build passed;
+Android packaging was not run because the Android SDK was unavailable.
+
 ## Commands
 
 ```bash

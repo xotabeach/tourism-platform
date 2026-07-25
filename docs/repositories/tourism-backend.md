@@ -67,10 +67,12 @@ Git submodule общего superproject.
 
 ### Этап 2. Data и contracts
 
-- [ ] Подключить SQLAlchemy, Alembic и PostGIS.
+- [x] Подключить SQLAlchemy, Alembic и PostGIS.
 - [ ] Реализовать первые modules без cross-domain ORM imports.
 - [ ] Опубликовать OpenAPI contract.
-- [ ] Настроить Ruff, MyPy и Pytest.
+- [x] Настроить Ruff, MyPy и Pytest.
+- [x] Добавить security regressions, `pip-audit` и fail-closed CI integration
+  gate.
 
 ### Этап 3. MVP
 

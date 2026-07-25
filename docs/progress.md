@@ -61,6 +61,32 @@ envelope, JSON logs.
 - Mobile: routes feature (domain/data/application/presentation), catalog +
   detail, вкладка «Маршруты» в shell.
 
+### Repository code review and hardening (2026-07-25)
+
+- Добавлены отдельные Cursor skills для evidence-first backend/mobile review на
+  основе workspace rules, security baseline и code style.
+- Backend и mobile проверены раздельно; отчёты и общий порядок исправлений:
+  [backend review](reviews/2026-07-25-backend-code-review.md),
+  [mobile review](reviews/2026-07-25-mobile-code-review.md),
+  [remediation plan](reviews/2026-07-25-code-review-remediation-plan.md).
+- Backend: readiness/validation больше не отражают внутренние исключения и
+  входные значения; public routes не раскрывают draft places; list ordering
+  стабилен; PostGIS coordinates загружаются bulk; CI integration gate fail
+  closed; coverage floor 75%.
+- Backend gate: Ruff/MyPy/pip-audit passed; Pytest `17 passed, 24 skipped`,
+  coverage 79.89%. Пропуски связаны с недоступным локальным Docker daemon.
+- Mobile: release выбирает production policy и требует HTTPS `API_BASE_URL`;
+  Android main manifest содержит `INTERNET`, debug signing fallback удалён;
+  remote media ограничены trusted HTTPS origin.
+- Right swipe теперь обновляет in-session favorites state, chips/search
+  работают, detail providers auto-dispose. Durable favorites остаются Phase 7.
+- Dio/JSON failures преобразуются в safe typed state; экраны показывают
+  стабильную ошибку и retry вместо raw exception.
+- Glass card alpha переведена с parent `Opacity` на compositor-safe color
+  filtering; пять затронутых macOS goldens сравнены и обновлены осознанно.
+- Mobile gate: format/analyze passed, 54 tests and all macOS pixel goldens
+  passed; iOS Simulator build passed. Android SDK отсутствует.
+
 ## Что дальше
 
 ### Phase 5 — Flutter foundation (продолжение)
@@ -119,6 +145,8 @@ envelope, JSON logs.
 - **Mock-first DX:** dev `useMockData: true` по умолчанию (8 places /
   3 routes + local assets). Docker/backend не нужны для UI.
   API: `flutter run --dart-define=USE_MOCK_DATA=false`.
+- Staging/production запускаются только с валидными
+  `APP_FLAVOR`/`API_BASE_URL`; release без flavor выбирает production.
 
 Остаётся: сверка approximate values и original SVG через Figma Dev Mode,
 device screenshot diff, performance profile на mid-range Android; Freezed
@@ -144,6 +172,8 @@ editorial-first, form/chat → `NormalizedRouteRequest`, MCP отложен.
 - Security: docs + Cursor skill/rule documented under
   [security/security-baseline.md](security/security-baseline.md). **Not**
   claimed complete; auth/Redis ACL/prod hardening still open.
+- Release blockers: organization-owned Android signing and Android build check
+  требуют CI secrets/Android SDK; physical-device Impeller profile не выполнен.
 
 ## Документировано (не реализовано): Security Baseline
 

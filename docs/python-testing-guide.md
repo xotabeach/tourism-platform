@@ -49,13 +49,17 @@ Bug fixes get a regression test.
 
 ## Coverage
 
-`pytest-cov` is available for local/CI **report**. There is **no fail-under
-threshold** yet — avoid gaming coverage. A future soft floor (~40–50% on
-`tourism_backend` packages) can be added after Phase 4–6 stabilize.
+`pytest-cov` reports and enforces an initial 75% floor. Raise the threshold only
+with meaningful behavior coverage; do not game it with low-value assertions.
+The 2026-07-25 validation reached 79.89%.
 
 ```bash
 uv run pytest --cov=tourism_backend --cov-report=term-missing
 ```
+
+Integration tests may skip unavailable Postgres/Redis locally. In CI they fail
+closed when either dependency is unavailable; a green CI run must not hide the
+database-backed API and security suite.
 
 ## Commands
 
