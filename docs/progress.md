@@ -5,7 +5,7 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
-**Последнее обновление:** 2026-07-25
+**Последнее обновление:** 2026-07-26
 
 ## Сводка фаз
 
@@ -129,7 +129,13 @@ envelope, JSON logs.
   состояние branch сохраняется.
 - Каталог мест и подробности точки также используют общий shell navbar.
   Переход из остановки маршрута переключает его на Map branch, а возврат к
-  каталогу не пересоздаёт navbar.
+  каталогу не пересоздаёт navbar. На подробностях точки navbar теперь плавно
+  схлопывается до активной Map-капли; первое нажатие раскрывает все сегменты,
+  повторное нажатие «Карта» возвращает каталог с сохранённым branch state.
+- Поиск на Home стал интерактивным и фильтрует текущие маршрутные карточки
+  совместно с chips. Поиск в «Места Крыма» использует debounce и параметр
+  backend API `q`; mock repository поддерживает тот же контракт. Оба поля
+  имеют явную очистку и состояния «ничего не найдено».
 - Основные и круглые команды на iOS используют reusable blur-glass surface;
   Android сохраняет текущие Material-кнопки.
 - Segmented floating nav: leading/trailing glass + interrupt-safe liquid
@@ -153,7 +159,8 @@ envelope, JSON logs.
   API: `flutter run --dart-define=DATA_SOURCE=api`.
 - Test/staging/production запускаются только с валидными
   `APP_ENV`/`API_BASE_URL`; release без environment выбирает production.
-- Current mobile gate after navbar fix: format/analyze passed, `57 tests` and
+- Current mobile gate after detail navbar/search fixes: format/analyze passed,
+  `59 tests` and
   all 13 macOS pixel goldens passed.
 
 Остаётся: сверка approximate values и original SVG через Figma Dev Mode,
