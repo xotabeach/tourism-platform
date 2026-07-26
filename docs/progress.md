@@ -134,21 +134,27 @@ envelope, JSON logs.
   Android сохраняет текущие Material-кнопки.
 - Segmented floating nav: leading/trailing glass + interrupt-safe liquid
   droplet, semantics, 48 px targets, reduced motion
+- Long-distance nav transitions no longer draw a bridge across the full bar:
+  the previous droplet contracts by travel distance and the liquid tail is
+  capped locally. A reviewed `0 → 4` mid-animation golden covers the original
+  artifact.
 - Figma-exported SVG icon set integrated through central `AppIconography`;
   transparent 128 px white/ink/muted runtime assets, no new dependency
-- 12 reviewed goldens at `393×852`, включая верх route details и отдельный iOS
-  glass coach; responsive checks at `412×915` and
+- 13 reviewed goldens at `393×852`, включая верх route details, отдельный iOS
+  glass coach и navbar `0 → 4` mid-frame; responsive checks at `412×915` and
   `360×740` with text scale `1.3`
 - Pixel goldens run on macOS only: Linux CI differs by `1.5–7.6 %` of pixels,
   so CI keeps the host-independent checks and visual regressions are caught
   locally. Reproduce CI with `SKIP_PIXEL_GOLDENS=1 flutter test`.
   See [flutter-testing-guide.md](flutter-testing-guide.md).
 - Auth — UI only; реальный OTP/токены — Phase 6
-- **Mock-first DX:** dev `useMockData: true` по умолчанию (8 places /
+- **Mock-first DX:** local `DATA_SOURCE=mock` по умолчанию (8 places /
   3 routes + local assets). Docker/backend не нужны для UI.
-  API: `flutter run --dart-define=USE_MOCK_DATA=false`.
-- Staging/production запускаются только с валидными
-  `APP_FLAVOR`/`API_BASE_URL`; release без flavor выбирает production.
+  API: `flutter run --dart-define=DATA_SOURCE=api`.
+- Test/staging/production запускаются только с валидными
+  `APP_ENV`/`API_BASE_URL`; release без environment выбирает production.
+- Current mobile gate after navbar fix: format/analyze passed, `57 tests` and
+  all 13 macOS pixel goldens passed.
 
 Остаётся: сверка approximate values и original SVG через Figma Dev Mode,
 device screenshot diff, performance profile на mid-range Android; Freezed
@@ -175,6 +181,12 @@ pip-audit без известных уязвимостей; runtime image соб
 Platform local и constrained test Compose config passed. Remote bootstrap ждёт
 ротации первоначального пароля, SSH deploy key и подтверждённого TLS hostname;
 host inventory и credentials в Git не сохраняются.
+
+Remote bootstrap отложен владельцем 2026-07-26. Отдельный локальный bootstrap
+key создан, но на сервер не установлен; сервер и его SSH/configuration не
+изменялись. При возобновлении начать с восстановления VNC/root-доступа,
+установки публичного ключа и проверки SSH host fingerprint. Не запрашивать и
+не сохранять пароль в чате или repository.
 
 См.
 [environment-and-backend-deployment.md](environment-and-backend-deployment.md).

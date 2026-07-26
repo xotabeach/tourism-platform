@@ -71,6 +71,7 @@ Current UI golden coverage:
 - restrained pre-commit swipe travel and fixed `42×42` action indicator;
 - continuous back-card promotion after a committed swipe;
 - nav selected indices `0`, `1`, `2`;
+- long-distance nav transition `0 → 4` at the liquid bridge frame;
 - route-details pin selection without auto-scroll, tap-only gallery
   expansion/collapse, unaffected ordinary content scrolling, full-bleed
   recommendations and preserved shell navbar/branch state;
