@@ -149,20 +149,20 @@ mobile, backend, CI и будущих AI providers.
 
 См. [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
 
-## Phase 5.6 — First backend server deployment
+## Phase 5.6 — First remote test backend
 
-**Цель:** развернуть `gamma` как первый staging backend на существующем
-одиночном сервере без AI inference.
+**Цель:** развернуть immutable image из `gamma` как disposable test backend на
+существующем малом сервере без AI inference и production data.
 
 | Область | Задачи |
 | --- | --- |
 | Backend | Immutable container image; migration and API smoke jobs |
-| Mobile | Staging build points to deployed HTTPS API |
-| Infrastructure | Server Compose, reverse proxy/TLS, protected deploy, rollback |
-| Data | Isolated PostGIS/Redis/object storage; encrypted off-host backups |
+| Mobile | Test build points to deployed HTTPS API |
+| Infrastructure | Constrained Compose, swap, reverse proxy/TLS, protected deploy, rollback |
+| Data | Isolated disposable PostGIS/Redis; no MinIO; off-host test backup |
 | Operations | Health, logs, resource/certificate alerts, restore exercise |
 | Security | Private data ports; key-only SSH; non-root deploy; secret isolation |
-| Acceptance | Deploy and rollback pass; staging API works from mobile; backup restore verified |
+| Acceptance | Deploy and rollback pass; test API works from mobile; backup restore verified |
 | Dependencies | Phase 5.5; server inventory, domain and deployment access |
 | Не входит | Production cutover; Kubernetes; self-hosted AI |
 
@@ -350,8 +350,8 @@ migration/canary; optional MCP adapter для тех же tools.
 | EPIC | E5.5 | Environment foundation | P0 | tourism-platform, backend, mobile | E5 | Typed env matrix and policy tests |
 | technical task | T5.5.1 | Backend/mobile environment contract | P0 | tourism-backend, tourism-mobile | E5.5 | Local/test/staging/production validated |
 | technical task | T5.5.2 | Environment-scoped CI configuration | P0 | tourism-platform | E5.5 | No shared secrets or mock data outside local/tests |
-| EPIC | E5.6 | First backend server deployment | P0 | tourism-platform, tourism-backend | E5.5 | Gamma staging deploy and rollback pass |
-| technical task | T5.6.1 | Single-server staging stack | P0 | tourism-platform | E5.6 | HTTPS API and private data services healthy |
+| EPIC | E5.6 | First remote test backend | P0 | tourism-platform, tourism-backend | E5.5 | Gamma image test deploy and rollback pass |
+| technical task | T5.6.1 | Constrained single-server test stack | P0 | tourism-platform | E5.6 | HTTPS API and private data services healthy |
 | technical task | T5.6.2 | Backup and restore smoke | P0 | tourism-platform | T5.6.1 | Encrypted off-host backup restored successfully |
 | EPIC | E6 | Authentication | P0 | tourism-backend, tourism-mobile | E2 | Register/login/profile |
 | user story | US6.1 | As a user I create an account | P0 | tourism-mobile | E6 | Session persisted securely |

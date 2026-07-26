@@ -25,8 +25,10 @@
 
 ## Эволюция стека
 
-- Первый `staging`: deployment-specific Docker Compose на одном сервере,
-  HTTPS reverse proxy и private data network.
+- Первый remote `test`: constrained Docker Compose на одном сервере,
+  HTTPS reverse proxy, swap и private data network.
+- `staging` и `production` требуют отдельного, правильно рассчитанного
+  контура.
 - GitLab CI с protected deploy job, immutable image, migration, smoke и
   rollback.
 - Kubernetes и Helm только после появления подтверждённой потребности в

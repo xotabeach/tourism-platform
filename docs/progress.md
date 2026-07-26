@@ -17,8 +17,8 @@
 | 3 | Geography and places | done |
 | 4 | Editorial routes | done |
 | 5 | Flutter application foundation | in_progress |
-| 5.5 | Environment foundation | pending |
-| 5.6 | First backend server deployment | pending |
+| 5.5 | Environment foundation | in_progress |
+| 5.6 | First remote test backend | in_progress |
 | 6 | Authentication | pending |
 | 7 | Favorites and profile | pending |
 | 8A | Deterministic Route Builder | pending |
@@ -155,14 +155,26 @@ device screenshot diff, performance profile на mid-range Android; Freezed
 optional. Pixel-perfect статус не заявлен без этих проверок.
 См. [flutter-app-architecture.md](flutter-app-architecture.md).
 
-### Phase 5.5–5.6 — Environments and first staging server
+### Phase 5.5–5.6 — Environments and first remote test server
 
 До Phase 6 нужно унифицировать `local/test/staging/production`, отделить
 mobile data source и AI provider от runtime environment, затем развернуть
-`gamma` как staging backend на существующем сервере. Первый rollout использует
-single-server Compose, HTTPS reverse proxy, закрытые data ports, миграционный
-job, health/smoke checks, rollback и off-host backup. Self-hosted AI в этот
-контур пока не входит.
+immutable backend image из `gamma` в test-контуре. Слабый узел использует
+constrained Compose, swap, один worker, HTTPS reverse proxy, закрытые data
+ports, миграционный job, health/smoke checks и off-host test backup. MinIO,
+пользовательские данные и AI в этот контур не входят.
+
+Подготовлено в коде: backend `APP_ENV` enum и immutable image с seed/media;
+mobile `APP_ENV` + `DATA_SOURCE` с запретом mock вне local; GitLab publication
+image по commit SHA; constrained test Compose и deploy script. Остаются
+host bootstrap, TLS/DNS, remote deploy, rollback и backup/restore smoke.
+
+Проверки 2026-07-26: backend validation `42 passed`, coverage 89.11%,
+pip-audit без известных уязвимостей; runtime image собран локально, seed/media
+проверены. Mobile validation `56 tests`, test/API iOS Simulator build passed.
+Platform local и constrained test Compose config passed. Remote bootstrap ждёт
+ротации первоначального пароля, SSH deploy key и подтверждённого TLS hostname;
+host inventory и credentials в Git не сохраняются.
 
 См.
 [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
