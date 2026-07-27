@@ -137,8 +137,11 @@ envelope, JSON logs.
   совместно с chips. Поиск в «Места Крыма» использует debounce и параметр
   backend API `q`; mock repository поддерживает тот же контракт. Оба поля
   имеют явную очистку и состояния «ничего не найдено».
-- Основные и круглые команды на iOS используют reusable blur-glass surface;
-  Android сохраняет текущие Material-кнопки.
+- Основные и круглые команды на iOS — Flutter frosted glass (`BackdropFilter`);
+  поиск/фильтр/колокольчик на светлых экранах — `controlSurface` как в Figma.
+  Native `UIGlassEffect` через `UiKitView` отключён: platform view размывает
+  native backdrop (тёмный), а не Flutter-пиксели. `AppFloatingNavBar`
+  остаётся Flutter-owned.
 - Segmented floating nav: leading/trailing glass + interrupt-safe liquid
   droplet, semantics, 48 px targets, reduced motion
 - Long-distance nav transitions no longer draw a bridge across the full bar:
@@ -160,9 +163,9 @@ envelope, JSON logs.
   API: `flutter run --dart-define=DATA_SOURCE=api`.
 - Test/staging/production запускаются только с валидными
   `APP_ENV`/`API_BASE_URL`; release без environment выбирает production.
-- Current mobile gate after profile screen: format/analyze passed, `61 tests`
-  and all 13 macOS pixel goldens passed. Android debug APK with
-  `APP_ENV=local` + `DATA_SOURCE=mock` builds successfully.
+- Current mobile gate after native Liquid Glass controls: format/analyze
+  passed, `63 tests` and all 13 macOS pixel goldens passed. Release mock
+  build reinstalled on physical iPhone (iOS 26.5).
 - Profile tab (Phase 5 mock UI, durable profile/auth still Phase 6–7;
   ranks/тп/achievements → **Phase 14**; published routes on profile →
   Phase 11): Figma layout with cover/avatar, rank card (`тп` / top place),

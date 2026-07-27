@@ -19,6 +19,7 @@ lib/core/design/
   components/
     app_controls.dart
     app_glass.dart
+    native_liquid_glass.dart
 ```
 
 `core/theme` wires these tokens into Material 3 and keeps compatibility
@@ -60,15 +61,26 @@ Golden tests precache the complete runtime icon list before capture.
 
 Reusable primitives:
 
-- `AppGlassSurface`
-- `AppGlassPill`
-- `AppGlassCircle`
-- `AppGlassIconButton`
+- `AppGlassSurface` / `AppGlassPill` / `AppGlassCircle` — Flutter
+  `BackdropFilter` glass used for iOS frosted controls, overlays, photo
+  chrome, and the floating nav droplet
+- `AppAdaptiveGlassSurface` / `AppGlassIconButton` /
+  `AppAdaptivePrimaryButton` — platform-adaptive wrappers (iOS frosted glass,
+  Android Material filled/solid)
+- Light page chrome (search field, bell, filter) uses soft
+  `AppColors.controlSurface` to match Figma — not platform-view glass
 
-They provide clipping, controlled backdrop blur, translucent fill, light
-border, optional inner highlight and bounded shadow. Avoid nested
-`BackdropFilter` chains: when a parent already blurs the backdrop, use
-`blur: 0` on nested surfaces.
+**Why not `UIGlassEffect` via `UiKitView`:** a platform view punches a hole in
+the Flutter layer and blurs the **native** window backdrop (often black), not
+the Flutter pixels underneath. That produced dark matte controls unlike system
+Liquid Glass and unlike Figma. Until Flutter can composite true
+`UIGlassEffect` over Flutter content, iOS chrome stays on `BackdropFilter`.
+
+**Out of scope for the floating nav:** `AppFloatingNavBar` stays Flutter-owned
+(`AppGlassSurface` + droplet morph). Do not swap it for `UITabBar`.
+
+Avoid nested `BackdropFilter` chains: when a parent already blurs the backdrop,
+use `blur: 0` on nested surfaces.
 
 ## Navigation and swipe
 
@@ -93,10 +105,10 @@ The controllers and existing `StatefulShellRoute` branch state survive route
 rebuilds. Place catalog/details use this same shell instance and keep Map
 selected.
 
-Primary and circular command controls are platform-adaptive. iOS composes
-them from `AppGlassSurface`/`AppGlassCircle` with blur, translucent fill,
-highlight, border and restrained shadow. Android retains the Material
-`FilledButton` and solid circular control styles.
+Primary and circular command controls are platform-adaptive. On iOS they use
+Flutter frosted glass (`AppAdaptiveGlassSurface` / `AppGlassSurface`); Android
+retains the Material `FilledButton` and solid circular control styles. Light
+page search/filter/bell keep `controlSurface` per Figma.
 
 Route swipe progress is `horizontalDrag / threshold`, clamped to `-1...1`.
 Rotation is limited to about 9 degrees. Raw drag drives threshold and visual
