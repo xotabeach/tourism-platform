@@ -187,19 +187,21 @@ mobile, backend, CI и будущих AI providers.
 
 ## Phase 7 — Favorites and profile
 
-**Цель:** сохранение мест и маршрутов, список избранного.
+**Цель:** сохранение мест и маршрутов, список избранного; каркас профиля
+из Phase 6 заполняется избранным. Геймификация (звание / тп / достижения) —
+отдельная Phase 14.
 
 | Область | Задачи |
 | --- | --- |
 | Backend | favorites module |
-| Mobile | Favorites screen |
+| Mobile | Favorites screen; profile показывает favorites entry points |
 | API | `/api/v1/favorites/*` |
 | Database | favorite_places, saved_routes |
 | Tests | Ownership invariants |
 | Security | Object ownership; BOLA negative tests; private favorites authZ |
 | Acceptance | Save/unsave place and route |
 | Dependencies | Phase 4, Phase 6 |
-| Не входит | Social sharing |
+| Не входит | Social sharing; ranks/achievements (Phase 14) |
 
 ## Phase 8A — Deterministic Route Builder
 
@@ -302,6 +304,40 @@ production cutover.
 | Dependencies | Phase 12 entitlements `trip_planner_enabled` |
 | Не входит | Collaborative trips, hotel booking |
 
+## Phase 14 — Traveler progress (ranks, тп, achievements)
+
+**Цель:** заменить mock-блоки профиля (звание, очки «тп», топ, достижения)
+данными из backend/БД. Начисление прогресса завязано на реальные события
+прохождения маршрутов, а не на клиентский хардкод.
+
+| Область | Задачи |
+| --- | --- |
+| Docs | data-model + правила начисления тп / рангов / достижений |
+| Backend | catalog достижений; прогресс пользователя; ранги; award pipeline |
+| Mobile | Profile: rank card, achievements carousel, read API вместо mock |
+| API | `/api/v1/me/progress`, `/api/v1/achievements`, `/api/v1/me/achievements` |
+| Database | `achievement_definitions`, `user_achievements`, `user_progress` (тп, rank) |
+| Events | Начисление из Phase 9 `route_executions` (km, round-trip, complete) |
+| Tests | Award invariants; idempotent unlock; ownership; no cross-user leak |
+| Security | Только свой progress; catalog публичный read-only; anti-cheat: server-side awards only |
+| Acceptance | Профиль показывает звание/тп/достижения с API; mock остаётся только local fallback |
+| Dependencies | Phase 6 (user), Phase 9 (execution events); Phase 7 желателен для единого profile |
+| Не входит | Социальный шаринг бейджей; PvP; сложные стрики как продукт MVP; магазин за тп |
+
+Правила MVP (preliminary, уточняются в data-model doc фазы):
+
+- **тп** — целочисленные travel points; растут за завершённые executions и
+  отдельные achievement unlock (веса в конфиге/seed, не в mobile).
+- **Звание** — пороги по тп (например «Продвинутый пешеход»); клиент только
+  отображает `rank_title` + `progress/next`.
+- **Топ N** — опционально approximate place по тп; допускается отложенный
+  пересчёт; не P0-критично для первого merge.
+- **Достижения** — seed-каталог (код, title, description, rule_key); unlock
+  server-side при matching event; mobile карусель как сейчас в Figma.
+
+Опубликованные маршруты на профиле остаются Phase 11 (user-created +
+publication), не часть Phase 14.
+
 ## Future — Conversational Route Planner
 
 **Цель:** NL interpretation, clarifying dialogue, `NormalizedRouteRequest`,
@@ -379,6 +415,11 @@ migration/canary; optional MCP adapter для тех же tools.
 | EPIC | E11 | User-created private routes | P1 | tourism-backend, tourism-mobile | E8 | Private CRUD |
 | EPIC | E12 | Travel+ foundations | P2 | tourism-backend | E8 | Entitlements without billing |
 | EPIC | E13 | Trip Planner | Future | tourism-backend, tourism-mobile | E12 | Trip with Route items |
+| EPIC | E14 | Traveler progress / achievements | P1 | tourism-backend, tourism-mobile | E6, E9 | Rank + тп + achievements from API |
+| user story | US14.1 | As a traveler I see my rank and тп on profile | P1 | tourism-mobile | E14 | Values from `/me/progress`, not mock |
+| user story | US14.2 | As a traveler I unlock an achievement after a route | P1 | tourism-backend | E14, E9 | Server awards idempotently on execution complete |
+| technical task | T14.1 | Achievement catalog seed + award rules | P1 | tourism-backend | E14 | rule_key mapped to execution events |
+| technical task | T14.2 | Replace profile mock progress providers | P1 | tourism-mobile | E14 | Mock only for `DATA_SOURCE=mock` |
 | user story | US-F1 | Publish route for moderation | Future | all | E11 | ModerationStatus flow |
 | user story | US-F2 | Subscribe to Travel+ | Future | all | E12 | Store purchase |
 | user story | US-F3 | Conversational route planner | Future | all | E8B, E12 | NL → NormalizedRouteRequest |

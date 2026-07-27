@@ -5,7 +5,7 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
-**Последнее обновление:** 2026-07-26
+**Последнее обновление:** 2026-07-27
 
 ## Сводка фаз
 
@@ -28,6 +28,7 @@
 | 11 | User-created routes | pending |
 | 12 | Travel+ foundations | pending |
 | 13 | Trip Planner | pending |
+| 14 | Traveler progress (ranks, тп, achievements) | pending |
 
 Статусы: `pending` · `next` · `in_progress` · `done` · `blocked`.
 
@@ -159,9 +160,14 @@ envelope, JSON logs.
   API: `flutter run --dart-define=DATA_SOURCE=api`.
 - Test/staging/production запускаются только с валидными
   `APP_ENV`/`API_BASE_URL`; release без environment выбирает production.
-- Current mobile gate after detail navbar/search fixes: format/analyze passed,
-  `59 tests` and
-  all 13 macOS pixel goldens passed.
+- Current mobile gate after profile screen: format/analyze passed, `61 tests`
+  and all 13 macOS pixel goldens passed. Android debug APK with
+  `APP_ENV=local` + `DATA_SOURCE=mock` builds successfully.
+- Profile tab (Phase 5 mock UI, durable profile/auth still Phase 6–7;
+  ranks/тп/achievements → **Phase 14**; published routes on profile →
+  Phase 11): Figma layout with cover/avatar, rank card (`тп` / top place),
+  achievements carousel, published routes carousel; name from session mock;
+  text-only rendering for untrusted display strings.
 
 Остаётся: сверка approximate values и original SVG через Figma Dev Mode,
 device screenshot diff, performance profile на mid-range Android; Freezed

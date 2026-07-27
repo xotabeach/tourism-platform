@@ -34,13 +34,15 @@ flowchart LR
     p11[Phase11_UserRoutes]
     p12[Phase12_TravelPlus]
     p13[Phase13_TripPlanner]
+    p14[Phase14_ProgressAchievements]
   end
 
   p0 --> p1 --> p2 --> p3 --> p4
   p4 --> p5
-  p4 --> p6 --> p7
+  p5 --> p6 --> p7
   p3 --> p8a
   p6 --> p8a --> p9
+  p9 --> p14
   p8a --> p8b
   p9 --> p10 --> p11
   p8a --> p12 --> p13
@@ -57,6 +59,7 @@ flowchart LR
 | 8A Builder | Форма подбора + результат маршрута | pending |
 | 9 Execution | «Пройти маршрут», чеклист точек | pending |
 | 8B / 12 / 13 | AI-чат, Travel+, Trip Planner | later |
+| **14 Progress** | Звание, тп, достижения на профиле | pending |
 
 ---
 
