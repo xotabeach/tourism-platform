@@ -136,7 +136,12 @@ envelope, JSON logs.
 - Поиск на Home стал интерактивным и фильтрует текущие маршрутные карточки
   совместно с chips. Поиск в «Места Крыма» использует debounce и параметр
   backend API `q`; mock repository поддерживает тот же контракт. Оба поля
-  имеют явную очистку и состояния «ничего не найдено».
+  имеют явную очистку и состояния «ничего не найдено». Закрытие поиска:
+  крестик в поле и tap outside (`TapRegion`). Routes catalog — inline search
+  (без fullscreen `showSearch`).
+- Назад с места, открытого из маршрута, возвращает в route details
+  (`/routes/:id/place/:placeId`), а не в каталог мест. Detail pages —
+  `CupertinoPage` для iOS edge-swipe.
 - Основные и круглые команды на iOS — Flutter frosted glass (`BackdropFilter`);
   поиск/фильтр/колокольчик на светлых экранах — `controlSurface` как в Figma.
   Native `UIGlassEffect` через `UiKitView` отключён: platform view размывает
