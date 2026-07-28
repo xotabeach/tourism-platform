@@ -88,6 +88,7 @@ REQUIRED_FILES=(
   scripts/clone-repositories.sh
   scripts/clone-repositories.ps1
   scripts/validate.sh
+  scripts/ci-mirror-to-github.sh
   scripts/deploy-test.sh
 )
 

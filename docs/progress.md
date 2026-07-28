@@ -183,6 +183,9 @@ envelope, JSON logs.
 - GitLab CI split completed in all repositories (`workspace`, `tourism-mobile`,
   `tourism-backend`, `tourism-platform`): `code-style` and `run-tests` jobs are
   now separated (build/publish stages preserved where applicable).
+- GitHub showcase mirror: public repos under `xotabeach/*`; GitLab CI
+  `github-mirror` stage syncs `gamma`/`main` on push after green checks
+  (token via group CI variable `GITHUB_MIRROR_TOKEN`).
 
 Остаётся: сверка approximate values и original SVG через Figma Dev Mode,
 device screenshot diff, performance profile на mid-range Android; Freezed

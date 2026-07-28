@@ -11,7 +11,30 @@ legacy/mirror и не являются источником истины.
 
 - `code-style` — формат/линт/статический анализ;
 - `run-tests` — unit/integration/security tests и проверка runtime configs;
-- дополнительные `build`/`publish` stages — только где действительно нужны.
+- дополнительные `build`/`publish` stages — только где действительно нужны;
+- `mirror` — автопубликация public showcase на GitHub после зелёных checks
+  (ветки `gamma` / `main`).
+
+### GitHub showcase mirror
+
+Источник истины — GitLab (`travel-platform2`). GitHub (`xotabeach/*`) —
+read-only витрина.
+
+После успешного `code-style` + `run-tests` job `github-mirror` пушит
+текущий commit:
+
+- `HEAD → github/<branch>` (обычно `gamma`);
+- дополнительно `HEAD → github/main`, если ветка `gamma` или `main`.
+
+Нужные **group** CI/CD variables в GitLab (`travel-platform2`):
+
+| Variable | Masked | Назначение |
+| --- | --- | --- |
+| `GITHUB_MIRROR_TOKEN` | yes | GitHub PAT / fine-grained token с `contents:write` на showcase repos |
+| `GITHUB_MIRROR_OWNER` | no | owner на GitHub (сейчас `xotabeach`) |
+
+Без `GITHUB_MIRROR_TOKEN` job просто не создаётся (`rules`). Локальный
+ручной прогон: `./scripts/mirror-to-github.sh` в workspace.
 
 ## Ответственность репозиториев
 
