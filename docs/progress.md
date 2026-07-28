@@ -19,8 +19,8 @@
 | 5 | Flutter application foundation | in_progress |
 | 5.5 | Environment foundation | in_progress |
 | 5.6 | First remote test backend | in_progress |
-| 6 | Authentication | pending |
-| 7 | Favorites and profile | pending |
+| 6 | Authentication | in_progress |
+| 7 | Favorites and profile | in_progress |
 | 8A | Deterministic Route Builder | pending |
 | 8B | AI-assisted Route Planning (experimental) | pending |
 | 9 | Route execution | pending |
@@ -213,11 +213,12 @@ Platform local и constrained test Compose config passed. Remote bootstrap жд�
 ротации первоначального пароля, SSH deploy key и подтверждённого TLS hostname;
 host inventory и credentials в Git не сохраняются.
 
-Remote bootstrap отложен владельцем 2026-07-26. Отдельный локальный bootstrap
-key создан, но на сервер не установлен; сервер и его SSH/configuration не
-изменялись. При возобновлении начать с восстановления VNC/root-доступа,
-установки публичного ключа и проверки SSH host fingerprint. Не запрашивать и
-не сохранять пароль в чате или repository.
+Remote test contour поднят 2026-07-28: host bootstrap (1 GiB swap, Docker),
+immutable `gamma` image, migrate + Crimea seed, Caddy HTTPS на
+`86-106-20-132.sslip.io`. SSH на нестандартном порту (не 22). Smoke:
+`/health/live`, `/health/ready`, places/routes API — 200. Остаются:
+non-root deploy user, key-only hardening, off-host backup/restore,
+mobile test build на этот API, CI protected deploy job.
 
 См.
 [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
