@@ -7,6 +7,12 @@
 Primary CI/CD: **GitLab CI**. GitHub Actions в репозиториях могут оставаться как
 legacy/mirror и не являются источником истины.
 
+Базовый CI-паттерн для репозиториев:
+
+- `code-style` — формат/линт/статический анализ;
+- `run-tests` — unit/integration/security tests и проверка runtime configs;
+- дополнительные `build`/`publish` stages — только где действительно нужны.
+
 ## Ответственность репозиториев
 
 | Repository | Ответственность |

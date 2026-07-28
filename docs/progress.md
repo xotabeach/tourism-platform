@@ -5,7 +5,7 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
-**Последнее обновление:** 2026-07-27
+**Последнее обновление:** 2026-07-28
 
 ## Сводка фаз
 
@@ -176,6 +176,13 @@ envelope, JSON logs.
   Phase 11): Figma layout with cover/avatar, rank card (`тп` / top place),
   achievements carousel, published routes carousel; name from session mock;
   text-only rendering for untrusted display strings.
+- Home header avatar/greeting area now opens Profile; OTP consent rows are
+  taller with centered checkbox/checkmark hit area for cleaner alignment.
+- Swipe deck no longer visually jumps after dismissing onboarding coach card:
+  added dedicated `coachDismiss` settle path + regression test coverage.
+- GitLab CI split completed in all repositories (`workspace`, `tourism-mobile`,
+  `tourism-backend`, `tourism-platform`): `code-style` and `run-tests` jobs are
+  now separated (build/publish stages preserved where applicable).
 
 Остаётся: сверка approximate values и original SVG через Figma Dev Mode,
 device screenshot diff, performance profile на mid-range Android; Freezed
