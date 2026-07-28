@@ -1,15 +1,54 @@
 stages:
-  - validate
+  - code-style
+  - run-tests
 
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
 
-platform-validate:
-  stage: validate
+platform-code-style:
+  stage: code-style
   image: docker:27-cli
   services:
     - docker:27-dind
   before_script:
     - apk add --no-cache bash git
   script:
-    - ./scripts/validate.sh
+    - |
+      for required_file in \
+        README.md \
+        CONTRIBUTING.md \
+        SECURITY.md \
+        compose.yaml \
+        docs/progress.md \
+        docs/implementation-plan.md \
+        docs/diagrams/container-diagram.md \
+        docs/diagrams/phase-and-screens-map.md; do
+        test -f "${required_file}"
+      done
+    - |
+      for shell_script in scripts/*.sh; do
+        bash -n "${shell_script}"
+      done
+    - |
+      if command -v markdownlint-cli2 >/dev/null 2>&1; then
+        markdownlint-cli2 "**/*.md"
+      else
+        echo "Markdown lint: SKIP (markdownlint-cli2 not installed)"
+      fi
+    - |
+      if command -v yamllint >/dev/null 2>&1; then
+        yamllint .gitlab-ci.yml .github compose.yaml
+      else
+        echo "YAML lint: SKIP (yamllint not installed)"
+      fi
+
+platform-run-tests:
+  stage: run-tests
+  image: docker:27-cli
+  services:
+    - docker:27-dind
+  before_script:
+    - apk add --no-cache bash git
+  script:
+    - docker compose --env-file .env.example config --quiet
+    - docker compose --env-file deploy/test/.env.example --file deploy/test/compose.yaml config --quiet

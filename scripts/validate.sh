@@ -40,6 +40,10 @@ REQUIRED_FILES=(
   docs/flutter-testing-guide.md
   docs/flutter-app-architecture.md
   docs/development-environment.md
+  docs/environment-and-backend-deployment.md
+  deploy/test/.env.example
+  deploy/test/Caddyfile
+  deploy/test/compose.yaml
   docs/decisions/ADR-001-modular-monolith-first.md
   docs/decisions/ADR-002-separate-mobile-backend-infrastructure-repositories.md
   docs/decisions/ADR-003-postgresql-postgis.md
@@ -84,6 +88,7 @@ REQUIRED_FILES=(
   scripts/clone-repositories.sh
   scripts/clone-repositories.ps1
   scripts/validate.sh
+  scripts/deploy-test.sh
 )
 
 cd "${PROJECT_ROOT}"
@@ -107,6 +112,11 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 docker compose --env-file .env.example config --quiet
 printf 'Docker Compose config: OK\n'
+docker compose \
+  --env-file deploy/test/.env.example \
+  --file deploy/test/compose.yaml \
+  config --quiet
+printf 'Test deployment Compose config: OK\n'
 
 if command -v markdownlint-cli2 >/dev/null 2>&1; then
   markdownlint-cli2 "**/*.md"

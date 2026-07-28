@@ -5,7 +5,7 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
-**Последнее обновление:** 2026-07-24
+**Последнее обновление:** 2026-07-28
 
 ## Сводка фаз
 
@@ -17,6 +17,8 @@
 | 3 | Geography and places | done |
 | 4 | Editorial routes | done |
 | 5 | Flutter application foundation | in_progress |
+| 5.5 | Environment foundation | in_progress |
+| 5.6 | First remote test backend | in_progress |
 | 6 | Authentication | pending |
 | 7 | Favorites and profile | pending |
 | 8A | Deterministic Route Builder | pending |
@@ -26,6 +28,7 @@
 | 11 | User-created routes | pending |
 | 12 | Travel+ foundations | pending |
 | 13 | Trip Planner | pending |
+| 14 | Traveler progress (ranks, тп, achievements) | pending |
 
 Статусы: `pending` · `next` · `in_progress` · `done` · `blocked`.
 
@@ -61,6 +64,32 @@ envelope, JSON logs.
 - Mobile: routes feature (domain/data/application/presentation), catalog +
   detail, вкладка «Маршруты» в shell.
 
+### Repository code review and hardening (2026-07-25)
+
+- Добавлены отдельные Cursor skills для evidence-first backend/mobile review на
+  основе workspace rules, security baseline и code style.
+- Backend и mobile проверены раздельно; отчёты и общий порядок исправлений:
+  [backend review](reviews/2026-07-25-backend-code-review.md),
+  [mobile review](reviews/2026-07-25-mobile-code-review.md),
+  [remediation plan](reviews/2026-07-25-code-review-remediation-plan.md).
+- Backend: readiness/validation больше не отражают внутренние исключения и
+  входные значения; public routes не раскрывают draft places; list ordering
+  стабилен; PostGIS coordinates загружаются bulk; CI integration gate fail
+  closed; coverage floor 75%.
+- Backend gate: Ruff/MyPy/pip-audit passed; Pytest `17 passed, 24 skipped`,
+  coverage 79.89%. Пропуски связаны с недоступным локальным Docker daemon.
+- Mobile: release выбирает production policy и требует HTTPS `API_BASE_URL`;
+  Android main manifest содержит `INTERNET`, debug signing fallback удалён;
+  remote media ограничены trusted HTTPS origin.
+- Right swipe теперь обновляет in-session favorites state, chips/search
+  работают, detail providers auto-dispose. Durable favorites остаются Phase 7.
+- Dio/JSON failures преобразуются в safe typed state; экраны показывают
+  стабильную ошибку и retry вместо raw exception.
+- Glass card alpha переведена с parent `Opacity` на compositor-safe color
+  filtering; пять затронутых macOS goldens сравнены и обновлены осознанно.
+- Mobile gate: format/analyze passed, 54 tests and all macOS pixel goldens
+  passed; iOS Simulator build passed. Android SDK отсутствует.
+
 ## Что дальше
 
 ### Phase 5 — Flutter foundation (продолжение)
@@ -69,33 +98,126 @@ envelope, JSON logs.
 - `core/design`: semantic colors, typography, spacing, radii, shadows, motion
 - Reusable glass surfaces/pills/circles/icon buttons; full Rubik variable font
 - Welcome → mock auth (имя/телефон → OTP + согласия) → Home
+- Native launch screen: адаптивные iOS/Android day/night resources с
+  `КРЫМТРИП`, заранее отрисованным из локального Rubik; Android 12 splash
+  настроен без новой зависимости.
 - Welcome/Home: исправлены crop, scrim, typography, search, hero, travelers
-- Route card: Figma hierarchy (author/tags/rating/locality/distance/difficulty)
+- Route card: Figma hierarchy (author/tags/rating/locality/distance);
+  difficulty остаётся только в swipe deck и route details, но не в Home list
 - Routes: responsive stacked swipe deck, vertical onboarding, green/burgundy
   drag states, restrained rotation/translation, fixed compact indicators,
-  spring-back and committed-swipe haptics
-- Swipe onboarding is a standalone first deck card with route cards behind it;
-  search/filter/nav stay outside its blur. Shared outlined search/filter
-  geometry is `58 px`.
+  spring-back, committed-swipe haptics и непрерывное продвижение
+  `back → front` без скачка геометрии.
+- Swipe onboarding — самостоятельная первая карточка колоды, а не overlay
+  внутри `RouteHeroCard`; две маршрутные карточки остаются видны за ней,
+  search/filter/nav остаются вне блюра.
+- Экраны сверены со свежими Figma-скринами: главная (48 px серые контролы,
+  баннер 246, ритм), подтверждение номера (серые поля кода: заполненное поле
+  плавно вырастает с 58 до 70 px и остаётся высоким, при стирании возвращается;
+  согласия в две строки), карточка свайпа (заголовок 24, тёмные
+  пилюли, контурные молнии, веерная стопка).
+- Route details переписан по дизайну: медиа-шапка с пагинацией, белый лист с
+  автором, заголовком, описанием, аудиогидом, тегами, параметрами, картой,
+  остановками, full-bleed блоком «Похожие маршруты», рейтингом и отзывами.
+  Тап по фото плавно раскрывает и закрывает галерею на `0.66` высоты экрана;
+  вертикальные жесты всегда остаются обычным scroll контента и не меняют
+  галерею. Выбор точки только синхронно подсвечивает карту и остановку, без
+  reposition страницы. Рекомендации открываются через Hero/reveal.
+- Route details остаётся внутри Routes branch и использует тот же keyed shell
+  navbar: за 560 мс сегменты схлопываются внутрь до home-капли, а «Пройти
+  маршрут» занимает освободившийся правый слот. При раскрытии CTA уезжает
+  наверх и кратко растягивается, а пункты navbar выходят из центра капли;
+  состояние branch сохраняется.
+- Каталог мест и подробности точки также используют общий shell navbar.
+  Переход из остановки маршрута переключает его на Map branch, а возврат к
+  каталогу не пересоздаёт navbar. На подробностях точки navbar теперь плавно
+  схлопывается до активной Map-капли; первое нажатие раскрывает все сегменты,
+  повторное нажатие «Карта» возвращает каталог с сохранённым branch state.
+- Поиск на Home стал интерактивным и фильтрует текущие маршрутные карточки
+  совместно с chips. Поиск в «Места Крыма» использует debounce и параметр
+  backend API `q`; mock repository поддерживает тот же контракт. Оба поля
+  имеют явную очистку и состояния «ничего не найдено». Закрытие поиска:
+  крестик в поле и tap outside (`TapRegion`). Routes catalog — inline search
+  (без fullscreen `showSearch`).
+- Назад с места, открытого из маршрута, возвращает в route details
+  (`/routes/:id/place/:placeId`), а не в каталог мест. Detail pages —
+  `CupertinoPage` для iOS edge-swipe.
+- Основные и круглые команды на iOS — Flutter frosted glass (`BackdropFilter`);
+  поиск/фильтр/колокольчик на светлых экранах — `controlSurface` как в Figma.
+  Native `UIGlassEffect` через `UiKitView` отключён: platform view размывает
+  native backdrop (тёмный), а не Flutter-пиксели. `AppFloatingNavBar`
+  остаётся Flutter-owned.
 - Segmented floating nav: leading/trailing glass + interrupt-safe liquid
   droplet, semantics, 48 px targets, reduced motion
+- Long-distance nav transitions no longer draw a bridge across the full bar:
+  the previous droplet contracts by travel distance and the liquid tail is
+  capped locally. A reviewed `0 → 4` mid-animation golden covers the original
+  artifact.
 - Figma-exported SVG icon set integrated through central `AppIconography`;
   transparent 128 px white/ink/muted runtime assets, no new dependency
-- 10 reviewed goldens at `393×852`; responsive checks at `412×915` and
+- 13 reviewed goldens at `393×852`, включая верх route details, отдельный iOS
+  glass coach и navbar `0 → 4` mid-frame; responsive checks at `412×915` and
   `360×740` with text scale `1.3`
 - Pixel goldens run on macOS only: Linux CI differs by `1.5–7.6 %` of pixels,
   so CI keeps the host-independent checks and visual regressions are caught
   locally. Reproduce CI with `SKIP_PIXEL_GOLDENS=1 flutter test`.
   See [flutter-testing-guide.md](flutter-testing-guide.md).
 - Auth — UI only; реальный OTP/токены — Phase 6
-- **Mock-first DX:** dev `useMockData: true` по умолчанию (8 places /
+- **Mock-first DX:** local `DATA_SOURCE=mock` по умолчанию (8 places /
   3 routes + local assets). Docker/backend не нужны для UI.
-  API: `flutter run --dart-define=USE_MOCK_DATA=false`.
+  API: `flutter run --dart-define=DATA_SOURCE=api`.
+- Test/staging/production запускаются только с валидными
+  `APP_ENV`/`API_BASE_URL`; release без environment выбирает production.
+- Current mobile gate after native Liquid Glass controls: format/analyze
+  passed, `63 tests` and all 13 macOS pixel goldens passed. Release mock
+  build reinstalled on physical iPhone (iOS 26.5).
+- Profile tab (Phase 5 mock UI, durable profile/auth still Phase 6–7;
+  ranks/тп/achievements → **Phase 14**; published routes on profile →
+  Phase 11): Figma layout with cover/avatar, rank card (`тп` / top place),
+  achievements carousel, published routes carousel; name from session mock;
+  text-only rendering for untrusted display strings.
+- Home header avatar/greeting area now opens Profile; OTP consent rows are
+  taller with centered checkbox/checkmark hit area for cleaner alignment.
+- Swipe deck no longer visually jumps after dismissing onboarding coach card:
+  added dedicated `coachDismiss` settle path + regression test coverage.
+- GitLab CI split completed in all repositories (`workspace`, `tourism-mobile`,
+  `tourism-backend`, `tourism-platform`): `code-style` and `run-tests` jobs are
+  now separated (build/publish stages preserved where applicable).
 
 Остаётся: сверка approximate values и original SVG через Figma Dev Mode,
 device screenshot diff, performance profile на mid-range Android; Freezed
 optional. Pixel-perfect статус не заявлен без этих проверок.
 См. [flutter-app-architecture.md](flutter-app-architecture.md).
+
+### Phase 5.5–5.6 — Environments and first remote test server
+
+До Phase 6 нужно унифицировать `local/test/staging/production`, отделить
+mobile data source и AI provider от runtime environment, затем развернуть
+immutable backend image из `gamma` в test-контуре. Слабый узел использует
+constrained Compose, swap, один worker, HTTPS reverse proxy, закрытые data
+ports, миграционный job, health/smoke checks и off-host test backup. MinIO,
+пользовательские данные и AI в этот контур не входят.
+
+Подготовлено в коде: backend `APP_ENV` enum и immutable image с seed/media;
+mobile `APP_ENV` + `DATA_SOURCE` с запретом mock вне local; GitLab publication
+image по commit SHA; constrained test Compose и deploy script. Остаются
+host bootstrap, TLS/DNS, remote deploy, rollback и backup/restore smoke.
+
+Проверки 2026-07-26: backend validation `42 passed`, coverage 89.11%,
+pip-audit без известных уязвимостей; runtime image собран локально, seed/media
+проверены. Mobile validation `56 tests`, test/API iOS Simulator build passed.
+Platform local и constrained test Compose config passed. Remote bootstrap ждёт
+ротации первоначального пароля, SSH deploy key и подтверждённого TLS hostname;
+host inventory и credentials в Git не сохраняются.
+
+Remote bootstrap отложен владельцем 2026-07-26. Отдельный локальный bootstrap
+key создан, но на сервер не установлен; сервер и его SSH/configuration не
+изменялись. При возобновлении начать с восстановления VNC/root-доступа,
+установки публичного ключа и проверки SSH host fingerprint. Не запрашивать и
+не сохранять пароль в чате или repository.
+
+См.
+[environment-and-backend-deployment.md](environment-and-backend-deployment.md).
 
 ### Документировано (не реализовано): AI route planning
 
@@ -116,6 +238,8 @@ editorial-first, form/chat → `NormalizedRouteRequest`, MCP отложен.
 - Security: docs + Cursor skill/rule documented under
   [security/security-baseline.md](security/security-baseline.md). **Not**
   claimed complete; auth/Redis ACL/prod hardening still open.
+- Release blockers: organization-owned Android signing and Android build check
+  требуют CI secrets/Android SDK; physical-device Impeller profile не выполнен.
 
 ## Документировано (не реализовано): Security Baseline
 

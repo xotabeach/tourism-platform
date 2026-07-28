@@ -127,9 +127,46 @@ storage adapter, feature-first layout ready for Phase 4–7 screens.
 | Database | Нет (offline spike later) |
 | Tests | Widget smoke through shell; secure-storage/HTTPS tests; deterministic UI goldens and responsive/reduced-motion checks |
 | Security | Secure storage wiring; HTTPS-only non-dev; deep-link policy stub; no debug secrets |
-| Acceptance | Tabs and segmented nav work; catalogs stay in shell; details open above shell; swipe onboarding is the standalone first deck card; accepted 393×852 goldens; no BLoC migration |
+| Acceptance | Tabs and segmented nav work; catalogs and route details keep one stateful shell nav; detail mode morphs the route CTA into the compact nav; native day/night launch is branded; swipe onboarding is the standalone first deck card; accepted 393×852 goldens; no BLoC migration |
 | Dependencies | Phase 3 done; Phase 4 contracts желательны для Routes tab content |
 | Не входит | Pixel-perfect claim without Figma/device diff; real auth; BLoC; Sentry/slang mandatory; Drift/Isar |
+
+## Phase 5.5 — Environment foundation
+
+**Цель:** единый типизированный контракт `local/test/staging/production` для
+mobile, backend, CI и будущих AI providers.
+
+| Область | Задачи |
+| --- | --- |
+| Backend | Typed `APP_ENV`; environment validation; separate DB/Redis/storage URLs |
+| Mobile | `APP_ENV` + `DATA_SOURCE=mock\|api`; mock разрешён только local/tests |
+| Infrastructure | Environment-scoped CI variables and safe config examples |
+| AI | Provider policy documented independently from environment; automated tests use mock |
+| Security | Reject local credentials and unsafe endpoints outside local |
+| Acceptance | Configuration matrix covered by tests; `gamma` maps to staging deployment |
+| Dependencies | Phase 5 foundation |
+| Не входит | Real AI adapter; production secrets; server deployment |
+
+См. [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
+
+## Phase 5.6 — First remote test backend
+
+**Цель:** развернуть immutable image из `gamma` как disposable test backend на
+существующем малом сервере без AI inference и production data.
+
+| Область | Задачи |
+| --- | --- |
+| Backend | Immutable container image; migration and API smoke jobs |
+| Mobile | Test build points to deployed HTTPS API |
+| Infrastructure | Constrained Compose, swap, reverse proxy/TLS, protected deploy, rollback |
+| Data | Isolated disposable PostGIS/Redis; no MinIO; off-host test backup |
+| Operations | Health, logs, resource/certificate alerts, restore exercise |
+| Security | Private data ports; key-only SSH; non-root deploy; secret isolation |
+| Acceptance | Deploy and rollback pass; test API works from mobile; backup restore verified |
+| Dependencies | Phase 5.5; server inventory, domain and deployment access |
+| Не входит | Production cutover; Kubernetes; self-hosted AI |
+
+См. [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
 
 ## Phase 6 — Authentication
 
@@ -150,19 +187,21 @@ storage adapter, feature-first layout ready for Phase 4–7 screens.
 
 ## Phase 7 — Favorites and profile
 
-**Цель:** сохранение мест и маршрутов, список избранного.
+**Цель:** сохранение мест и маршрутов, список избранного; каркас профиля
+из Phase 6 заполняется избранным. Геймификация (звание / тп / достижения) —
+отдельная Phase 14.
 
 | Область | Задачи |
 | --- | --- |
 | Backend | favorites module |
-| Mobile | Favorites screen |
+| Mobile | Favorites screen; profile показывает favorites entry points |
 | API | `/api/v1/favorites/*` |
 | Database | favorite_places, saved_routes |
 | Tests | Ownership invariants |
 | Security | Object ownership; BOLA negative tests; private favorites authZ |
 | Acceptance | Save/unsave place and route |
 | Dependencies | Phase 4, Phase 6 |
-| Не входит | Social sharing |
+| Не входит | Social sharing; ranks/achievements (Phase 14) |
 
 ## Phase 8A — Deterministic Route Builder
 
@@ -225,17 +264,18 @@ experimental.
 | Dependencies | Phase 4, Phase 6 |
 | Не входит | Live GPS tracking productization |
 
-## Phase 10 — Stabilization and staging
+## Phase 10 — Production readiness and stabilization
 
-**Цель:** seed контент, staging deploy prep в tourism-platform, CI hardening.
+**Цель:** усилить уже работающий staging-контур и подготовить контролируемый
+production cutover.
 
 | Область | Задачи |
 | --- | --- |
 | Backend | Seed scripts, perf smoke |
 | Mobile | Point to staging API |
-| Infrastructure | Helm/manifests draft; no production deploy |
+| Infrastructure | Capacity/rollback/backup hardening; Helm only if justified |
 | Security | Staging DAST (allowed env only); container scanning; secrets validation; security release checklist |
-| Acceptance | Staging smoke пройден |
+| Acceptance | Production readiness review and staging smoke passed |
 | Dependencies | Phases 6–9 |
 | Не входит | Production cutover |
 
@@ -263,6 +303,40 @@ experimental.
 | Acceptance | Создать поездку и прикрепить route |
 | Dependencies | Phase 12 entitlements `trip_planner_enabled` |
 | Не входит | Collaborative trips, hotel booking |
+
+## Phase 14 — Traveler progress (ranks, тп, achievements)
+
+**Цель:** заменить mock-блоки профиля (звание, очки «тп», топ, достижения)
+данными из backend/БД. Начисление прогресса завязано на реальные события
+прохождения маршрутов, а не на клиентский хардкод.
+
+| Область | Задачи |
+| --- | --- |
+| Docs | data-model + правила начисления тп / рангов / достижений |
+| Backend | catalog достижений; прогресс пользователя; ранги; award pipeline |
+| Mobile | Profile: rank card, achievements carousel, read API вместо mock |
+| API | `/api/v1/me/progress`, `/api/v1/achievements`, `/api/v1/me/achievements` |
+| Database | `achievement_definitions`, `user_achievements`, `user_progress` (тп, rank) |
+| Events | Начисление из Phase 9 `route_executions` (km, round-trip, complete) |
+| Tests | Award invariants; idempotent unlock; ownership; no cross-user leak |
+| Security | Только свой progress; catalog публичный read-only; anti-cheat: server-side awards only |
+| Acceptance | Профиль показывает звание/тп/достижения с API; mock остаётся только local fallback |
+| Dependencies | Phase 6 (user), Phase 9 (execution events); Phase 7 желателен для единого profile |
+| Не входит | Социальный шаринг бейджей; PvP; сложные стрики как продукт MVP; магазин за тп |
+
+Правила MVP (preliminary, уточняются в data-model doc фазы):
+
+- **тп** — целочисленные travel points; растут за завершённые executions и
+  отдельные achievement unlock (веса в конфиге/seed, не в mobile).
+- **Звание** — пороги по тп (например «Продвинутый пешеход»); клиент только
+  отображает `rank_title` + `progress/next`.
+- **Топ N** — опционально approximate place по тп; допускается отложенный
+  пересчёт; не P0-критично для первого merge.
+- **Достижения** — seed-каталог (код, title, description, rule_key); unlock
+  server-side при matching event; mobile карусель как сейчас в Figma.
+
+Опубликованные маршруты на профиле остаются Phase 11 (user-created +
+publication), не часть Phase 14.
 
 ## Future — Conversational Route Planner
 
@@ -309,6 +383,12 @@ migration/canary; optional MCP adapter для тех же tools.
 | technical task | T5.1 | Shell + theme + secure storage foundation | P0 | tourism-mobile | E5 | Tabs + AppTheme + SecureStorage port |
 | technical task | T5.2 | Align layout with flutter-app-architecture.md | P0 | tourism-mobile | T5.1 | core/ + feature presentation/widgets |
 | user story | US5.1 | As a traveler I switch main tabs | P0 | tourism-mobile | T5.1 | Bottom nav to Home/Places/Routes/… |
+| EPIC | E5.5 | Environment foundation | P0 | tourism-platform, backend, mobile | E5 | Typed env matrix and policy tests |
+| technical task | T5.5.1 | Backend/mobile environment contract | P0 | tourism-backend, tourism-mobile | E5.5 | Local/test/staging/production validated |
+| technical task | T5.5.2 | Environment-scoped CI configuration | P0 | tourism-platform | E5.5 | No shared secrets or mock data outside local/tests |
+| EPIC | E5.6 | First remote test backend | P0 | tourism-platform, tourism-backend | E5.5 | Gamma image test deploy and rollback pass |
+| technical task | T5.6.1 | Constrained single-server test stack | P0 | tourism-platform | E5.6 | HTTPS API and private data services healthy |
+| technical task | T5.6.2 | Backup and restore smoke | P0 | tourism-platform | T5.6.1 | Encrypted off-host backup restored successfully |
 | EPIC | E6 | Authentication | P0 | tourism-backend, tourism-mobile | E2 | Register/login/profile |
 | user story | US6.1 | As a user I create an account | P0 | tourism-mobile | E6 | Session persisted securely |
 | EPIC | E7 | Favorites | P0 | tourism-backend, tourism-mobile | E4, E6 | Save place/route |
@@ -331,10 +411,15 @@ migration/canary; optional MCP adapter для тех же tools.
 | technical task | AI-ARCH-13 | Optional MCP adapter | Future | tourism-backend | AI-ARCH-4 | Same tools, MCP transport |
 | EPIC | E9 | Route execution | P0 | tourism-backend, tourism-mobile | E4, E6 | Start/complete/history |
 | user story | US9.1 | As a traveler I mark visited stops | P0 | tourism-mobile | E9 | Progress updates |
-| EPIC | E10 | Staging stabilization | P1 | tourism-platform, all | E6–E9 | Staging smoke |
+| EPIC | E10 | Production readiness | P1 | tourism-platform, all | E5.6, E6–E9 | Production readiness review |
 | EPIC | E11 | User-created private routes | P1 | tourism-backend, tourism-mobile | E8 | Private CRUD |
 | EPIC | E12 | Travel+ foundations | P2 | tourism-backend | E8 | Entitlements without billing |
 | EPIC | E13 | Trip Planner | Future | tourism-backend, tourism-mobile | E12 | Trip with Route items |
+| EPIC | E14 | Traveler progress / achievements | P1 | tourism-backend, tourism-mobile | E6, E9 | Rank + тп + achievements from API |
+| user story | US14.1 | As a traveler I see my rank and тп on profile | P1 | tourism-mobile | E14 | Values from `/me/progress`, not mock |
+| user story | US14.2 | As a traveler I unlock an achievement after a route | P1 | tourism-backend | E14, E9 | Server awards idempotently on execution complete |
+| technical task | T14.1 | Achievement catalog seed + award rules | P1 | tourism-backend | E14 | rule_key mapped to execution events |
+| technical task | T14.2 | Replace profile mock progress providers | P1 | tourism-mobile | E14 | Mock only for `DATA_SOURCE=mock` |
 | user story | US-F1 | Publish route for moderation | Future | all | E11 | ModerationStatus flow |
 | user story | US-F2 | Subscribe to Travel+ | Future | all | E12 | Store purchase |
 | user story | US-F3 | Conversational route planner | Future | all | E8B, E12 | NL → NormalizedRouteRequest |

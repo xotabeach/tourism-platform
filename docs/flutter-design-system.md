@@ -19,6 +19,7 @@ lib/core/design/
   components/
     app_controls.dart
     app_glass.dart
+    native_liquid_glass.dart
 ```
 
 `core/theme` wires these tokens into Material 3 and keeps compatibility
@@ -60,15 +61,26 @@ Golden tests precache the complete runtime icon list before capture.
 
 Reusable primitives:
 
-- `AppGlassSurface`
-- `AppGlassPill`
-- `AppGlassCircle`
-- `AppGlassIconButton`
+- `AppGlassSurface` / `AppGlassPill` / `AppGlassCircle` — Flutter
+  `BackdropFilter` glass used for iOS frosted controls, overlays, photo
+  chrome, and the floating nav droplet
+- `AppAdaptiveGlassSurface` / `AppGlassIconButton` /
+  `AppAdaptivePrimaryButton` — platform-adaptive wrappers (iOS frosted glass,
+  Android Material filled/solid)
+- Light page chrome (search field, bell, filter) uses soft
+  `AppColors.controlSurface` to match Figma — not platform-view glass
 
-They provide clipping, controlled backdrop blur, translucent fill, light
-border, optional inner highlight and bounded shadow. Avoid nested
-`BackdropFilter` chains: when a parent already blurs the backdrop, use
-`blur: 0` on nested surfaces.
+**Why not `UIGlassEffect` via `UiKitView`:** a platform view punches a hole in
+the Flutter layer and blurs the **native** window backdrop (often black), not
+the Flutter pixels underneath. That produced dark matte controls unlike system
+Liquid Glass and unlike Figma. Until Flutter can composite true
+`UIGlassEffect` over Flutter content, iOS chrome stays on `BackdropFilter`.
+
+**Out of scope for the floating nav:** `AppFloatingNavBar` stays Flutter-owned
+(`AppGlassSurface` + droplet morph). Do not swap it for `UITabBar`.
+
+Avoid nested `BackdropFilter` chains: when a parent already blurs the backdrop,
+use `blur: 0` on nested surfaces.
 
 ## Navigation and swipe
 
@@ -82,25 +94,55 @@ The droplet uses a local `CustomPainter`, a 360 ms interrupt-safe controller
 and selection haptics. Reduced-motion mode removes bridge/stretch and uses a
 150 ms slide/crossfade.
 
+Route details use the same keyed shell nav instance as the catalogs. Its detail
+mode moves the active droplet from Routes to a compact Home circle, contracts
+the inactive glass segments and places the route CTA in the released right
+slot. Tapping the compact droplet reverses the same geometry: the CTA moves
+above the full bar and stretches briefly while inactive destinations emerge
+from the active center. The 560 ms inward morph uses the shared emphasized
+curve; reduced-motion mode substitutes the existing 150 ms simple transition.
+The controllers and existing `StatefulShellRoute` branch state survive route
+rebuilds. Place catalog/details use this same shell instance and keep Map
+selected.
+
+Primary and circular command controls are platform-adaptive. On iOS they use
+Flutter frosted glass (`AppAdaptiveGlassSurface` / `AppGlassSurface`); Android
+retains the Material `FilledButton` and solid circular control styles. Light
+page search/filter/bell keep `controlSurface` per Figma.
+
 Route swipe progress is `horizontalDrag / threshold`, clamped to `-1...1`.
 Rotation is limited to about 9 degrees. Raw drag drives threshold and visual
 state, while pre-commit card translation is restrained to about `42 px`.
 Swipe indicators stay at `42 px` and do not scale with progress. A committed
 swipe triggers haptic feedback and fly-out; an uncommitted swipe springs back
-without data changes.
+without data changes. Back cards use route-id keys and explicit resting,
+promoted and settling geometry. After commit the previous back card animates
+from its promoted coordinates into the front slot while the following layers
+advance separately; a new drag is disabled until settle completes.
 
 The first-visit swipe coach is a standalone front card in the deck, not an
 overlay inside `RouteHeroCard`. The first and second route cards remain visible
 behind it as the next stack items. Its blur, dark surface and border use the
 same card geometry; search, filters and navigation remain outside the blur.
+Its swipe/tap glyphs follow the Figma vertical icon set. The CTA uses stronger
+blur, highlight and border on iOS, while Android keeps the neutral surface.
 
 ## Golden review
 
 Primary deterministic frame: iOS `393×852`, device pixel ratio `1`,
 text scale `1.0`, local images only. The golden suite covers Welcome, Home,
-route list card, slider resting, onboarding, both swipe directions and three
-nav states. It also checks `412×915`, a `360×740` frame at text scale `1.3`,
-48 px nav targets and reduced motion.
+route list card, slider resting, Android/iOS onboarding, both swipe directions
+and three nav states, plus the route-details top chrome. It also checks
+`412×915`, a `360×740` frame at text scale `1.3`, 48 px nav targets and reduced
+motion.
+
+## Native launch
+
+iOS uses adaptive asset-catalog colors and light/dark wordmark appearances.
+Android uses density-specific day/night drawables and Android 12 splash theme
+resources. The tracked wordmark is pre-rendered from the bundled Rubik
+SemiBold font, so startup does not depend on Flutter font loading or a system
+fallback.
 
 Run:
 

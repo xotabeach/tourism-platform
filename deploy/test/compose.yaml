@@ -1,0 +1,191 @@
+name: crimeatrip-test
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: 5m
+    max-file: "2"
+
+x-backend-environment: &backend-environment
+  APP_ENV: test
+  LOG_LEVEL: INFO
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  DATABASE_URL_SYNC: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+
+services:
+  caddy:
+    image: ${CADDY_IMAGE}
+    restart: unless-stopped
+    mem_limit: 48m
+    pids_limit: 64
+    environment:
+      API_HOST: ${API_HOST}
+      ACME_EMAIL: ${ACME_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - edge
+      - private
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  backend:
+    image: ${BACKEND_IMAGE}
+    restart: unless-stopped
+    mem_limit: 192m
+    pids_limit: 128
+    environment: *backend-environment
+    expose:
+      - "8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import urllib.request;
+          urllib.request.urlopen("http://localhost:8000/health/ready", timeout=5)
+      interval: 15s
+      timeout: 7s
+      retries: 8
+      start_period: 20s
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    networks:
+      - private
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    restart: unless-stopped
+    mem_limit: 224m
+    pids_limit: 100
+    shm_size: 32m
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    command:
+      - postgres
+      - -c
+      - shared_buffers=32MB
+      - -c
+      - effective_cache_size=128MB
+      - -c
+      - work_mem=1MB
+      - -c
+      - maintenance_work_mem=16MB
+      - -c
+      - max_connections=20
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - private
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  redis:
+    image: ${REDIS_IMAGE}
+    restart: unless-stopped
+    mem_limit: 48m
+    pids_limit: 64
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        exec redis-server
+        --requirepass "$${REDIS_PASSWORD}"
+        --maxmemory 24mb
+        --maxmemory-policy allkeys-lru
+        --appendonly no
+        --save ""
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "$${REDIS_PASSWORD}" --no-auth-warning ping
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks:
+      - private
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  migrate:
+    image: ${BACKEND_IMAGE}
+    profiles:
+      - tools
+    mem_limit: 192m
+    pids_limit: 128
+    environment: *backend-environment
+    command:
+      - alembic
+      - upgrade
+      - head
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  seed:
+    image: ${BACKEND_IMAGE}
+    profiles:
+      - tools
+    mem_limit: 192m
+    pids_limit: 128
+    environment: *backend-environment
+    command:
+      - python
+      - scripts/seed_crimea.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+volumes:
+  caddy-data:
+  caddy-config:
+  postgres-data:
+
+networks:
+  edge:
+  private:
+    internal: true

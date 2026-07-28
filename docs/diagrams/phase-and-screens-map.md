@@ -3,8 +3,8 @@
 Документ для синхронизации с дизайном экранов. Технические детали —
 в [implementation-plan.md](implementation-plan.md) и [progress.md](progress.md).
 
-**Статус на 2026-07-23:** готовы foundation и каталог мест (Phase 0–3).  
-**Сейчас в разработке по плану:** редакционные маршруты (Phase 4).
+**Статус на 2026-07-28:** завершены фазы 0–4; в активной разработке Phase 5 + 5.5/5.6.  
+**Сейчас в работе по продукту:** polish Flutter UI/навигации, CI split, подготовка test backend.
 
 ---
 
@@ -17,10 +17,10 @@ flowchart LR
     p1[Phase1_Infra]
     p2[Phase2_API]
     p3[Phase3_Places]
+    p4[Phase4_EditorialRoutes]
   end
 
   subgraph near [Ближайшие_MVP]
-    p4[Phase4_EditorialRoutes]
     p5[Phase5_AppShell]
     p6[Phase6_Auth]
     p7[Phase7_Favorites]
@@ -34,13 +34,14 @@ flowchart LR
     p11[Phase11_UserRoutes]
     p12[Phase12_TravelPlus]
     p13[Phase13_TripPlanner]
+    p14[Phase14_ProgressAchievements]
   end
 
-  p0 --> p1 --> p2 --> p3 --> p4
-  p4 --> p5
-  p4 --> p6 --> p7
+  p0 --> p1 --> p2 --> p3 --> p4 --> p5
+  p5 --> p6 --> p7
   p3 --> p8a
   p6 --> p8a --> p9
+  p9 --> p14
   p8a --> p8b
   p9 --> p10 --> p11
   p8a --> p12 --> p13
@@ -50,34 +51,35 @@ flowchart LR
 | --- | --- | --- |
 | 0–2 | Инфра, не экраны | done |
 | **3 Places** | Каталог мест, карточка места | **done** (в коде есть простой UI) |
-| **4 Routes** | Каталог маршрутов, карточка маршрута со stops | **next** |
-| 5 Shell | Welcome / Home / навбар / темы | pending |
+| **4 Routes** | Каталог маршрутов, карточка маршрута со stops | **done** |
+| 5 Shell | Welcome / Home / навбар / темы | in_progress |
 | 6 Auth | Регистрация, вход, профиль | pending |
 | 7 Favorites | Избранное мест и маршрутов | pending |
 | 8A Builder | Форма подбора + результат маршрута | pending |
 | 9 Execution | «Пройти маршрут», чеклист точек | pending |
 | 8B / 12 / 13 | AI-чат, Travel+, Trip Planner | later |
+| **14 Progress** | Звание, тп, достижения на профиле | pending |
 
 ---
 
 ## 2. Приоритет экранов для дизайна сейчас
 
-Что имеет смысл рисовать **в первую очередь** (можно опираться на уже готовые данные/API мест и скоро — маршруты):
+Что имеет смысл рисовать **в первую очередь** (опираясь на уже реализованный shell и текущий scope):
 
 ```mermaid
 flowchart TD
-  subgraph now [Приоритет_1_сейчас]
-    welcome[Welcome]
+  subgraph now [Приоритет_1_текущий_polish]
+    welcome[Welcome_AuthFlow]
     home[Home]
     placesCat[PlacesCatalog]
     placeDet[PlaceDetails]
     routesCat[RoutesCatalog]
     routeDet[RouteDetails]
+    profile[Profile_MockData]
   end
 
-  subgraph soon [Приоритет_2_следом]
+  subgraph soon [Приоритет_2_после_Phase5]
     signIn[SignIn_SignUp]
-    profile[Profile]
     fav[Favorites]
     builder[RouteBuilderForm]
     builderRes[BuilderResult]
@@ -102,8 +104,8 @@ flowchart TD
 
 ### Рекомендация другу-дизайнеру
 
-1. **Сейчас:** Welcome, Home, Places catalog/detail, Routes catalog/detail (stops, карта-схема, CTA «Пройти» можно как заглушку).
-2. **Следом:** Auth, Profile, Favorites, форма подбора маршрута + экран результата.
+1. **Сейчас:** до-polish уже реализованных Welcome/Auth/Home/Places/Routes/Profile flows + UX consistency (gestures/back/search/swipe deck).
+2. **Следом:** Favorites, форма подбора маршрута + экран результата, затем real auth data wiring.
 3. **Не блокировать MVP:** AI-чат, Trip Planner, публикация своих маршрутов — отдельные волны.
 
 Шаблон Welcome у вас уже есть в Figma — его не ломаем; новые экраны лучше на отдельной странице (как «Cursor — экраны v1»).
@@ -149,8 +151,8 @@ flowchart TB
 
   subgraph phases [Фазы]
     Ph3[Phase3_done]
-    Ph4[Phase4_next]
-    Ph5[Phase5]
+    Ph4[Phase4_done]
+    Ph5[Phase5_in_progress]
     Ph6_7[Phase6_7]
     Ph8_9[Phase8A_9]
   end

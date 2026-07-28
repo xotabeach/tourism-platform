@@ -1,8 +1,8 @@
 # Mobile security (Flutter)
 
 Baseline: OWASP MASVS categories relevant to CrimeaTrip. Auth UI and token
-flows land in Phase 5–6; dependency `flutter_secure_storage` is already in
-`pubspec.yaml` but **not wired** yet.
+flows land in Phase 5–6. The `flutter_secure_storage` adapter is wired, but no
+authentication tokens are issued or persisted yet.
 
 ## Storage
 
@@ -17,10 +17,12 @@ Logout / account deletion must clear credentials and user-scoped caches.
 
 ## Network
 
-- Production/staging: HTTPS only (`AppConfig` already uses `https://` placeholders).
+- Production/staging: HTTPS only. Bootstrap validates `APP_FLAVOR` and requires
+  an explicit, non-placeholder `API_BASE_URL`; release defaults to production.
 - Dev may use `http://localhost` — never ship cleartext exceptions to production
   Android Network Security Config / iOS ATS broad exceptions.
 - Timeouts already set on Dio (connect 10s, receive 20s).
+- Non-dev remote media must use HTTPS and the configured API origin.
 - Certificate pinning: **not** enabled by default; requires threat + rotation
   analysis before adoption.
 - No secrets in query strings.
@@ -41,7 +43,9 @@ links safely.
 ## Platform / release
 
 - Document minimum OS versions when releasing.
-- Protect signing keys; disable debug menus/features in release.
+- Protect signing keys; disable debug menus/features in release. Android release
+  packaging must use organization-owned signing configuration and never fall
+  back to the debug key.
 - No test credentials, localhost endpoints, verbose network logging, or
   stack traces in production builds.
 - Avoid secrets on clipboard; lock-screen notifications without sensitive detail.

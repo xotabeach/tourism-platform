@@ -38,12 +38,18 @@ tolerance large enough to pass would no longer catch real regressions.
 Therefore `matchesGoldenFile` tests are skipped when the host is not macOS, and
 CI keeps the host-independent expectations from the same file: responsive
 overflow at `412×915` and `360×740` with text scale `1.3`, restrained swipe
-travel with fixed `42×42` indicator, standalone onboarding deck card, reduced
-motion and minimum `48×48` nav targets.
+travel with fixed `42×42` indicator, continuous post-swipe promotion,
+standalone onboarding deck card, reduced motion and minimum `48×48` nav
+targets.
 
 Consequence: **pixel regressions are caught locally, not by CI.** Run the
 goldens on macOS before pushing UI changes. Revisit this when the UI stabilises
 (Phase 10) — the strict option is recording baselines inside the CI image.
+
+The 2026-07-25 remediation run passed format, strict analysis, all 54 tests and
+the macOS pixel goldens. Five compositor-related baselines were accepted only
+after comparing their master/test images. The iOS Simulator build passed;
+Android packaging was not run because the Android SDK was unavailable.
 
 ## Commands
 
@@ -60,9 +66,19 @@ Current UI golden coverage:
 
 - Welcome and Home top;
 - route list card and slider resting state;
-- swipe onboarding, right progress and left progress;
+- route-details top chrome with the shared shell CTA/compact Home composition;
+- Android/iOS swipe onboarding, right progress and left progress;
 - restrained pre-commit swipe travel and fixed `42×42` action indicator;
+- continuous back-card promotion after a committed swipe;
 - nav selected indices `0`, `1`, `2`;
+- long-distance nav transition `0 → 4` at the liquid bridge frame;
+- route-details pin selection without auto-scroll, tap-only gallery
+  expansion/collapse, unaffected ordinary content scrolling, full-bleed
+  recommendations and preserved shell navbar/branch state;
+- one keyed navbar across the places catalog and place details, with Map
+  selected after opening a route stop;
+- iOS glass versus Android Material primary-control structure;
+- native iOS/Android day/night launch resources;
 - responsive smoke at `412×915` and `360×740` with text scale `1.3`;
 - reduced motion and minimum `48×48` nav targets.
 

@@ -82,10 +82,15 @@ Onboarding (вне shell): `/welcome` → `/auth/identity` → `/auth/otp` (mock
 | 4 | Profile | `/profile` | Placeholder → Phase 6 |
 
 Nav follows the Figma segmented model: leading inactive glass segment, active
-dark droplet, trailing inactive glass segment. Place/route detail use the
-**root** navigator. Swipe onboarding is a standalone first card in the route
-deck, so its blur and interaction lock do not cover search, filters or bottom
-navigation.
+dark droplet, trailing inactive glass segment. Route details stay in the Routes
+branch, while the places catalog and place details stay in the Map branch.
+Consequently one keyed shell navbar remains mounted across catalogs and detail
+screens. On route-details entry it morphs into a compact Home droplet with the
+route CTA in the released space; expanding it moves the CTA above the restored
+full navbar. Opening a route stop switches to the Map branch and selects its
+destination without creating a page-local navbar. Swipe onboarding is a
+standalone first card in the route deck, so its blur and interaction lock do
+not cover search, filters or bottom navigation.
 
 ## Security hooks (Phase 5 foundation)
 
