@@ -218,7 +218,17 @@ immutable `gamma` image, migrate + Crimea seed, Caddy HTTPS на
 `86-106-20-132.sslip.io`. SSH на нестандартном порту (не 22). Smoke:
 `/health/live`, `/health/ready`, places/routes API — 200. Остаются:
 non-root deploy user, key-only hardening, off-host backup/restore,
-mobile test build на этот API, CI protected deploy job.
+CI protected deploy job.
+
+### Phase 6–7 — Auth + favorites (partial, 2026-07-28)
+
+- Backend: phone OTP (`/auth/otp/request|verify`), JWT access + opaque refresh
+  (rotation + reuse detection), `/me`, favorites places/routes. SMS provider —
+  TODO; `AUTH_OTP_ACCEPT_ANY` auto-on for local/test.
+- Mobile: secure refresh storage, Dio Bearer + single-flight refresh, OTP UI
+  wired to API, profile shows durable name + favorites summary; achievements/
+  ranks remain mock (Phase 14).
+- Security tests: auth/favorites BOLA + OTP input bounds; mobile session tests.
 
 См.
 [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
