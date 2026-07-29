@@ -143,7 +143,7 @@ mobile, backend, CI и будущих AI providers.
 | Infrastructure | Environment-scoped CI variables and safe config examples |
 | AI | Provider policy documented independently from environment; automated tests use mock |
 | Security | Reject local credentials and unsafe endpoints outside local |
-| Acceptance | Configuration matrix covered by tests; `gamma` maps to staging deployment |
+| Acceptance | Configuration matrix covered by tests; `main` → production deploy, `gamma` → stage |
 | Dependencies | Phase 5 foundation |
 | Не входит | Real AI adapter; production secrets; server deployment |
 
@@ -151,8 +151,10 @@ mobile, backend, CI и будущих AI providers.
 
 ## Phase 5.6 — First remote test backend
 
-**Цель:** развернуть immutable image из `gamma` как disposable test backend на
-существующем малом сервере без AI inference и production data.
+**Цель:** развернуть immutable image из `main` (GitLab environment
+`production`) на существующем малом сервере без AI inference и production data.
+Ветка `gamma` обслуживает environment `stage` (publish only, без SSH на сервер,
+пока нет отдельного stage-хоста).
 
 | Область | Задачи |
 | --- | --- |
