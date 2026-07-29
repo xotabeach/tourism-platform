@@ -5,7 +5,7 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
-**Последнее обновление:** 2026-07-28
+**Последнее обновление:** 2026-07-29
 
 ## Сводка фаз
 
@@ -187,6 +187,13 @@ envelope, JSON logs.
   `github-mirror` stage syncs `gamma`/`main` on push after green checks
   (token via group CI variable `GITHUB_MIRROR_TOKEN`).
 
+- In-memory API cache for places and routes (lists 5 min TTL, details 10 min).
+  Caching decorator over repository interfaces; global invalidation on logout;
+  clear-cache action moved to Settings → Offline.
+- Settings UI polished to Figma screenshots (2026-07-29): Travel+ banner on
+  top, separate icon cards, dark circular back/check, blue chat CTA, offline
+  trash clear-cache, Travel+ paywall hero + plan cards.
+
 Остаётся: сверка approximate values и original SVG через Figma Dev Mode,
 device screenshot diff, performance profile на mid-range Android; Freezed
 optional. Pixel-perfect статус не заявлен без этих проверок.
@@ -196,15 +203,17 @@ optional. Pixel-perfect статус не заявлен без этих про�
 
 До Phase 6 нужно унифицировать `local/test/staging/production`, отделить
 mobile data source и AI provider от runtime environment, затем развернуть
-immutable backend image из `gamma` в test-контуре. Слабый узел использует
+immutable backend image из `main` (GitLab `production`) на удалённый сервер;
+`gamma` → `stage` (publish, без деплоя на сервер). Слабый узел использует
 constrained Compose, swap, один worker, HTTPS reverse proxy, закрытые data
 ports, миграционный job, health/smoke checks и off-host test backup. MinIO,
 пользовательские данные и AI в этот контур не входят.
 
 Подготовлено в коде: backend `APP_ENV` enum и immutable image с seed/media;
 mobile `APP_ENV` + `DATA_SOURCE` с запретом mock вне local; GitLab publication
-image по commit SHA; constrained test Compose и deploy script. Остаются
-host bootstrap, TLS/DNS, remote deploy, rollback и backup/restore smoke.
+image по commit SHA; constrained Compose и `deploy-remote.sh`. CI:
+`backend-publish` на `main`/`gamma`, `backend-deploy-stage` на `gamma`,
+`backend-deploy-production` (SSH) только на `main`.
 
 Проверки 2026-07-26: backend validation `42 passed`, coverage 89.11%,
 pip-audit без известных уязвимостей; runtime image собран локально, seed/media
@@ -213,12 +222,12 @@ Platform local и constrained test Compose config passed. Remote bootstrap жд�
 ротации первоначального пароля, SSH deploy key и подтверждённого TLS hostname;
 host inventory и credentials в Git не сохраняются.
 
-Remote test contour поднят 2026-07-28: host bootstrap (1 GiB swap, Docker),
-immutable `gamma` image, migrate + Crimea seed, Caddy HTTPS на
-`86-106-20-132.sslip.io`. SSH на нестандартном порту (не 22). Smoke:
-`/health/live`, `/health/ready`, places/routes API — 200. Остаются:
-non-root deploy user, key-only hardening, off-host backup/restore,
-CI protected deploy job.
+Remote contour поднят 2026-07-28: host bootstrap (1 GiB swap, Docker),
+immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандартном
+порту (не 22). Smoke: `/health/live`, `/health/ready`, places/routes API —
+200. Добавлены non-root deploy user + CI SSH deploy с `main` /
+`production`. Остаются: отдельный stage-хост, off-host backup/restore smoke
+и key-only hardening review.
 
 ### Phase 6–7 — Auth + favorites (partial, 2026-07-28)
 
@@ -229,6 +238,14 @@ CI protected deploy job.
   wired to API, profile shows durable name + favorites summary; achievements/
   ranks remain mock (Phase 14).
 - Security tests: auth/favorites BOLA + OTP input bounds; mobile session tests.
+- Settings/Support/Travel+ UI aligned to pixel spec
+  [figma-spec-settings-support-v2.md](design/figma-spec-settings-support-v2.md):
+  accent `#386FC4`, tile radius 14, 64/52 rows, Travel+ banner §3 2nd edition
+  (concentric C≈(353.7,131), disk R101.5 / arc R110.4, dash 9/2.6, solid
+  `#1537E7`, shared title/+ gradient, chip without fill), year/month cards
+  361×72. Copy follows Figma including typos
+  (`удоства`, `Поддерка`, `Асистент`, `измененно`, `Сохранить новое номер`)
+  pending product decision to correct.
 
 См.
 [environment-and-backend-deployment.md](environment-and-backend-deployment.md).

@@ -22,9 +22,16 @@ Canonical runtime environments:
 | `staging` | API only | Isolated staging services and credentials | Self-hosted when available; otherwise disabled or explicitly configured Gemini |
 | `production` | API only | Isolated production services and credentials | Self-hosted only when AI planning is enabled |
 
-The Git branch `gamma` may deploy an immutable image to `test`; `gamma` is not
-a runtime environment value. Staging and production deployment must use their
-own protected jobs and isolated infrastructure.
+GitLab CD environments map to branches:
+
+| Git branch | GitLab environment | Registry tip tag | Remote server deploy |
+| --- | --- | --- | --- |
+| `gamma` | `stage` | `:stage` | No — stage host not configured yet |
+| `main` | `production` | `:production` | Yes — protected SSH deploy job only |
+
+Runtime `APP_ENV` on the host is independent of the GitLab environment name and
+stays configured on the server. Staging and a future dedicated production host
+must use their own protected jobs and isolated infrastructure.
 
 Target configuration:
 
@@ -82,17 +89,36 @@ possible but does not turn the host into a production-capable server.
 
 1. Backend CI runs lint, type checks, tests, dependency audit, migration smoke,
    and container build.
-2. CI pushes an immutable image tagged with the commit SHA.
-3. A protected test deploy job connects using a restricted deploy identity.
-4. The server pulls the exact image, runs database migrations once, and starts
-   the application.
-5. Deployment waits for `/health/live` and `/health/ready`, then runs a public
-   API smoke test.
-6. Failure restores the previous known-good image. Database rollback is not
-   automatic unless the migration has an explicitly reviewed downgrade path.
+2. On `gamma` or `main`, CI pushes an immutable image tagged with the commit
+   SHA, plus a floating tip (`:stage` on `gamma`, `:production` on `main`).
+3. Deploy stage:
+   - `gamma` → GitLab environment `stage` (records the published image; no SSH).
+   - `main` → GitLab environment `production` SSHes with a restricted non-root
+     deploy identity and updates the remote server.
+4. On production deploy, the server pulls the exact image, runs database
+   migrations once, and recreates the backend container.
+5. Deployment waits for container health (`/health/ready` inside the image),
+   then optionally hits the public readiness URL.
+6. Failure leaves investigation to operators; restore the previous
+   `BACKEND_IMAGE` value in the server `.env` and recreate. Database rollback
+   is not automatic unless the migration has an explicitly reviewed downgrade
+   path.
+
+Protected GitLab CI variables for production deploy (names only; values stay in
+GitLab, never Git):
+
+```text
+DEPLOY_SSH_HOST
+DEPLOY_SSH_PORT
+DEPLOY_SSH_USER
+DEPLOY_SSH_PRIVATE_KEY   # type: file
+DEPLOY_SSH_KNOWN_HOSTS   # type: file
+DEPLOY_HEALTH_URL        # optional public smoke URL
+```
 
 No source checkout, compiler toolchain, or long-lived GitLab personal token is
-required on the server.
+required on the server. Registry pulls use a server-local Docker login for the
+GitLab Container Registry.
 
 ## Security and operations baseline
 
@@ -125,7 +151,8 @@ required on the server.
 - Decide DNS names and TLS entry point.
 - Add constrained deployment Compose, reverse proxy, health checks, migration
   job, backup hooks, and protected test pipeline.
-- Deploy a `gamma` image to `test` and connect a test mobile build.
+- Deploy a `main` / production image to the remote host and connect a mobile
+  build. Keep `gamma` / stage publish-only until a stage host exists.
 - Complete deploy, rollback, backup, and restore smoke tests.
 
 ### Phase 10 - Production readiness
