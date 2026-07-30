@@ -2,14 +2,17 @@
 
 Maps to OWASP API Security Top 10 (2023) for the FastAPI modular monolith.
 
-## Current state (2026-07-23)
+## Current state (2026-07-30)
 
-- Public read APIs: geography, categories, places (published only).
+See [security-as-built.md](security-as-built.md) for the full picture.
+
+- Public read: geography, categories, places (published), routes (public
+  editorial + user_created), public user profile + user routes.
+- Auth: Bearer JWT via `CurrentUserId`; OTP + refresh endpoints.
+- Private: `/me`, favorites, support, profile media uploads.
 - No CORS middleware (native mobile does not rely on CORS).
-- No auth middleware.
-- Explicit response DTOs for places/geography.
-- Pagination `limit` capped 1–100 on places.
-- ORM/parameterized queries for search (`ilike` with bound pattern).
+- Explicit request/response DTOs; pagination caps; ORM/parameterized SQL.
+- CSRF N/A for Bearer; cookie CSRF when web/admin lands.
 
 ## API Top 10 controls
 

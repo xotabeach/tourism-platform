@@ -35,7 +35,12 @@ SSRF controls (see backend-api-security).
 - CORS only for required web origins (future admin).
 - Account deletion schedules related object deletes.
 
-## Current state
+## Current state (2026-07-30)
 
-Compose creates bucket `tourism-media` with anonymous `none`. No upload API
-yet — controls above are mandatory when media land.
+- Canonical table `media_attachments` (entity_type / entity_id / role /
+  storage_key / public_path).
+- Profile avatar/cover upload API: decode + re-encode WebP, size/pixel limits,
+  server-generated keys, EXIF strip.
+- Place covers linked via attachments; local `MEDIA_ROOT` serving `/media/...`.
+- Compose MinIO bucket `tourism-media` anonymous `none` (local). Full MinIO
+  production ACLs still target hardening — see checklist / as-built gaps.

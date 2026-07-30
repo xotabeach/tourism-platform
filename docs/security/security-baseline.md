@@ -21,20 +21,24 @@ platform). Административные и security-critical операци�
 | Область | Статус |
 | --- | --- |
 | Security documentation | documented (этот каталог) |
-| Threat model | documented |
-| Auth/session implementation | **not implemented** (Phase 6 + ADR-007) |
-| Object-level authZ for private data | **not applicable yet** (нет private user data API) |
-| Public content publication filter | implemented for places |
+| Threat model | documented (нуждается в refresh под Phase 6–7) |
+| Auth/session implementation | **partial** — phone OTP + JWT access + opaque refresh (ADR-007 mobile path) |
+| Object-level authZ for private data | **partial** — `/me`, favorites, support; public profile без phone |
+| Public content publication filter | implemented for places + public routes (editorial + user_created) |
+| Media attachments | implemented (`media_attachments` + profile upload re-encode) |
 | Secrets in Git | policy + `.env` gitignore |
 | Dependency / SAST CI | foundation jobs documented + open-source gates |
 | Container hardening | Dockerfile non-root (backend) |
 | Redis/Postgres/MinIO ACL for prod | **not done** (local Compose only) |
 | AI/RAG security | documented for Phase 8B+ |
 
+Живое as-built описание: **[security-as-built.md](security-as-built.md)**.
+
 ## Documents
 
 | Document | Purpose |
 | --- | --- |
+| [security-as-built.md](security-as-built.md) | **Как устроено сейчас** (auth, API, mobile, injections) |
 | [threat-model.md](threat-model.md) | STRIDE, assets, trust boundaries |
 | [data-classification-and-retention.md](data-classification-and-retention.md) | PUBLIC…RESTRICTED, retention |
 | [authentication-and-token-security.md](authentication-and-token-security.md) | Passwords, tokens, sessions |

@@ -1,9 +1,22 @@
 # Authentication and token security
 
-Status: **policy for Phase 6**. Implementation not present. Decision:
+Status: **policy + partial as-built (Phase 6)**. Decision:
 [ADR-007](../decisions/ADR-007-authentication-and-session-strategy.md).
+Living summary: [security-as-built.md](security-as-built.md).
+
+### As-built (mobile path, 2026-07)
+
+- Login: phone OTP (`/auth/otp/request|verify`), not passwords.
+- Access: short-lived JWT HS256 (allowlist); claims `sub/iss/aud/exp/iat/jti/typ`.
+- Refresh: opaque; SHA-256 digest in Postgres; rotation + family reuse detection.
+- Mobile: refresh in Keychain/Keystore; access in memory; Dio single-flight refresh.
+- Rate limits (Redis) on OTP request/verify; OTP stored as digest only.
+- SMS provider TODO; `AUTH_OTP_ACCEPT_ANY` local/test only.
 
 ## Passwords
+
+**Not used in MVP login.** Policy below applies when password auth / admin
+lands.
 
 Never store: plaintext, reversible encryption, MD5/SHA-1/SHA-256(password),
 passwords in logs/Redis/events/analytics/exception context.

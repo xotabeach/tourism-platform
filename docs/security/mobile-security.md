@@ -1,8 +1,11 @@
 # Mobile security (Flutter)
 
-Baseline: OWASP MASVS categories relevant to CrimeaTrip. Auth UI and token
-flows land in Phase 5–6. The `flutter_secure_storage` adapter is wired, but no
-authentication tokens are issued or persisted yet.
+Baseline: OWASP MASVS categories relevant to CrimeaTrip. As-built summary:
+[security-as-built.md](security-as-built.md).
+
+Phase 6 mobile path is live: OTP UI → API tokens; refresh via
+`flutter_secure_storage` (Keychain/Keystore); access in memory; Dio Bearer +
+single-flight refresh.
 
 ## Storage
 

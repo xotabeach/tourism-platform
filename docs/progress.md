@@ -5,7 +5,7 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
-**Последнее обновление:** 2026-07-29
+**Последнее обновление:** 2026-07-30
 
 ## Сводка фаз
 
@@ -240,15 +240,21 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
 - 2026-07-30: `media_attachments` table (canonical media links); public
   `GET /users/{id}` + `/routes`; catalog includes public `user_created`;
   seed one route per user; mobile image disk/memory cache; author → view-only
-  profile.- Security tests: auth/favorites BOLA + OTP input bounds; mobile session tests.
+  profile.
+- Security as-built doc:
+  [security/security-as-built.md](security/security-as-built.md) — auth tokens,
+  API/mobile controls, injections, media, gaps; baseline/topic docs refreshed
+  (`security-baseline`, auth/API/mobile/media topic pages).
+- Security tests: auth/favorites BOLA + OTP input bounds; mobile session tests.
 - Settings/Support/Travel+ UI aligned to pixel spec
-  [figma-spec-settings-support-v2.md](design/figma-spec-settings-support-v2.md):
-  accent `#386FC4`, tile radius 14, 64/52 rows, Travel+ banner §3 2nd edition
-  (concentric C≈(353.7,131), disk R101.5 / arc R110.4, dash 9/2.6, solid
-  `#1537E7`, shared title/+ gradient, chip without fill), year/month cards
-  361×72. Copy follows Figma including typos
-  (`удоства`, `Поддерка`, `Асистент`, `измененно`, `Сохранить новое номер`)
-  pending product decision to correct.
+  [figma-spec-settings-support-v2.md](design/figma-spec-settings-support-v2.md)
+  + QA handoff [banner-flutter-diff-v3.md](design/banner-flutter-diff-v3.md):
+  accent `#386FC4`, tile radius 14, 64/52 rows; Travel+ banner — soft disk at
+  C≈(353.7,131), **no** solid concentric rings, dashed arc 90° (9→12 o'clock)
+  with flat-outer/round-inner dashes `#1537E7`, nav cursor on arc, chip fill
+  white 18%, shared title/+ gradient. Year/month cards 361×72. Copy follows
+  Figma including typos (`удоства`, `Поддерка`, `Асистент`, `измененно`,
+  `Сохранить новое номер`) pending product decision to correct.
 
 См.
 [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
