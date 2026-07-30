@@ -237,7 +237,10 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
 - Mobile: secure refresh storage, Dio Bearer + single-flight refresh, OTP UI
   wired to API, profile shows durable name + favorites summary; achievements/
   ranks remain mock (Phase 14).
-- Security tests: auth/favorites BOLA + OTP input bounds; mobile session tests.
+- 2026-07-30: `media_attachments` table (canonical media links); public
+  `GET /users/{id}` + `/routes`; catalog includes public `user_created`;
+  seed one route per user; mobile image disk/memory cache; author → view-only
+  profile.- Security tests: auth/favorites BOLA + OTP input bounds; mobile session tests.
 - Settings/Support/Travel+ UI aligned to pixel spec
   [figma-spec-settings-support-v2.md](design/figma-spec-settings-support-v2.md):
   accent `#386FC4`, tile radius 14, 64/52 rows, Travel+ banner §3 2nd edition
