@@ -98,7 +98,7 @@ Frame 280:4792 «Frame 1283111662»   393 × 275   x=0 y=0
 | Цвет dash | `#1537E7` | pixel-measure / code |
 | Длина dash вдоль дуги | **9 pt** | pixel-measure |
 | Gap | **2.6 pt** | pixel-measure |
-| Толщина dash (радиальная) | ≈ **заполняет кольцо 10 pt** (outer flat / inner soft) | zoom + meta |
+| Толщина dash (радиальная) | ≈ **2.8–3 pt** тонкий stroke (не заливка кольца 10 pt) | screenshot `travel+ banner.png` 2026-07-31 |
 | Внешняя сторона dash | плоская, острая, ближе к R=111 | zoom |
 | Внутренняя сторона dash | мягко скруглённая, ближе к R=101 | zoom |
 | Прозрачность dash | 100% (без альфы) | pixel-measure |
