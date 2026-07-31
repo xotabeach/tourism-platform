@@ -47,10 +47,11 @@ dimension so text or icon loading cannot collapse the field.
 
 The Figma-exported icon set is stored in `assets/icons/source/` as original
 SVG files. Flutter uses transparent `128×128` PNG exports from
-`assets/icons/raster/`; semantic white, ink and muted variants keep the
-supplied paths, avoid runtime color-filter issues in Impeller and require no
-SVG runtime dependency. `AppAssetIcon` selects the variant and applies only
-animation opacity.
+`assets/icons/raster/`; semantic white, ink, muted and accent (settings
+blue `#2F6FD0`) variants keep the supplied paths, avoid runtime color-filter
+issues in Impeller and require no SVG runtime dependency. `AppAssetIcon`
+selects the variant and applies only animation opacity. Settings glyphs live
+under `assets/icons/source/settings/` with matching PNG exports.
 
 `AppIconography` is the central asset registry. Navigation, search/filter,
 notification, profile, route actions and swipe indicators use these assets.
