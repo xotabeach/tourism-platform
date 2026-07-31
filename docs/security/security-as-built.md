@@ -53,11 +53,16 @@ flowchart LR
 
 Код:
 
-- OTP в Postgres хранится как **SHA-256 digest**, не plaintext
+- OTP в Postgres хранится как **SHA-256 digest**; сравнение — constant-time
 - TTL challenge ~10 минут, max attempts ~8
 - Rate-limit в Redis по IP и телефону (request / verify)
-- Ответ request — `204`, код **никогда** не возвращается и не логируется
-- SMS gateway — TODO; `AUTH_OTP_ACCEPT_ANY` только local/test
+- Ответ request — `204`, код **никогда** не возвращается API и не логируется
+- SMS gateway — TODO. Пока нет провайдера:
+  - `AUTH_OTP_ACCEPT_ANY` defaults **on only for `APP_ENV=local`**; test contour
+    requires a real code; staging/production **refuse to start** if enabled
+  - `AUTH_OTP_STORE_DEBUG_CODE` may keep a cleartext copy in
+    `auth_otp_challenges.debug_code` for local/test only
+    ([SEC-EX-2026-001](exceptions/SEC-EX-2026-001.md)); refused in staging/prod
 
 Смена телефона: отдельный OTP flow (`/me/phone/request|verify`) с теми же
 лимитами; `user_id` только из JWT.
@@ -224,7 +229,8 @@ tests, media_attachments.
 
 Ещё впереди / слабо:
 
-- реальная SMS + жёсткий prod-запрет accept-any OTP
+- реальная SMS + удаление `debug_code` / SEC-EX-2026-001; accept-any уже
+  запрещён вне local на старте процесса
 - мгновенный revoke access (сейчас TTL; denylist опционален)
 - password / Argon2id (когда понадобится)
 - cookie CSRF для web/admin

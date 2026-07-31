@@ -15,7 +15,7 @@ legacy/mirror и не являются источником истины.
 - `mirror` — автопубликация public showcase на GitHub после зелёных checks
   (ветки `gamma` / `main`).
 
-### GitHub showcase mirror
+## GitHub showcase mirror
 
 Источник истины — GitLab (`travel-platform2`). GitHub (`xotabeach/*`) —
 read-only витрина.

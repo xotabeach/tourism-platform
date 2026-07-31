@@ -58,4 +58,3 @@ uv run python scripts/seed_crimea.py --file data/extra_places.json --places-only
 
 Route / RouteStop (Phase 4): `source` ∈ {editorial, generated, user_created};
 stable `place_id`; provider-neutral geometry и порядок stops.
-

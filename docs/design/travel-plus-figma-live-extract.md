@@ -8,6 +8,7 @@
 > `code-comment (property panel)` | `TODO:get_design_context`.
 
 Связанные экраны:
+
 | Экран | Node ID | Статус |
 |---|---|---|
 | Тревел + (неактивна) | `280:4790` | геометрия вытащена |
@@ -20,7 +21,7 @@
 
 ## 1. Экран «Тревел + (неактивна)» — каркас
 
-```
+```text
 Frame 280:4790          393 × 891
 └ Frame 280:4791        393 × 891   (весь контент)
    ├ Frame 280:4792     393 × 275   ★ HERO / баннер на всю ширину
@@ -32,7 +33,7 @@ Frame 280:4790          393 × 891
 
 ## 2. ★ HERO / баннер — дерево слоёв (из Figma)
 
-```
+```text
 Frame 280:4792 «Frame 1283111662»   393 × 275   x=0 y=0
 │
 ├ Frame 280:4793 «Frame 151»        361 × 48    x=16 y=62     ← хедер
@@ -80,7 +81,7 @@ Frame 280:4792 «Frame 1283111662»   393 × 275   x=0 y=0
 Это **полоса-трек** толщиной ~10 pt между Ellipse 8 и Ellipse 10,
 внутри которой лежат тёмно-синие «таблетки»-штрихи.
 
-```
+```text
                     внешняя кромка (R=111) — более резкая / плоская
                  ╭─────────────────────────────────╮
                  │  ▓▓▓▓    ▓▓▓▓    ▓▓▓▓    ▓▓▓▓   │  ← dash pills
@@ -105,7 +106,7 @@ Frame 280:4792 «Frame 1283111662»   393 × 275   x=0 y=0
 
 ### Как рисовать во Flutter
 
-```
+```text
 1. Светлый диск: circle(center, R=101), fill white @ ~7%
 2. Для каждого dash-сегмента вдоль дуги R_mid≈106 (или по outer):
    - построить annular sector между R_inner=101 и R_outer=111
@@ -192,7 +193,7 @@ Ellipse 8 (disk): center (329, 285), R=101 — белый ~7%, **TODO точны
 
 ## 6. Белый лист и контент ниже hero
 
-```
+```text
 Frame 280:4804   393 × 640   y=251
 ├ padding 16
 ├ «Преимущества подписки:»     361 × 19
@@ -206,12 +207,14 @@ Frame 280:4804   393 × 640   y=251
 ```
 
 Benefit row структура (`Frame 143` etc.):
+
 - 361 × 66, padding content 8
 - icon column 48 × 48, solar:check-circle-linear 36 × 36
 - title 16h + subtitle 30h (2 lines)
 - chevron solar:alt-arrow-right-linear 24 × 24 at x=329
 
 Тариф ГОД (`280:4863`):
+
 - 361 × 72
 - watermark «ГОД» 65 × 38 at (12, 17)
 - цена «999 ₽/год» 134 × 22
@@ -252,13 +255,15 @@ Node `274:1155` — metadata **не вытащена** (лимит).
 3. Title height ориентировать на **36**, не 52.
 4. Chip 200×33 @ (16, 194).
 5. Когда лимит MCP сбросится — **один** вызов:
-   ```
+
+   ```text
    get_design_context
      fileKey: 5JLDCYifRsTI8Zex4jirbT
      nodeId: 280:4792
      forceCode: true
      skillNames: resource:figma-design-to-code
    ```
+
    Этого хватит, чтобы добить fills/strokes/effects/font по property panel.
    Второй вызов (если останется квота): `274:1155` для компактного баннера.
 

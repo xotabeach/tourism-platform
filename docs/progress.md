@@ -4,8 +4,8 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 5 — Flutter foundation (UI по дизайну КрымТрип)
-**Последнее обновление:** 2026-07-30
+**Текущая фаза:** Phase 6 — Authentication (OTP hardening); next = Phase 6.5 admin
+**Последнее обновление:** 2026-07-31
 
 ## Сводка фаз
 
@@ -20,6 +20,7 @@
 | 5.5 | Environment foundation | in_progress |
 | 5.6 | First remote test backend | in_progress |
 | 6 | Authentication | in_progress |
+| 6.5 | Internal ops admin (HTML) | next |
 | 7 | Favorites and profile | in_progress |
 | 8A | Deterministic Route Builder | pending |
 | 8B | AI-assisted Route Planning (experimental) | pending |
@@ -95,6 +96,7 @@ envelope, JSON logs.
 ### Phase 5 — Flutter foundation (продолжение)
 
 Сделано по comparison screenshots Figma:
+
 - `core/design`: semantic colors, typography, spacing, radii, shadows, motion
 - Reusable glass surfaces/pills/circles/icon buttons; full Rubik variable font
 - Welcome → mock auth (имя/телефон → OTP + согласия) → Home
@@ -233,7 +235,12 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
 
 - Backend: phone OTP (`/auth/otp/request|verify`), JWT access + opaque refresh
   (rotation + reuse detection), `/me`, favorites places/routes. SMS provider —
-  TODO; `AUTH_OTP_ACCEPT_ANY` auto-on for local/test.
+  TODO. 2026-07-31: real OTP on the test contour
+  (`AUTH_OTP_ACCEPT_ANY` default off for `APP_ENV=test`); readable
+  `debug_code` only via `AUTH_OTP_STORE_DEBUG_CODE` on local/test
+  ([SEC-EX-2026-001](security/exceptions/SEC-EX-2026-001.md)); staging/prod
+  refuse both shortcuts at startup; constant-time digest compare. Next:
+  Phase 6.5 HTML ops admin (users / OTP / support chat).
 - Mobile: secure refresh storage, Dio Bearer + single-flight refresh, OTP UI
   wired to API, profile shows durable name + favorites summary; achievements/
   ranks remain mock (Phase 14).
@@ -248,7 +255,7 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
 - Security tests: auth/favorites BOLA + OTP input bounds; mobile session tests.
 - Settings/Support/Travel+ UI aligned to pixel spec
   [figma-spec-settings-support-v2.md](design/figma-spec-settings-support-v2.md)
-  + QA handoff [banner-flutter-diff-v3.md](design/banner-flutter-diff-v3.md):
+  - QA handoff [banner-flutter-diff-v3.md](design/banner-flutter-diff-v3.md):
   accent `#386FC4`, tile radius 14, 64/52 rows; Travel+ banner — soft disk at
   C≈(353.7,131), **no** solid concentric rings, dashed arc 90° (9→12 o'clock)
   with flat-outer/round-inner dashes `#1537E7`, nav cursor on arc, chip fill

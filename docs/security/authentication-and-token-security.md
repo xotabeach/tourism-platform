@@ -4,14 +4,20 @@ Status: **policy + partial as-built (Phase 6)**. Decision:
 [ADR-007](../decisions/ADR-007-authentication-and-session-strategy.md).
 Living summary: [security-as-built.md](security-as-built.md).
 
-### As-built (mobile path, 2026-07)
+## As-built (mobile path, 2026-07)
 
 - Login: phone OTP (`/auth/otp/request|verify`), not passwords.
 - Access: short-lived JWT HS256 (allowlist); claims `sub/iss/aud/exp/iat/jti/typ`.
 - Refresh: opaque; SHA-256 digest in Postgres; rotation + family reuse detection.
 - Mobile: refresh in Keychain/Keystore; access in memory; Dio single-flight refresh.
-- Rate limits (Redis) on OTP request/verify; OTP stored as digest only.
-- SMS provider TODO; `AUTH_OTP_ACCEPT_ANY` local/test only.
+- Rate limits (Redis) on OTP request/verify; code compared in constant time.
+- OTP verification is always enforced except on a developer machine:
+  `AUTH_OTP_ACCEPT_ANY` defaults on only for `APP_ENV=local`, and startup fails
+  if it is set in staging/production.
+- SMS provider TODO. Until it lands, `AUTH_OTP_STORE_DEBUG_CODE` keeps the code
+  readable in `auth_otp_challenges.debug_code` for local/test only — a recorded
+  exception to digest-only storage, see
+  [SEC-EX-2026-001](exceptions/SEC-EX-2026-001.md).
 
 ## Passwords
 

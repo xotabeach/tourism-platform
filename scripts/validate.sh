@@ -119,16 +119,24 @@ docker compose \
   config --quiet
 printf 'Test deployment Compose config: OK\n'
 
+# CI runs both linters unconditionally; skipping them locally would hide
+# failures until the pipeline.
 if command -v markdownlint-cli2 >/dev/null 2>&1; then
   markdownlint-cli2 "**/*.md"
-  printf 'Markdown lint: OK\n'
+elif command -v npx >/dev/null 2>&1; then
+  npx --yes markdownlint-cli2@0.18.1 "**/*.md"
 else
-  printf 'Markdown lint: SKIP (markdownlint-cli2 не установлен)\n'
+  printf 'Ошибка: нужен markdownlint-cli2 или npx.\n' >&2
+  exit 1
 fi
+printf 'Markdown lint: OK\n'
 
 if command -v yamllint >/dev/null 2>&1; then
   yamllint .gitlab-ci.yml .github compose.yaml
-  printf 'YAML lint: OK\n'
+elif python3 -c 'import yamllint' >/dev/null 2>&1; then
+  python3 -m yamllint .gitlab-ci.yml .github compose.yaml
 else
-  printf 'YAML lint: SKIP (yamllint не установлен)\n'
+  printf 'Ошибка: нужен yamllint (pip install yamllint).\n' >&2
+  exit 1
 fi
+printf 'YAML lint: OK\n'

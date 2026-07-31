@@ -1,0 +1,7 @@
+config:
+  # Figma handoff notes transcribe node ids, coordinates and export URLs that
+  # cannot be wrapped without losing the ability to copy them verbatim.
+  MD013: false
+  # Screen walkthroughs interleave spec tables between numbered steps, so the
+  # step numbers deliberately continue across the table.
+  MD029: false

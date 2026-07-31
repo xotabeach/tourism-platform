@@ -78,7 +78,7 @@
 
 ## IA: Профиль → Настройки → Поддержка
 
-```
+```text
 Профиль (206:631)
   └─ ⋯ / gear → Настройки
         ├─ Настройки профиля → Сменить имя / фото / номер / предпочтения
@@ -129,6 +129,7 @@
 ### Статус в коде
 
 `tourism-mobile/lib/features/profile/presentation/profile_screen.dart`:
+
 - Header / rank / achievements carousel — уже близко к макету
 - `onEdit` / `onMore` → snackbar «появится позже» — **нужно связать с настройками**
 - Есть «Избранное», «Опубликованные», clear cache — в Figma профиля акцент на достижениях + популярных маршрутах; cache ушёл в Настройки → Оффлайн
@@ -309,9 +310,9 @@ Toggles / rows:
 
 ## Прямые ссылки на ключевые node
 
-- Профиль: https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=206-631
-- Настройки (active): https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=274-1023
-- Настройки (inactive): https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=274-1155
-- Поддержка: https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=274-1650
-- Чат: https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=274-2027
-- Тревел+: https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=280-4790
+- Профиль: <https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=206-631>
+- Настройки (active): <https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=274-1023>
+- Настройки (inactive): <https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=274-1155>
+- Поддержка: <https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=274-1650>
+- Чат: <https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=274-2027>
+- Тревел+: <https://www.figma.com/design/5JLDCYifRsTI8Zex4jirbT/КрымТрип?node-id=280-4790>

@@ -3,3 +3,11 @@ config:
     line_length: 100
     code_blocks: false
     tables: false
+  # House style labels findings as **Impact** / **Evidence** inside a section
+  # rather than promoting each one to a heading.
+  MD036: false
+
+# Dated records are kept as written at the time and are not re-edited.
+ignores:
+  - docs/reviews/**
+  - docs/security/audits/**
