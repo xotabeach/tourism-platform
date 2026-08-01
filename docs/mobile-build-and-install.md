@@ -186,12 +186,42 @@ Application id: `com.crimeatravel.tourism_mobile`.
 
 ## 6. Android: подписанный APK / AAB + API
 
-Подпись release берётся из **gitignored** файла
-`tourism-mobile/android/key.properties` (см. `android/app/build.gradle.kts`).
-Без этого файла release **не** подписывается debug-ключом (и Play/установка
-как signed release не получится).
+### 6.0. Проще всего — скрипт
+
+Один раз нужен `android/key.properties` (см. §6.1). У тебя он уже может
+лежать локально (файл в `.gitignore`). Дальше:
+
+```bash
+cd tourism-mobile
+
+# release APK на test API (дефолт)
+./scripts/build-signed-apk.sh
+
+# сразу поставить на телефон по USB
+./scripts/build-signed-apk.sh --install
+
+# свой API / env
+./scripts/build-signed-apk.sh \
+  --env staging \
+  --api-url https://staging-api.example.org \
+  --install
+
+# AAB для Google Play
+./scripts/build-signed-apk.sh --aab --env production --api-url https://api.example.org
+```
+
+Готовый файл по умолчанию:
+
+```text
+build/app/outputs/flutter-apk/app-release.apk
+```
+
+Скрипт сам проверит `key.properties` и путь к `.jks`, прокинет
+`APP_ENV` / `DATA_SOURCE` / `API_BASE_URL`, соберёт **release + signing**.
 
 ### 6.1. Подготовить keystore (один раз)
+
+Нужно только если ещё нет `android/key.properties` и `.jks`.
 
 ```bash
 # пример путей — свои значения, НЕ коммить в git
@@ -213,8 +243,10 @@ storeFile=/absolute/path/to/tourism-mobile-upload.jks
 ```
 
 Никогда не коммить `key.properties`, `.jks`, пароли.
+Подпись читает `android/app/build.gradle.kts` — без этого файла release
+**не** падает обратно на debug key.
 
-### 6.2. Signed APK (удобно ставить на телефон напрямую)
+### 6.2. Вручную (если без скрипта)
 
 ```bash
 cd tourism-mobile
@@ -223,46 +255,33 @@ flutter build apk --release \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
   --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
-```
 
-Артефакт:
-
-```text
-build/app/outputs/flutter-apk/app-release.apk
-```
-
-Установка по USB:
-
-```bash
 adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
 
 Раздельные APK по ABI (меньше размер):
 
 ```bash
+./scripts/build-signed-apk.sh --split-per-abi
+# или:
 flutter build apk --release --split-per-abi \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
   --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
-# → build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-# → build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-# → build/app/outputs/flutter-apk/app-x86_64-release.apk
 ```
 
 ### 6.3. App Bundle для Google Play (AAB)
 
 ```bash
+./scripts/build-signed-apk.sh --aab
+# или вручную:
 flutter build appbundle --release \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
   --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
 ```
 
-Артефакт:
-
-```text
-build/app/outputs/bundle/release/app-release.aab
-```
+Артефакт: `build/app/outputs/bundle/release/app-release.aab`.
 
 ### 6.4. Debug APK без release-подписи (только для себя)
 
@@ -296,12 +315,7 @@ flutter build ios --release \
 
 ```bash
 cd tourism-mobile
-# нужен android/key.properties
-flutter build apk --release \
-  --dart-define=APP_ENV=test \
-  --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io \
-&& adb install -r build/app/outputs/flutter-apk/app-release.apk
+./scripts/build-signed-apk.sh --install
 ```
 
 ### iPhone debug (правки UI без полной пересборки)
