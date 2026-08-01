@@ -210,14 +210,17 @@ cd tourism-mobile
 ./scripts/build-signed-apk.sh --aab --env production --api-url https://api.example.org
 ```
 
-Готовый файл по умолчанию:
+Готовый файл:
 
 ```text
-build/app/outputs/flutter-apk/app-release.apk
+build/app/outputs/flutter-apk/app-release.apk          # сырой артефакт Flutter
+dist/CrimeaTrip-test-api.apk                           # копия с понятным именем
 ```
 
-Скрипт сам проверит `key.properties` и путь к `.jks`, прокинет
-`APP_ENV` / `DATA_SOURCE` / `API_BASE_URL`, соберёт **release + signing**.
+Имя в `dist/` строится как `CrimeaTrip-<APP_ENV>-<DATA_SOURCE>.apk`
+(например `CrimeaTrip-test-api.apk`). Скрипт сам проверит `key.properties`
+и путь к `.jks`, прокинет `APP_ENV` / `DATA_SOURCE` / `API_BASE_URL`,
+соберёт **release + signing**.
 
 ### 6.1. Подготовить keystore (один раз)
 
