@@ -248,6 +248,8 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
   + Origin/Referer CSRF; bootstrap via `ADMIN_BOOTSTRAP_*`; views for users,
   OTP (`debug_code` gated), phone-change, support + operator reply, audit.
 - Security tests: `tests/security/test_admin_security.py`.
+- 2026-08-01: CrimeaTrip theme (Rubik, `#386FC4` / coastline sidebar, Russian
+  IA groups Пользователи / Поддержка / Доступ); ProxyHeaders for HTTPS statics.
 - Mobile: secure refresh storage, Dio Bearer + single-flight refresh, OTP UI
   wired to API, profile shows durable name + favorites summary; achievements/
   ranks remain mock (Phase 14).

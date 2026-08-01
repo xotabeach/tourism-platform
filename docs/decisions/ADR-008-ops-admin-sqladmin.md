@@ -26,3 +26,5 @@ Use **SQLAdmin** mounted at `/admin`:
 - Faster delivery than custom Jinja CRUD; dependency on `sqladmin` / WTForms.
 - Admin identity tables are separate from mobile `users` (no `is_admin` on User).
 - Full CMS for places/routes remains out of scope.
+- UI is branded via template/CSS overrides under
+  `modules/admin/theme` (CrimeaTrip tokens + Rubik), not a separate SPA.
