@@ -11,7 +11,8 @@
 		Strict-Transport-Security "max-age=31536000"
 		X-Content-Type-Options "nosniff"
 		X-Frame-Options "DENY"
-		Referrer-Policy "no-referrer"
+		# same-origin keeps Referer for /admin form CSRF fallback; strips cross-site.
+		Referrer-Policy "same-origin"
 	}
 
 	reverse_proxy backend:8000
