@@ -245,8 +245,9 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
 
 - Backend: SQLAdmin at `/admin` ([ADR-008](decisions/ADR-008-ops-admin-sqladmin.md));
   `admin_principals` / role bindings / audit events; Argon2id; cookie session
-  + Origin/Referer CSRF; bootstrap via `ADMIN_BOOTSTRAP_*`; views for users,
-  OTP (`debug_code` gated), phone-change, support + operator reply, audit.
+  with Origin/Referer/Sec-Fetch-Site CSRF; bootstrap via `ADMIN_BOOTSTRAP_*`;
+  views for users, OTP (`debug_code` gated), phone-change, support + operator
+  reply, audit.
 - Security tests: `tests/security/test_admin_security.py`.
 - 2026-08-01: CrimeaTrip theme (Rubik, `#386FC4` / coastline sidebar, Russian
   IA groups Пользователи / Поддержка / Доступ); ProxyHeaders for HTTPS statics.
