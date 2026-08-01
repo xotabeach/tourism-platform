@@ -289,6 +289,11 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
   `translationX` motion (detail/settings only). Guest/other profile keeps
   **full** nav; Home slot becomes history-back (`pop`, same as edge swipe).
   Scroll-down on a tab shows scroll-to-top glyph on the active item.
+- Support chat: operator replies refresh every 3 seconds while the screen is
+  active; refresh stops in background and runs immediately after resume. The
+  composer is pinned above the keyboard, preserves focus after sending, and
+  scrolls to the newest message. The floating nav is hidden only on
+  `/profile/settings/support/chat`.
 - Home sticky «КРЫМТРИП» bar: shorter under Dynamic Island, fully opaque.
 - Swipe coach: smaller arrows shifted in swipe direction; tap/finger glyph
   much smaller.
