@@ -1,0 +1,339 @@
+# Mobile: сборка и установка (iOS / Android)
+
+Инструкция для локальной сборки CrimeaTrip (`tourism-mobile`) с mock или
+реальным API. Каноничный конфиг приложения:
+`tourism-mobile/lib/core/config/app_config.dart`.
+
+Рабочая директория для всех команд ниже:
+
+```bash
+cd tourism-mobile
+flutter pub get
+flutter devices   # список телефонов / симуляторов / Chrome
+```
+
+Текущий тестовый API (пример): `https://86-106-20-132.sslip.io`.
+
+---
+
+## 1. Dart-define параметры приложения
+
+Передаются как `--dart-define=KEY=value` в `flutter run` / `flutter build`.
+
+| Ключ | Значения | По умолчанию | Правила |
+| --- | --- | --- | --- |
+| `APP_ENV` | `local` \| `test` \| `staging` \| `production` | debug → `local`; **release без флага → `production`** | Имя приложения в UI зависит от env |
+| `DATA_SOURCE` | `mock` \| `api` | local → `mock`; иначе → `api` | `mock` **только** при `APP_ENV=local` |
+| `API_BASE_URL` | абсолютный URL без credentials | local → `http://localhost:8000`; иначе **обязателен** | Для `test`/`staging`/`production` только **HTTPS**; host не может быть `*.example.com` |
+
+### Типовые комбинации
+
+```bash
+# UI без сети (mock)
+--dart-define=APP_ENV=local \
+--dart-define=DATA_SOURCE=mock
+
+# Local + свой backend (Compose на Mac)
+--dart-define=APP_ENV=local \
+--dart-define=DATA_SOURCE=api \
+--dart-define=API_BASE_URL=http://localhost:8000
+# На физическом устройстве localhost = сам телефон.
+# Используй IP Mac в LAN, например http://192.168.1.10:8000
+
+# Тестовый контур (то, чем обычно пользуемся на iPhone)
+--dart-define=APP_ENV=test \
+--dart-define=DATA_SOURCE=api \
+--dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+
+# Staging / production — тот же набор, другой URL и APP_ENV
+--dart-define=APP_ENV=staging \
+--dart-define=DATA_SOURCE=api \
+--dart-define=API_BASE_URL=https://staging-api.example.org
+```
+
+Release **без** `APP_ENV` стартует как `production` и упадёт без валидного
+HTTPS `API_BASE_URL`.
+
+---
+
+## 2. Полезные флаги Flutter CLI
+
+Общие для `run` / `build` (неполный список, самые нужные):
+
+| Флаг | Назначение |
+| --- | --- |
+| `-d <deviceId>` | Устройство (`flutter devices`) |
+| `--debug` | Debug (hot reload). По умолчанию для `flutter run` |
+| `--profile` | Profile mode |
+| `--release` | Release (без hot reload) |
+| `--dart-define=K=V` | Compile-time константа (см. выше) |
+| `--dart-define-from-file=path.json` | Пачка defines из JSON (если удобнее) |
+| `--no-pub` | Не вызывать `pub get` перед сборкой |
+| `--build-name=x.y.z` | versionName / CFBundleShortVersionString |
+| `--build-number=N` | versionCode / CFBundleVersion |
+
+Только `flutter run`:
+
+| Флаг | Назначение |
+| --- | --- |
+| `--hot` / `--no-hot` | Hot reload (в debug) |
+| `r` / `R` / `q` в терминале | reload / restart / quit |
+
+Только iOS build:
+
+| Флаг | Назначение |
+| --- | --- |
+| `--simulator` | Сборка под Simulator (не на телефон) |
+| `--no-codesign` | Без подписи (не ставится на device как есть) |
+| `--codesign` | С подписью (нужен Apple team / Xcode) |
+
+Только Android build:
+
+| Флаг | Назначение |
+| --- | --- |
+| `--split-per-abi` | Отдельные APK по ABI (меньше размер) |
+| `--target-platform=android-arm,android-arm64,android-x64` | Платформы |
+| `--obfuscate --split-debug-info=build/symbols` | Обфускация Dart (release) |
+
+---
+
+## 3. iPhone: debug (live / hot reload) + API
+
+Телефон по USB, разблокирован, Developer Mode включён.
+
+```bash
+cd tourism-mobile
+
+# узнать id
+flutter devices
+
+flutter run -d 00008140-001A7D0C2668801C \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+```
+
+В терминале: `r` hot reload, `R` hot restart, `q` выход.
+
+Браузер (быстрые UI-правки, не 1:1 с iOS):
+
+```bash
+flutter run -d chrome \
+  --dart-define=APP_ENV=local \
+  --dart-define=DATA_SOURCE=mock
+```
+
+---
+
+## 4. iPhone: release-сборка и установка + API
+
+### Вариант A — одной командой (подпись через Xcode / automatic signing)
+
+```bash
+cd tourism-mobile
+
+flutter run -d 00008140-001A7D0C2668801C --release \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+```
+
+### Вариант B — `build` + `devicectl` (как в агентских сессиях)
+
+```bash
+cd tourism-mobile
+
+flutter build ios --release \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+
+# DEVICE = UDID из `xcrun devicectl list devices` или `flutter devices`
+DEVICE=00008140-001A7D0C2668801C
+
+xcrun devicectl device install app \
+  --device "$DEVICE" \
+  build/ios/iphoneos/Runner.app
+
+xcrun devicectl device process launch \
+  --device "$DEVICE" \
+  com.crimeatravel.tourismMobile
+```
+
+Замечания:
+
+- Для device нужен валидный Apple signing (team в Xcode → Runner).
+- `--no-codesign` даёт `.app`, который на физический iPhone обычно **не** ставится.
+- Bundle id iOS: `com.crimeatravel.tourismMobile`.
+
+---
+
+## 5. Android: debug / run + API
+
+```bash
+cd tourism-mobile
+flutter devices
+
+flutter run -d <android-device-id> \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+```
+
+Application id: `com.crimeatravel.tourism_mobile`.
+
+---
+
+## 6. Android: подписанный APK / AAB + API
+
+Подпись release берётся из **gitignored** файла
+`tourism-mobile/android/key.properties` (см. `android/app/build.gradle.kts`).
+Без этого файла release **не** подписывается debug-ключом (и Play/установка
+как signed release не получится).
+
+### 6.1. Подготовить keystore (один раз)
+
+```bash
+# пример путей — свои значения, НЕ коммить в git
+mkdir -p "$HOME/.crimeatrip-signing"
+
+keytool -genkey -v \
+  -keystore "$HOME/.crimeatrip-signing/tourism-mobile-upload.jks" \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias crimeatrip
+```
+
+Создать `tourism-mobile/android/key.properties` (файл в `.gitignore`):
+
+```properties
+storePassword=REPLACE_ME
+keyPassword=REPLACE_ME
+keyAlias=crimeatrip
+storeFile=/absolute/path/to/tourism-mobile-upload.jks
+```
+
+Никогда не коммить `key.properties`, `.jks`, пароли.
+
+### 6.2. Signed APK (удобно ставить на телефон напрямую)
+
+```bash
+cd tourism-mobile
+
+flutter build apk --release \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+```
+
+Артефакт:
+
+```text
+build/app/outputs/flutter-apk/app-release.apk
+```
+
+Установка по USB:
+
+```bash
+adb install -r build/app/outputs/flutter-apk/app-release.apk
+```
+
+Раздельные APK по ABI (меньше размер):
+
+```bash
+flutter build apk --release --split-per-abi \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+# → build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+# → build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+# → build/app/outputs/flutter-apk/app-x86_64-release.apk
+```
+
+### 6.3. App Bundle для Google Play (AAB)
+
+```bash
+flutter build appbundle --release \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+```
+
+Артефакт:
+
+```text
+build/app/outputs/bundle/release/app-release.aab
+```
+
+### 6.4. Debug APK без release-подписи (только для себя)
+
+```bash
+flutter build apk --debug \
+  --dart-define=APP_ENV=local \
+  --dart-define=DATA_SOURCE=mock
+```
+
+---
+
+## 7. Шпаргалка «скопировал и запустил»
+
+### iPhone + test API (release)
+
+```bash
+cd tourism-mobile
+flutter build ios --release \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io \
+&& xcrun devicectl device install app \
+  --device 00008140-001A7D0C2668801C \
+  build/ios/iphoneos/Runner.app \
+&& xcrun devicectl device process launch \
+  --device 00008140-001A7D0C2668801C \
+  com.crimeatravel.tourismMobile
+```
+
+### Android signed APK + test API
+
+```bash
+cd tourism-mobile
+# нужен android/key.properties
+flutter build apk --release \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io \
+&& adb install -r build/app/outputs/flutter-apk/app-release.apk
+```
+
+### iPhone debug (правки UI без полной пересборки)
+
+```bash
+cd tourism-mobile
+flutter run -d 00008140-001A7D0C2668801C \
+  --dart-define=APP_ENV=test \
+  --dart-define=DATA_SOURCE=api \
+  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+# затем r / R в терминале
+```
+
+---
+
+## 8. Типичные ошибки
+
+| Симптом | Причина / что сделать |
+| --- | --- |
+| `API_BASE_URL is required` | Для non-local не передан URL |
+| `must use HTTPS` | Для test/staging/production нужен `https://` |
+| `Mock data is allowed only in local` | `DATA_SOURCE=mock` с `APP_ENV=test` и т.п. |
+| iOS install fail после `--no-codesign` | Нужна подпись Xcode / `flutter run` без `--no-codesign` |
+| Android release без подписи | Нет `android/key.properties` или неверный `storeFile` |
+| Device not found | Кабель, разблокировка, `flutter devices`, trust computer |
+
+---
+
+## 9. Связанные документы
+
+- `tourism-mobile/README.md` — краткий старт
+- `docs/flutter-app-architecture.md` — архитектура
+- `docs/flutter-testing-guide.md` — тесты / goldens
+- `docs/security/mobile-security.md` — mobile security baseline
+- `docs/local-development.md` — local Compose + backend
