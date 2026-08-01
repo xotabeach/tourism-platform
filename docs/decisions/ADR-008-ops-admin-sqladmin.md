@@ -28,3 +28,15 @@ Use **SQLAdmin** mounted at `/admin`:
 - Full CMS for places/routes remains out of scope.
 - UI is branded via template/CSS overrides under
   `modules/admin/theme` (CrimeaTrip tokens + Rubik), not a separate SPA.
+
+## Follow-up (2026-08-01)
+
+Shipped on the same ADR boundary (still SQLAdmin, not a SPA):
+
+- **Users:** editable ops fields (display name, phone E.164, travel points,
+  notify flags) with `admin.user_update` audit; list/detail show avatar and
+  cover from `media_attachments` using allowlisted `/media/` URLs only.
+- **OTP:** newest-first default sort; filter by phone and by linked user id
+  (phone join — OTP rows have no `user_id` until verify).
+- **Support:** ticket details template is a left/right bubble chat with
+  operator compose posting through existing `operator_reply`.

@@ -196,14 +196,15 @@ OTP-коды (пока нет SMS), права, диалоги поддержк�
 
 | Область | Задачи |
 | --- | --- |
-| Backend | SQLAdmin at `/admin`; session cookie + Origin/Referer CSRF; roles allowlist |
-| UI | SQLAdmin ModelViews: users, OTP challenges (`debug_code` local/test only), principals/roles, support threads/replies |
-| API | Internal `/admin/*` (not public mobile contract); no ORM dump of secrets; audit log of admin actions |
-| Database | `admin_principals`, `admin_role_bindings`, `admin_audit_events`; reuse support tables |
-| Security | Separate from mobile JWT (Argon2id principals); login rate limits; no OTP codes in staging/prod |
-| Acceptance | Operator can look up a test user, read a live OTP on the test contour, and reply in support chat |
+| Backend | SQLAdmin at `/admin`; session cookie + Origin/Referer/Sec-Fetch-Site CSRF; roles allowlist |
+| UI | ModelViews: users (edit + avatar/cover), OTP (newest-first, phone/user_id filters, `debug_code` gated), phone-change, principals/roles, support bubble chat + operator reply |
+| API | Internal `/admin/*` + `/admin/api/user-brief/{id}`; no ORM dump of secrets; audit log of admin actions |
+| Database | `admin_principals`, `admin_role_bindings`, `admin_audit_events`; reuse support + media tables |
+| Security | Separate from mobile JWT (Argon2id principals); login rate limits; no OTP codes in staging/prod; media thumbs only `/media/` |
+| Acceptance | Operator can look up a test user (with media), read a live OTP on the test contour, filter OTP by phone/user, edit user fields, and reply in support chat |
 | Dependencies | Phase 6 (identity + OTP), existing support chat persistence |
 | Не входит | Full CMS, billing, Travel+ entitlements UI, public web app |
+| Status | **done** (2026-08-01); see [progress.md](progress.md) and [ADR-008](decisions/ADR-008-ops-admin-sqladmin.md) |
 
 ## Phase 7 — Favorites and profile
 

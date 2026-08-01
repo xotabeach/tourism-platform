@@ -4,8 +4,8 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 6.5 — Ops admin (SQLAdmin); next = Phase 8A / remaining 5.x
-**Последнее обновление:** 2026-08-01
+**Текущая фаза:** Phase 5/6/7 polish + ops; next = Phase 8A / remaining 5.x
+**Последнее обновление:** 2026-08-01 (вечер)
 
 ## Сводка фаз
 
@@ -251,6 +251,16 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
 - Security tests: `tests/security/test_admin_security.py`.
 - 2026-08-01: CrimeaTrip theme (Rubik, `#386FC4` / coastline sidebar, Russian
   IA groups Пользователи / Поддержка / Доступ); ProxyHeaders for HTTPS statics.
+- 2026-08-01 (follow-up):
+  - Users: edit (name/phone/тп/notify flags) with audit `admin.user_update`;
+    list shows avatar + cover thumbs from `media_attachments` (only `/media/`
+    paths); filters by phone and user id.
+  - OTP: default sort newest-first; filters by phone and linked `user_id`
+    (join on `users.phone_e164`).
+  - Support ticket details: bubble chat UI (user left / operator right) with
+    inline operator compose; messages still via `SupportMessage` +
+    `operator_reply`.
+  - Theme polish: hub cards, chat shell, user media cells.
 - Mobile: secure refresh storage, Dio Bearer + single-flight refresh, OTP UI
   wired to API, profile shows durable name + favorites summary; achievements/
   ranks remain mock (Phase 14).
@@ -272,6 +282,19 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
   white 18%, shared title/+ gradient. Year/month cards 361×72. Copy follows
   Figma including typos (`удоства`, `Поддерка`, `Асистент`, `измененно`,
   `Сохранить новое номер`) pending product decision to correct.
+
+### Shell / profile polish (2026-08-01)
+
+- Floating nav: liquid collapse/expand restored to original lerp + icon
+  `translationX` motion (detail/settings only). Guest/other profile keeps
+  **full** nav; Home slot becomes history-back (`pop`, same as edge swipe).
+  Scroll-down on a tab shows scroll-to-top glyph on the active item.
+- Home sticky «КРЫМТРИП» bar: shorter under Dynamic Island, fully opaque.
+- Swipe coach: smaller arrows shifted in swipe direction; tap/finger glyph
+  much smaller.
+- Profile: smaller banner, rank divider, like control on guest profile;
+  delayed travel points (+5 after 6h for profile like and route favorite) —
+  backend migration `0011_travel_points` + mobile API wiring.
 
 См.
 [environment-and-backend-deployment.md](environment-and-backend-deployment.md).

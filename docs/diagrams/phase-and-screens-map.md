@@ -3,8 +3,10 @@
 Документ для синхронизации с дизайном экранов. Технические детали —
 в [implementation-plan.md](implementation-plan.md) и [progress.md](progress.md).
 
-**Статус на 2026-07-28:** завершены фазы 0–4; в активной разработке Phase 5 + 5.5/5.6.  
-**Сейчас в работе по продукту:** polish Flutter UI/навигации, CI split, подготовка test backend.
+**Статус на 2026-08-01:** фазы 0–4 и **6.5 ops admin** — done; Phase 5 / 5.5–5.6 /
+6 / 7 — in_progress (реальный OTP+JWT на test contour, favorites, shell polish).  
+**Сейчас по продукту:** polish shell/nav и профиля; ops-админка на test; next —
+Phase 8A Route Builder.
 
 ---
 
@@ -18,9 +20,10 @@ flowchart LR
     p2[Phase2_API]
     p3[Phase3_Places]
     p4[Phase4_EditorialRoutes]
+    p65[Phase6_5_OpsAdmin]
   end
 
-  subgraph near [Ближайшие_MVP]
+  subgraph near [В_работе_и_MVP]
     p5[Phase5_AppShell]
     p6[Phase6_Auth]
     p7[Phase7_Favorites]
@@ -39,6 +42,7 @@ flowchart LR
 
   p0 --> p1 --> p2 --> p3 --> p4 --> p5
   p5 --> p6 --> p7
+  p6 --> p65
   p3 --> p8a
   p6 --> p8a --> p9
   p9 --> p14
@@ -50,11 +54,12 @@ flowchart LR
 | Фаза | Для дизайна значит | Статус |
 | --- | --- | --- |
 | 0–2 | Инфра, не экраны | done |
-| **3 Places** | Каталог мест, карточка места | **done** (в коде есть простой UI) |
+| **3 Places** | Каталог мест, карточка места | **done** |
 | **4 Routes** | Каталог маршрутов, карточка маршрута со stops | **done** |
 | 5 Shell | Welcome / Home / навбар / темы | in_progress |
-| 6 Auth | Регистрация, вход, профиль | pending |
-| 7 Favorites | Избранное мест и маршрутов | pending |
+| 6 Auth | Регистрация, вход, профиль (API OTP/JWT на test) | in_progress |
+| **6.5 Ops** | Внутренняя админка `/admin` (не mobile UI) | **done** |
+| 7 Favorites | Избранное мест и маршрутов; guest profile | in_progress |
 | 8A Builder | Форма подбора + результат маршрута | pending |
 | 9 Execution | «Пройти маршрут», чеклист точек | pending |
 | 8B / 12 / 13 | AI-чат, Travel+, Trip Planner | later |
@@ -64,23 +69,26 @@ flowchart LR
 
 ## 2. Приоритет экранов для дизайна сейчас
 
-Что имеет смысл рисовать **в первую очередь** (опираясь на уже реализованный shell и текущий scope):
-
 ```mermaid
 flowchart TD
   subgraph now [Приоритет_1_текущий_polish]
     welcome[Welcome_AuthFlow]
-    home[Home]
+    home[Home_StickyBrand]
     placesCat[PlacesCatalog]
     placeDet[PlaceDetails]
-    routesCat[RoutesCatalog]
+    routesCat[RoutesSwipeDeck]
     routeDet[RouteDetails]
-    profile[Profile_MockData]
+    profile[Profile_Self_And_Guest]
+    settings[Settings_Support_TravelPlus]
   end
 
-  subgraph soon [Приоритет_2_после_Phase5]
-    signIn[SignIn_SignUp]
-    fav[Favorites]
+  subgraph ops [Ops_не_mobile]
+    adminUsers[Admin_Users_OTP]
+    adminChat[Admin_SupportChat]
+  end
+
+  subgraph soon [Приоритет_2_следующее]
+    fav[FavoritesScreen]
     builder[RouteBuilderForm]
     builderRes[BuilderResult]
     active[ActiveRoute]
@@ -99,19 +107,49 @@ flowchart TD
   routeDet --> active
   home --> fav
   home --> profile
-  home --> signIn
+  profile --> settings
+  adminUsers -.-> adminChat
 ```
+
+### Shell / nav (mobile) — актуальные правила
+
+```mermaid
+flowchart LR
+  subgraph expanded [Полный_navbar]
+    h[Home]
+    r[Routes]
+    b[Builder]
+    m[Map]
+    p[Profile]
+  end
+
+  subgraph detail [Detail_chrome]
+    drop[Active_droplet]
+    cta[CTA_Пройти_или_TravelPlus]
+  end
+
+  subgraph guest [Чужой_профиль]
+    back[Home_slot_стрелка_назад]
+    rest[Остальные_вкладки_как_обычно]
+  end
+
+  expanded -->|collapse_lerp| detail
+  detail -->|expand_из_капли| expanded
+  expanded -->|guest_profile| guest
+```
+
+- Detail/settings: liquid collapse (lerp капли + `translationX` иконок) →
+  компактная капля + опциональный CTA.
+- Чужой профиль: **не** схлопывать бар; слот Home = history-back (`pop`).
+- Scroll вниз на вкладке: иконка активной вкладки → «наверх».
 
 ### Рекомендация другу-дизайнеру
 
-1. **Сейчас:** до-polish уже реализованных Welcome/Auth/Home/Places/Routes/Profile
-   flows + UX consistency (gestures/back/search/swipe deck).
-2. **Следом:** Favorites, форма подбора маршрута + экран результата, затем real auth data wiring.
-3. **Не блокировать MVP:** AI-чат, Trip Planner, публикация своих маршрутов —
-   отдельные волны.
-
-Шаблон Welcome у вас уже есть в Figma — его не ломаем; новые экраны лучше на
-отдельной странице (как «Cursor — экраны v1»).
+1. **Сейчас:** polish Welcome/Auth/Home/Places/Routes/Profile/Settings +
+   consistency жестов (swipe deck coach, guest back, sticky home brand).
+2. **Следом:** отдельный Favorites screen, форма подбора маршрута + результат.
+3. **Не блокировать MVP:** AI-чат, Trip Planner, публикация своих маршрутов.
+4. Ops UI живёт только в `/admin` (SQLAdmin) — отдельные макеты mobile не нужны.
 
 ---
 
@@ -122,15 +160,17 @@ journey
   title MVP traveler journey
   section Старт
     Открыть Welcome: 5: Traveler
-    Войти или пропустить: 4: Traveler
+    Войти по OTP: 5: Traveler
   section Каталог
     Главная с категориями: 5: Traveler
     Листать места Крыма: 5: Traveler
     Открыть карточку места: 5: Traveler
     Листать готовые маршруты: 4: Traveler
     Открыть карточку маршрута: 5: Traveler
+  section Социальное
+    Открыть чужой профиль: 4: Traveler
+    Лайк профиля / избранное маршрута: 3: Traveler
   section Действие
-    Сохранить в избранное: 3: Traveler
     Собрать свой маршрут: 4: Traveler
     Пройти по точкам: 5: Traveler
 ```
@@ -150,13 +190,15 @@ flowchart TB
     S_fav[Favorites]
     S_builder[Builder]
     S_run[ActiveRoute]
+    S_ops[OpsAdmin_Web]
   end
 
   subgraph phases [Фазы]
     Ph3[Phase3_done]
     Ph4[Phase4_done]
     Ph5[Phase5_in_progress]
-    Ph6_7[Phase6_7]
+    Ph6_7[Phase6_7_in_progress]
+    Ph65[Phase6_5_done]
     Ph8_9[Phase8A_9]
   end
 
@@ -166,6 +208,7 @@ flowchart TB
   S_home --> Ph5
   S_auth --> Ph6_7
   S_fav --> Ph6_7
+  S_ops --> Ph65
   S_builder --> Ph8_9
   S_run --> Ph8_9
 ```
@@ -181,12 +224,13 @@ flowchart LR
   user[UserCreated_свои]
 
   editorial -->|public_каталог| catalog[RoutesCatalog]
+  user -->|public_если_опубликован| catalog
   generated -->|private_после_формы| my[Мои_или_результат]
-  user -->|позже_Phase11| my
+  user -->|полный_CRUD_Phase11| my
 ```
 
-В MVP в публичном каталоге — **редакционные** маршруты. Сгенерированный — личный
-результат builder. Свои маршруты пользователя — позже.
+В каталоге сейчас — редакционные + публичные `user_created`. Сгенерированный —
+личный результат builder. Полный CRUD своих маршрутов — Phase 11.
 
 ---
 

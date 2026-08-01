@@ -132,6 +132,10 @@ backend: чужой профиль нельзя менять через `/me/*`.
 (Phase 6.5): отдельные `admin_principals` + role bindings (`ops`/`admin`),
 SQLAdmin на `/admin`, cookie session (`ADMIN_SESSION_SECRET`), Argon2id
 пароли, login rate-limit в Redis. Mobile JWT **не** открывает `/admin`.
+Оператор может править профиль пользователя (имя/телефон/тп/notify) с audit
+`admin.user_update`; превью avatar/cover только из allowlisted `/media/`
+путей. OTP list не отдаёт `code_digest`; `debug_code` только при
+`AUTH_OTP_STORE_DEBUG_CODE` на local/test.
 
 ## 4. API мобилка ↔ сервер
 
