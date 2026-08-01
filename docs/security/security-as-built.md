@@ -128,7 +128,10 @@ Favorites / tickets всегда фильтруются `WHERE user_id = current
 Mobile view-only профиль — UI-гейт (нет settings/edit). Реальная защита —
 backend: чужой профиль нельзя менять через `/me/*`.
 
-Роли editor/moderator/admin в коде MVP почти не разведены (матрица — target).
+Роли editor/moderator на mobile API в MVP почти не разведены. **Ops admin**
+(Phase 6.5): отдельные `admin_principals` + role bindings (`ops`/`admin`),
+SQLAdmin на `/admin`, cookie session (`ADMIN_SESSION_SECRET`), Argon2id
+пароли, login rate-limit в Redis. Mobile JWT **не** открывает `/admin`.
 
 ## 4. API мобилка ↔ сервер
 
@@ -136,7 +139,7 @@ backend: чужой профиль нельзя менять через `/me/*`.
 | --- | --- |
 | Transport | HTTPS stage/prod; `http://localhost` только local |
 | Auth header | `Authorization: Bearer <access>`; не в query / deep link |
-| CSRF | N/A для native Bearer; cookie CSRF — когда появится web/admin |
+| CSRF | N/A для native Bearer; `/admin` — Origin/Referer check + SameSite=Lax session cookie |
 | CORS | Не security boundary для native |
 | Timeouts | Dio connect 10s / receive 20s |
 | Errors | Стабильные `code`/`message`, без stack/SQL/путей клиенту |
@@ -232,11 +235,11 @@ tests, media_attachments.
 - реальная SMS + удаление `debug_code` / SEC-EX-2026-001; accept-any уже
   запрещён вне local на старте процесса
 - мгновенный revoke access (сейчас TTL; denylist опционален)
-- password / Argon2id (когда понадобится)
-- cookie CSRF для web/admin
+- password / Argon2id для **mobile** users (ops admin уже Argon2id)
 - prod Redis/Postgres ACL + TLS между сервисами
 - certificate pinning (по threat model)
-- роли admin/editor + AI/RAG quotas
+- роли editor/moderator на mobile API + AI/RAG quotas
+- MFA / step-up для admin principals
 - часть topic-docs ниже могла отставать — **этот файл** + код + ADR-007
   приоритетнее устаревших «not implemented» абзацев
 

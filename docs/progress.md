@@ -4,8 +4,8 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 6 — Authentication (OTP hardening); next = Phase 6.5 admin
-**Последнее обновление:** 2026-07-31
+**Текущая фаза:** Phase 6.5 — Ops admin (SQLAdmin); next = Phase 8A / remaining 5.x
+**Последнее обновление:** 2026-08-01
 
 ## Сводка фаз
 
@@ -20,7 +20,7 @@
 | 5.5 | Environment foundation | in_progress |
 | 5.6 | First remote test backend | in_progress |
 | 6 | Authentication | in_progress |
-| 6.5 | Internal ops admin (HTML) | next |
+| 6.5 | Internal ops admin (SQLAdmin) | done |
 | 7 | Favorites and profile | in_progress |
 | 8A | Deterministic Route Builder | pending |
 | 8B | AI-assisted Route Planning (experimental) | pending |
@@ -239,8 +239,15 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
   (`AUTH_OTP_ACCEPT_ANY` default off for `APP_ENV=test`); readable
   `debug_code` only via `AUTH_OTP_STORE_DEBUG_CODE` on local/test
   ([SEC-EX-2026-001](security/exceptions/SEC-EX-2026-001.md)); staging/prod
-  refuse both shortcuts at startup; constant-time digest compare. Next:
-  Phase 6.5 HTML ops admin (users / OTP / support chat).
+  refuse both shortcuts at startup; constant-time digest compare.
+
+### Phase 6.5 — Ops admin SQLAdmin (2026-08-01)
+
+- Backend: SQLAdmin at `/admin` ([ADR-008](decisions/ADR-008-ops-admin-sqladmin.md));
+  `admin_principals` / role bindings / audit events; Argon2id; cookie session
+  + Origin/Referer CSRF; bootstrap via `ADMIN_BOOTSTRAP_*`; views for users,
+  OTP (`debug_code` gated), phone-change, support + operator reply, audit.
+- Security tests: `tests/security/test_admin_security.py`.
 - Mobile: secure refresh storage, Dio Bearer + single-flight refresh, OTP UI
   wired to API, profile shows durable name + favorites summary; achievements/
   ranks remain mock (Phase 14).

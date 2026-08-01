@@ -187,20 +187,20 @@ mobile, backend, CI и будущих AI providers.
 | Dependencies | Phase 2; Security Baseline; ADR-007 |
 | Не входит | OAuth providers (можно позже), SSO |
 
-## Phase 6.5 — Internal ops admin (HTML)
+## Phase 6.5 — Internal ops admin (SQLAdmin)
 
-**Цель:** простая server-rendered админка (HTML/CSS, без SPA) для поддержки
-теста и ops: пользователи, OTP-коды (пока нет SMS), права, диалоги поддержки.
-Делать **сразу после** текущего project-review hardening / OTP debug-code
-контура, до расширения Phase 8+.
+**Цель:** server-rendered ops-админка для поддержки теста и ops: пользователи,
+OTP-коды (пока нет SMS), права, диалоги поддержки. Реализация через
+**SQLAdmin** (HTML UI на FastAPI/SQLAlchemy), а не ручные Jinja-табы и не SPA.
+Делать **сразу после** OTP debug-code контура, до расширения Phase 8+.
 
 | Область | Задачи |
 | --- | --- |
-| Backend | Admin module behind separate auth (session cookie + CSRF); roles allowlist |
-| UI | Minimal HTML/CSS tabs: users, OTP challenges (`debug_code` local/test only), permissions, support threads/replies |
-| API | Internal `/admin/*` (not public mobile contract); no ORM dump; audit log of admin actions |
-| Database | Admin principals / role bindings if not already present; reuse support tables |
-| Security | Separate from mobile JWT; step-up; rate limits; no OTP codes in staging/prod; BOLA on support threads |
+| Backend | SQLAdmin at `/admin`; session cookie + Origin/Referer CSRF; roles allowlist |
+| UI | SQLAdmin ModelViews: users, OTP challenges (`debug_code` local/test only), principals/roles, support threads/replies |
+| API | Internal `/admin/*` (not public mobile contract); no ORM dump of secrets; audit log of admin actions |
+| Database | `admin_principals`, `admin_role_bindings`, `admin_audit_events`; reuse support tables |
+| Security | Separate from mobile JWT (Argon2id principals); login rate limits; no OTP codes in staging/prod |
 | Acceptance | Operator can look up a test user, read a live OTP on the test contour, and reply in support chat |
 | Dependencies | Phase 6 (identity + OTP), existing support chat persistence |
 | Не входит | Full CMS, billing, Travel+ entitlements UI, public web app |
@@ -411,7 +411,7 @@ migration/canary; optional MCP adapter для тех же tools.
 | technical task | T5.6.2 | Backup and restore smoke | P0 | tourism-platform | T5.6.1 | Encrypted off-host backup restored successfully |
 | EPIC | E6 | Authentication | P0 | tourism-backend, tourism-mobile | E2 | Register/login/profile |
 | user story | US6.1 | As a user I create an account | P0 | tourism-mobile | E6 | Session persisted securely |
-| EPIC | E6.5 | Internal ops admin (HTML) | P0 | tourism-backend | E6 | Users / OTP / support chat |
+| EPIC | E6.5 | Internal ops admin (SQLAdmin) | P0 | tourism-backend | E6 | Users / OTP / support chat |
 | user story | US6.5.1 | As an operator I reply to support from admin | P0 | tourism-backend | E6.5 | Thread visible and reply persisted |
 | technical task | T6.5.1 | Admin session auth + CSRF | P0 | tourism-backend | E6.5 | Cookie session, not mobile JWT |
 | technical task | T6.5.2 | OTP challenge list (debug_code gated) | P0 | tourism-backend | E6.5 | Test contour only |
