@@ -369,11 +369,24 @@ iterative edits; тот же `RouteBuilderPipeline`.
 
 ## Future — Self-hosted Tourism AI
 
-**Цель:** Gemma-family inference, RAG, evaluation, optional tuning, provider
-migration/canary; optional MCP adapter для тех же tools.
+**Цель:** Gemma-family inference (Ollama home lab → later dedicated host),
+Qdrant RAG, evaluation, optional tuning, provider migration/canary; optional
+MCP adapter для тех же tools.
 
+Практическая инструкция (Compose, модели под ~12 GB VRAM, PostGIS vs chunks,
+ingest/TTL, security, чеклисты Lab-0…Lab-5):
+[ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
+
+| Область | Задачи |
+| --- | --- |
+| Infra | Compose: Ollama + Qdrant на 127.0.0.1; GPU passthrough Linux |
+| Backend | `Ollama`/`Gemma` adapter за `AIPlanningProvider`; retriever port |
+| Data | Internal places/routes → markdown chunks; optional OSM/Wikivoyage |
+| RAG | Embed + Qdrant payload (ttl, hash, license, place_id) |
+| Security | Private network; RAG as untrusted DATA; no PII in vectors |
+| Acceptance | Gold set на Ollama; validation/fallback; documented VRAM/latency |
 | Dependencies | Phase 8B stable experimental + eval gold set |
-| Не входит | Treating model weights as Crimea factual DB |
+| Не входит | Laravel/K8s-first; weights as Crimea factual DB; public chatbot |
 
 ---
 
@@ -431,8 +444,8 @@ migration/canary; optional MCP adapter для тех же tools.
 | technical task | AI-ARCH-8 | Prompt versioning | P1 | tourism-backend | E8B | Version in usage metadata |
 | technical task | AI-ARCH-9 | AI observability | P1 | tourism-backend | E8B | AIUsageRecorder |
 | technical task | AI-ARCH-10 | Evaluation dataset and runner | P2 | tourism-backend | E8B | Gold set metrics |
-| technical task | AI-ARCH-11 | Gemma inference adapter | Future | tourism-backend | AI-ARCH-1 | Self-hosted HTTP |
-| technical task | AI-ARCH-12 | Tourism RAG | Future | tourism-backend | AI-ARCH-11 | Docs retrieval |
+| technical task | AI-ARCH-11 | Gemma inference adapter | Future | tourism-backend | AI-ARCH-1 | Ollama/HTTP; see home-lab guide |
+| technical task | AI-ARCH-12 | Tourism RAG | Future | tourism-backend | AI-ARCH-11 | Qdrant + ingest; home-lab Lab-2+ |
 | technical task | AI-ARCH-13 | Optional MCP adapter | Future | tourism-backend | AI-ARCH-4 | Same tools, MCP transport |
 | EPIC | E9 | Route execution | P0 | tourism-backend, tourism-mobile | E4, E6 | Start/complete/history |
 | user story | US9.1 | As a traveler I mark visited stops | P0 | tourism-mobile | E9 | Progress updates |
@@ -462,6 +475,8 @@ conversational planner (US-F3) + AI generation limits.
 ### AI route planning scope (будущее)
 
 Документ: [ai-route-planning-architecture.md](ai-route-planning-architecture.md),
+сквозной поток: [ai-route-system-end-to-end.md](ai-route-system-end-to-end.md),
+home lab: [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md),
 ADR-006. Реализация: E8B + AI-ARCH-* ; self-host/RAG/MCP — Future.
 
 ### Trip Planner scope (будущее)

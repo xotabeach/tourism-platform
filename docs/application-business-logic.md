@@ -257,7 +257,8 @@ config-реализация, бесплатный план по умолчани
 
 Бесплатный form-based builder должен оставаться корректным; намеренная
 деградация качества free-маршрутов запрещена.
-См. [ai-route-planning-architecture.md](ai-route-planning-architecture.md).
+См. [ai-route-planning-architecture.md](ai-route-planning-architecture.md)
+и [ai-route-system-end-to-end.md](ai-route-system-end-to-end.md).
 
 ## 17. Будущий модуль поездок
 

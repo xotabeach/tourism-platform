@@ -5,7 +5,7 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5/6/7 polish + ops; next = Phase 8A / remaining 5.x
-**Последнее обновление:** 2026-08-01 (вечер)
+**Последнее обновление:** 2026-08-03
 
 ## Сводка фаз
 
@@ -312,7 +312,12 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
 Архитектура и ADR-006: provider-neutral AI, Gemini experimental → Gemma + RAG,
 editorial-first, form/chat → `NormalizedRouteRequest`, MCP отложен.
 См. [ai-route-planning-architecture.md](ai-route-planning-architecture.md).
-Реализация — Phase 8B+, не часть Phase 3/4.
+Home lab (Ollama + Qdrant, PostGIS vs RAG, Lab-0…5, RTX ~12 GB):
+[ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
+Сквозной поток запрос → промпт → параметры → RoutingProvider → маршрут,
+форматы хранения и наполнение баз:
+[ai-route-system-end-to-end.md](ai-route-system-end-to-end.md).
+Реализация — Phase 8B+ / Future; не часть текущего UI polish.
 
 ## Блокеры и заметки
 
@@ -320,7 +325,8 @@ editorial-first, form/chat → `NormalizedRouteRequest`, MCP отложен.
   later for web/admin). Implementation still Phase 6.
 - Routing provider — open decision (ADR-004).
 - Не коммитить `.tmp-ref-frames/` и локальные `.env`.
-- AI architecture documented only; no Gemini/Gemma/MCP code yet.
+- AI architecture + home-lab guide documented only; no Gemini/Gemma/MCP/
+  Ollama/Qdrant code yet.
 - DX: style guides + Cursor workspace settings — see
   [development-environment.md](development-environment.md).
 - Security: docs + Cursor skill/rule documented under

@@ -36,7 +36,11 @@ editorial catalog.
 7. Form и Travel+ chat сходятся в **`NormalizedRouteRequest`** и один
    `RouteBuilderPipeline`.
 
-Детали: [ai-route-planning-architecture.md](../ai-route-planning-architecture.md).
+Детали: [ai-route-planning-architecture.md](../ai-route-planning-architecture.md).  
+Сквозной поток (промпт → параметры → дороги → persist):
+[ai-route-system-end-to-end.md](../ai-route-system-end-to-end.md).  
+Home lab (Ollama, Qdrant, RAG):
+[ai-self-hosted-home-lab.md](../ai-self-hosted-home-lab.md).
 
 ## Альтернативы
 
@@ -100,6 +104,8 @@ protocol; готовы authZ/audit на transport.
 
 **Self-hosting:** стабильный 8B experimental; cost/latency/privacy требуют
 on-prem; gold eval проходит на Gemma candidate; ops ready for inference.
+Практический порядок: см.
+[ai-self-hosted-home-lab.md](../ai-self-hosted-home-lab.md) §1 и §13.
 
 ## Связь с roadmap
 

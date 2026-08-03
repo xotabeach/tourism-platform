@@ -5,7 +5,10 @@
 Связанные решения: [ADR-006](decisions/ADR-006-ai-assisted-route-planning.md),
 [ADR-004](decisions/ADR-004-routing-provider-abstraction.md),
 [implementation-plan.md](implementation-plan.md) (Phase 8A/8B),
-[application-business-logic.md](application-business-logic.md).
+[application-business-logic.md](application-business-logic.md),
+сквозной поток запрос→маршрут→данные:
+[ai-route-system-end-to-end.md](ai-route-system-end-to-end.md),
+home lab: [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
 
 ## 1. Purpose
 
@@ -133,13 +136,22 @@ Domain/application **не импортируют** Google GenAI SDK, vLLM, Ollam
 - Feature flag, без production SLA.
 - Candidate model ids в env — placeholders, не утверждение доступности.
 
-## 9. Gemma 4 self-hosted stage (Future)
+## 9. Gemma self-hosted stage (Future)
 
-- Inference server за OpenAI-compatible или internal HTTP contract.
-- Кандидаты на оценку: семейство Gemma 4 (конкретный размер — evaluation).
-- RAG над tourism knowledge; PostGIS остаётся SoT для фактов.
-- Optional vector store; optional LoRA для planning behaviour.
-- Canary: valid JSON rate, hard-constraint compliance, latency, cost.
+Кратко здесь; **практический план home lab** (Compose, Ollama, Qdrant,
+VRAM, ingest, TTL, чеклисты):
+[ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
+
+- Inference: Ollama (lab) или OpenAI-compatible HTTP; adapter
+  `GemmaAIPlanningProvider` / `OllamaAIPlanningProvider` за тем же port.
+- Модели: **Gemma 4**; на ~12 GB VRAM default **`gemma4:12b`** (не откат на
+  Gemma 2/3). `26b` — probe; `31b` — не default. См. home-lab §5.
+- RAG: Qdrant + embed model; long-form only. PostGIS остаётся SoT для фактов.
+- Оркестратор — FastAPI modular monolith (не отдельный Laravel/AI backend).
+- Сначала Docker Compose на одной машине; Kubernetes — только при SLA/ops need.
+- Optional LoRA для planning behaviour позже.
+- Canary Gemini↔Gemma: valid JSON rate, hard-constraint compliance, latency,
+  cost, fallback rate.
 
 ## 10. Why RAG is required
 
@@ -357,7 +369,8 @@ Future после 8B + entitlements. Free form builder не деградируе
 2. Phase 8A — deterministic pipeline + failure codes + mock RoutingProvider.
 3. Phase 8B — interfaces, mock AI, Gemini adapter behind flag, validation/repair.
 4. Phase 12 — quotas / Travel+ flag для AI limits.
-5. Future — conversational interpreter; Gemma + RAG; optional MCP adapter;
+5. Future — conversational interpreter; Gemma + RAG (см.
+   [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md)); optional MCP;
    canary migration.
 
 ## 25. Mermaid diagrams (summary)
@@ -406,17 +419,27 @@ flowchart LR
 ```bash
 # AI planning (Phase 8B+). Disabled by default.
 # AI_PLANNING_ENABLED=false
-# AI_PROVIDER=mock
+# AI_PROVIDER=mock          # mock | gemini | ollama
 # AI_MODEL=
 # AI_REQUEST_TIMEOUT_SECONDS=30
 # AI_MAX_REPAIR_ATTEMPTS=1
 # AI_PROMPT_VERSION=v1
 # GEMINI_API_KEY=
 # GEMINI_MODEL=
+
+# Home lab / Future self-host (see ai-self-hosted-home-lab.md)
+# OLLAMA_BASE_URL=http://127.0.0.1:11434
+# OLLAMA_CHAT_MODEL=gemma4:12b
+# OLLAMA_EMBED_MODEL=nomic-embed-text
+# QDRANT_URL=http://127.0.0.1:6333
+# QDRANT_COLLECTION=crimea_tourism
+# RAG_ENABLED=false
+# RAG_TOP_K=5
 ```
 
-`GEMINI_MODEL` — configurable placeholder (например семейство flash), не
-hardcoded business constant.
+`GEMINI_MODEL` / `OLLAMA_*` — configurable placeholders, не hardcoded
+business constants. Полный контракт env и чеклисты —
+[ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
 
 ## Extension points already implied by Phase 3/4
 

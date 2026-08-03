@@ -41,5 +41,9 @@ equipment и freshness остаётся ответственностью пла�
 AI-assisted planning (Phase 8B+) подключается как опциональная
 `PlanningStrategy` после editorial miss и выбора candidates: LLM предлагает
 ordered place IDs из allowlist, затем снова `RoutingProvider` + deterministic
-validation. См. [ai-route-planning-architecture.md](../ai-route-planning-architecture.md)
+validation. См. [ai-route-planning-architecture.md](../ai-route-planning-architecture.md),
+[ai-route-system-end-to-end.md](../ai-route-system-end-to-end.md)
 и [ADR-006](../decisions/ADR-006-ai-assisted-route-planning.md).
+
+Точность «по дорогам Крыма» — зона реального `RoutingProvider` (OSM graph),
+не LLM. Stub остаётся synthetic до подключения OSRM/Valhalla/ORS adapter.

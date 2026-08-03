@@ -34,6 +34,8 @@ REQUIRED_FILES=(
   docs/data-model-geography-places.md
   docs/data-model-routes.md
   docs/ai-route-planning-architecture.md
+  docs/ai-self-hosted-home-lab.md
+  docs/ai-route-system-end-to-end.md
   docs/python-code-style.md
   docs/python-testing-guide.md
   docs/flutter-code-style.md

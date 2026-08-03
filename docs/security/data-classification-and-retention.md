@@ -66,6 +66,9 @@ records; administrative access records; signing keys.
 - Candidate place IDs and public editorial facts may enter prompts.
 - Private trip notes, email, tokens, exact GPS — default **deny**.
 - Retrieved RAG docs are untrusted content (injection).
+- Do not store private chat, tokens, or precise GPS traces in the vector DB.
+- Home-lab Ollama/Qdrant bind to localhost / private Docker network only;
+  see [ai-self-hosted-home-lab.md](../ai-self-hosted-home-lab.md) §10.
 - Provider retention: prefer zero-retention / enterprise terms when available;
   document actual provider setting before enabling production AI.
 
