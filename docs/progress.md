@@ -266,7 +266,7 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
   ranks remain mock (Phase 14).
 - 2026-07-30: `media_attachments` table (canonical media links); public
   `GET /users/{id}` + `/routes`; catalog includes public `user_created`;
-  seed one route per user; mobile image disk/memory cache; author → view-only
+  seed three routes per user; mobile image disk/memory cache; author → view-only
   profile.
 - Security as-built doc:
   [security/security-as-built.md](security/security-as-built.md) — auth tokens,
@@ -294,6 +294,9 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
   composer is pinned above the keyboard, preserves focus after sending, and
   scrolls to the newest message. The floating nav is hidden only on
   `/profile/settings/support/chat`.
+- Detail screens: routes, places, and profiles use a shared pinned collapsing
+  hero header. Scrolling fades media and expanded actions into a compact title
+  bar while retaining the detail page's native content scroll.
 - Home sticky «КРЫМТРИП» bar: shorter under Dynamic Island, fully opaque.
 - Swipe coach: smaller arrows shifted in swipe direction; tap/finger glyph
   much smaller.
