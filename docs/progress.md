@@ -307,6 +307,13 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
 См.
 [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
 
+### Design handoff — новые экраны (2026-08-03)
+
+PNG-пакет: `docs/design/screens-figma/krymtrip-2/`.
+Gap backlog: [design-gap-backlog-2026-08-03.md](design/design-gap-backlog-2026-08-03.md).
+Начата верстка: nav compose (+ → Опубликовать/Подобрать), таб «Мои маршруты»,
+форма подбора, stubs публикации/результата; places убраны из tab bar.
+
 ### Документировано (не реализовано): AI route planning
 
 Архитектура и ADR-006: provider-neutral AI, Gemini experimental → Gemma + RAG,

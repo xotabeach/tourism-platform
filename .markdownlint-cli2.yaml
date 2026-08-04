@@ -11,3 +11,5 @@ config:
 ignores:
   - docs/reviews/**
   - docs/security/audits/**
+  # Raw MCP metadata export: preserve node labels, URLs, and repeated sections.
+  - docs/design/figma-wireframes-priority-2026-08-03.md
