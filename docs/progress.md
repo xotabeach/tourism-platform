@@ -5,7 +5,23 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5/6/7 polish + ops; next = Phase 8A / remaining 5.x
-**Последнее обновление:** 2026-08-03
+**Последнее обновление:** 2026-08-05
+
+### 2026-08-05 — Route reviews + in-app notifications + FCM scaffold
+
+- Backend: `route_reviews` + `notifications` (migration `0015`),
+  public/list/submit review API, `/me/notifications` inbox, moderation approve
+  creates owner **in-app** notification.
+- Admin: раздел «Отзывы» с approve/reject; FK user/route показывают имя + ссылку.
+- Mobile: отзывы на деталях маршрута, inbox из API с переходом в маршрут
+  (**работает на iOS и Android** — HTTP + UI, без tray).
+- FCM каркас: migration `0016_device_tokens`, API `/me/device-tokens`, optional
+  FCM HTTP v1 send на approve; mobile `firebase_core`/`firebase_messaging` +
+  stub `firebase_options` (`configured = false`). Docs:
+  [push-notifications-fcm.md](push-notifications-fcm.md).
+- **Блокер для system push:** создать проект в Firebase Console,
+  `google-services.json` / `GoogleService-Info.plist`, `flutterfire configure`,
+  service account в `FCM_SERVICE_ACCOUNT_*` (не в Git).
 
 ## Сводка фаз
 
