@@ -7,6 +7,13 @@
 **Текущая фаза:** Phase 5/6/7 polish + ops; next = Phase 8A / remaining 5.x
 **Последнее обновление:** 2026-08-05
 
+### 2026-08-05 — Moderation inbox kinds (routes + reviews)
+
+- In-app kinds: `route_published` / `route_rejected` (владелец маршрута),
+  `review_published` / `review_rejected` (автор отзыва); `route_review`
+  по-прежнему только когда отзыв оставил другой пользователь.
+- Migration `0017_notif_moderation_kinds`.
+
 ### 2026-08-05 — Route reviews + in-app notifications + FCM scaffold
 
 - Backend: `route_reviews` + `notifications` (migration `0015`),

@@ -21,7 +21,10 @@
   (`enable-swift-package-manager: false`) — плагины идут через CocoaPods
   (иначе Xcode ломается на путях вроде `image_picker_ios-0.8.13+6`).
   Deployment target **iOS 15+** (требование Firebase SDK 12.x).
-- Approve отзыва создаёт in-app notification; FCM send включается, когда
+- Approve/reject маршрута и отзыва создают in-app notification автору
+  (`route_published` / `route_rejected` / `review_published` /
+  `review_rejected`); approve чужого отзыва — ещё `route_review` владельцу.
+  FCM send включается, когда
   на бэкенде задан `FCM_SERVICE_ACCOUNT_JSON` (или путь к файлу).
 
 ## Что сделать руками (пошагово, один раз)

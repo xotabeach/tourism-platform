@@ -157,8 +157,12 @@ accessibility needs. Credentials живут только в module `identity`.
 - автор (auth) создаёт/обновляет один отзыв на маршрут → статус
   `pending_review` (не виден в публичном списке);
 - ops в SQLAdmin одобряет или отклоняет;
-- при `published` создаётся **in-app** уведомление владельцу маршрута
-  (`notifications`, kind `route_review`, deep link на маршрут);
+- in-app уведомления (`notifications`, deep link на маршрут):
+  - `route_review` — владельцу маршрута, если отзыв оставил **другой**
+    пользователь и его одобрили;
+  - `review_published` / `review_rejected` — автору отзыва после модерации;
+  - `route_published` / `route_rejected` — владельцу маршрута после
+    модерации публикации;
 - публичный `GET /routes/{id}/reviews` отдаёт только `published` + средний
   рейтинг.
 
