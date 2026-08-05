@@ -1,7 +1,8 @@
 # Push-уведомления (FCM) — план подключения
 
 Канонический статус: **in-app inbox уже работает на iOS и Android**
-(API `/me/notifications` + UI). Системные баннеры (tray) — через
+(API `/me/notifications` + UI, бейдж на колокольчике и foreground-тост
+при открытом приложении). Системные баннеры (tray) — через
 **Firebase Cloud Messaging**.
 
 Официальный старт: [FCM для Flutter](https://firebase.google.com/docs/cloud-messaging/flutter/get-started).
@@ -24,8 +25,8 @@
 - Approve/reject маршрута и отзыва создают in-app notification автору
   (`route_published` / `route_rejected` / `review_published` /
   `review_rejected`); approve чужого отзыва — ещё `route_review` владельцу.
-  FCM send включается, когда
-  на бэкенде задан `FCM_SERVICE_ACCOUNT_JSON` (или путь к файлу).
+  Лайк профиля (подписка) — `profile_like` получателю. FCM send включается,
+  когда на бэкенде задан `FCM_SERVICE_ACCOUNT_JSON` (или путь к файлу).
 
 ## Что сделать руками (пошагово, один раз)
 

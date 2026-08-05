@@ -7,6 +7,20 @@
 **Текущая фаза:** Phase 5/6/7 polish + ops; next = Phase 8A / remaining 5.x
 **Последнее обновление:** 2026-08-05
 
+### 2026-08-05 — Inbox badge + foreground toast
+
+- Home bell shows unread count badge; shell polls inbox every 30s while
+  resumed and shows a top in-app toast for newly arrived unread rows.
+- System tray push (FCM/APNs) still requires iOS Firebase/APNs setup.
+
+### 2026-08-05 — Multi-reviews, 6h delete, profile_like inbox
+
+- Reviews: drop unique `(route, author)`; POST updates only pending, else
+  inserts; `DELETE /routes/{id}/reviews/{review_id}` within 6h of `created_at`.
+- In-app `profile_like` on first profile like; target_type `user`.
+- Migration `0018_reviews_profile_like`. Mobile: delete UX, full-width review
+  sheet, inbox deep link to liker profile.
+
 ### 2026-08-05 — Moderation inbox kinds (routes + reviews)
 
 - In-app kinds: `route_published` / `route_rejected` (владелец маршрута),
