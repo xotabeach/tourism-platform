@@ -90,8 +90,14 @@ flutterfire configure
 В Firebase Console → Project settings → Service accounts →
 **Generate new private key**. Содержимое JSON — только в секрет деплоя:
 
-- `FCM_SERVICE_ACCOUNT_JSON` (весь JSON одной строкой/env), или
+- `FCM_SERVICE_ACCOUNT_JSON` (весь JSON одной строкой в server `.env`), или
 - `FCM_SERVICE_ACCOUNT_FILE` (путь к файлу на сервере)
+
+На test-контуре переменная пробрасывается через
+`tourism-platform/deploy/test/compose.yaml` → backend container.
+Сниппет `firebase_admin.initialize_app(...)` **не нужен** — бэкенд шлёт
+FCM HTTP v1 через `google-auth` + `httpx`
+(`modules/notifications/application/fcm.py`).
 
 **Никогда не коммить** service account. Клиентские
 `google-services.json` / `GoogleService-Info.plist` обычно можно в Git.
@@ -111,4 +117,40 @@ flutterfire configure
 | --- | --- |
 | In-app inbox | Всегда при событии (например, опубликован отзыв) |
 | System push | Если у пользователя `notify_push_enabled`, есть device token, и FCM настроен |
-| Тап по push | Deep link `target_type`/`target_id` → экран маршрута (как inbox) |
+| Тап по push | Deep link `target_type`/`target_id` → экран маршрута / профиля (как inbox) |
+
+## Почему in-app есть, а Firebase tray нет
+
+In-app inbox **не зависит** от FCM. Системный баннер Android/iOS идёт
+только через `maybe_push_notification` → FCM HTTP v1. Типичные причины:
+
+1. **На сервере нет service account** — без `FCM_SERVICE_ACCOUNT_JSON` или
+   `FCM_SERVICE_ACCOUNT_FILE` бэкенд пишет `fcm_skipped_no_service_account`
+   и **молча** не шлёт tray (inbox при этом создаётся). Это самый частый
+   блокер на stage/prod.
+2. **Нет строки в `device_tokens`** — клиент регистрирует токен при логине
+   (если «Пуш-уведомления» включены) и при переключении тумблера в
+   настройках. Проверь: `SELECT user_id, platform, left(token,12), updated_at
+   FROM device_tokens ORDER BY updated_at DESC LIMIT 20;`.
+3. **`notify_push_enabled = false`** у пользователя.
+4. **Android 13+**: отказ в `POST_NOTIFICATIONS` → `getToken`/permission
+   denied; в настройках ОС для приложения уведомления должны быть On.
+5. **Package / Firebase project mismatch** — APK `applicationId`
+   `com.crimeatravel.tourism_mobile` должен совпадать с
+   `google-services.json` (сейчас проект `crimeatrip-41d24`).
+6. Приложение **на переднем плане**: системный баннер FCM на Android часто
+   не рисуется (это нормально) — смотри tray при свёрнутом приложении;
+   in-app тост/бейдж при открытом приложении — отдельный путь.
+
+### Быстрая проверка на сервере
+
+```bash
+# после деплоя service account
+# в логах API при approve отзыва/маршрута должно быть fcm_send_ok,
+# а не fcm_skipped_no_service_account / fcm_send_failed
+```
+
+Firebase Console → Project settings → Service accounts →
+**Generate new private key** → положить JSON в секрет деплоя
+(`FCM_SERVICE_ACCOUNT_JSON` целиком или файл + `FCM_SERVICE_ACCOUNT_FILE`).
+`project_id` в JSON должен быть `crimeatrip-41d24` (тот же, что у APK).
