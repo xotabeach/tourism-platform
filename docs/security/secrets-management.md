@@ -42,6 +42,12 @@ real `.env` files, CI_DEBUG dumps.
 No server/API secrets in APK/IPA. Public SDK keys restricted by package name,
 signing cert, API allowlist, quotas.
 
+Firebase client config (`google-services.json`, `firebase_options.dart`,
+optional iOS plist) is committed on purpose: those API keys are public
+mobile-SDK credentials. Gitleaks allowlists them via
+`tourism-mobile/.gitleaks.toml`. Do **not** allowlist server keys or
+keystore material.
+
 ### Android CI signing (tourism-mobile)
 
 GitLab CI variables for `mobile-apk-test` (masked; prefer protected on

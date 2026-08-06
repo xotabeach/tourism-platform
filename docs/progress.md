@@ -9,6 +9,27 @@
 
 ## Changelog
 
+### 2026-08-06 — Lean CI default (shared-runner minutes)
+
+- Default `.gitlab-ci.yml` is **lean**: notice + backend publish/manual
+  deploy; mobile APK manual-only; platform notice. Feature branches skip CI.
+- Full DevSecOps moved to `.gitlab-ci.full.yml`; enable with
+  `CI_PIPELINE_MODE=full`.
+- Local gates: `./scripts/validate.sh` + Cursor skill
+  `travel-platform-local-ci`. Doc: [ci-and-runners.md](ci-and-runners.md)
+  (includes self-hosted runner notes — prefer not on prod host).
+
+### 2026-08-06 — CI DevSecOps green-up + admin datetime format
+
+- Backend: `backend-security-tests` seeds Crimea + `--no-cov` (subset must
+  not inherit suite `cov-fail-under`); Semgrep retry + empty entrypoint.
+- Mobile: `.gitleaks.toml` allowlist for public Firebase client config;
+  OSV uses `/osv-scanner`; Semgrep retry.
+- Platform: `.gitleaks.toml` allowlist for Figma `fileKey` inventory;
+  markdown table fix in implementation-plan.
+- Admin UI dates: `YYYY-MM-DD HH:MM:SS МСК` (no fractional seconds); DB
+  still UTC.
+
 ### 2026-08-06 — CI DevSecOps + signed APK artifacts
 
 - Backend: dropped redundant `backend-image`; `uv` cache; dedicated

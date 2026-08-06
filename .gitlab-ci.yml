@@ -1,62 +1,37 @@
+# Lean CI for active development (saves GitLab shared-runner minutes).
+# Docs / compose / markdown checks run locally:
+#   ./scripts/validate.sh
+# Full pipeline: `.gitlab-ci.full.yml`
+# Enable full: CI/CD variable CI_PIPELINE_MODE=full
+# Docs: tourism-platform/docs/ci-and-runners.md
+
+include:
+  - local: ".gitlab-ci.full.yml"
+    rules:
+      - if: '$CI_PIPELINE_MODE == "full"'
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_MODE == "full"'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "gamma"'
+    - if: '$CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api"'
+    - when: never
+
 stages:
-  - code-style
-  - run-tests
+  - lean
   - mirror
 
-variables:
-  DOCKER_TLS_CERTDIR: "/certs"
-
-platform-gitleaks:
-  stage: code-style
-  image:
-    name: zricethezav/gitleaks:v8.24.2
-    entrypoint: [""]
+ci-lean-notice:
+  stage: lean
+  image: alpine:3.21
   script:
-    - gitleaks detect --source . --verbose --redact --exit-code 1
-  allow_failure: false
+    - echo "Lean CI — platform validate/lint is local (./scripts/validate.sh)."
+    - echo "Set CI_PIPELINE_MODE=full for gitleaks + markdown/yamllint + compose checks."
+  rules:
+    - if: '$CI_PIPELINE_MODE == "full"'
+      when: never
+    - when: on_success
 
-platform-code-style:
-  stage: code-style
-  image: docker:27-cli
-  services:
-    - docker:27-dind
-  before_script:
-    # The linters must be installed here: a `command -v` guard would let the job
-    # pass green having checked nothing.
-    - apk add --no-cache bash git yamllint npm
-    - npm install --global --no-fund --no-audit markdownlint-cli2@0.18.1
-  script:
-    - |
-      for required_file in \
-        README.md \
-        CONTRIBUTING.md \
-        SECURITY.md \
-        compose.yaml \
-        docs/progress.md \
-        docs/implementation-plan.md \
-        docs/diagrams/container-diagram.md \
-        docs/diagrams/phase-and-screens-map.md; do
-        test -f "${required_file}"
-      done
-    - |
-      for shell_script in scripts/*.sh; do
-        bash -n "${shell_script}"
-      done
-    - markdownlint-cli2 "**/*.md"
-    - yamllint .gitlab-ci.yml .github compose.yaml
-
-platform-run-tests:
-  stage: run-tests
-  image: docker:27-cli
-  services:
-    - docker:27-dind
-  before_script:
-    - apk add --no-cache bash git
-  script:
-    - docker compose --env-file .env.example config --quiet
-    - docker compose --env-file deploy/test/.env.example --file deploy/test/compose.yaml config --quiet
-
-# Public GitHub showcase mirror. GitLab remains source of truth.
 github-mirror:
   stage: mirror
   image: alpine:3.21
@@ -65,9 +40,9 @@ github-mirror:
   script:
     - bash scripts/ci-mirror-to-github.sh
   rules:
+    - if: '$CI_PIPELINE_MODE == "full"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == "gamma" && $GITHUB_MIRROR_TOKEN'
     - if: '$CI_COMMIT_BRANCH == "main" && $GITHUB_MIRROR_TOKEN'
   needs:
-    - platform-gitleaks
-    - platform-code-style
-    - platform-run-tests
+    - ci-lean-notice

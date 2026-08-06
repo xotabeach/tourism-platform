@@ -1,0 +1,15 @@
+# Gitleaks allowlist for non-secret design inventory identifiers.
+# Figma `fileKey` values are public file IDs in share URLs, not API tokens.
+
+title = "tourism-platform"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Figma fileKey / design inventory (not credentials)"
+paths = [
+  '''docs/design/figma-screen-inventory-.*\.json''',
+  '''docs/design/figma-wireframes-priority-.*\.json''',
+  '''docs/design/travel-plus-figma-live-extract\.md''',
+]

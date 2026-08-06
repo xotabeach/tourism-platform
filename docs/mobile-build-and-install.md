@@ -225,7 +225,9 @@ dist/CrimeaTrip-test-api.apk                           # копия с поня�
 ### 6.0.1. CI: скачать APK из GitLab
 
 На ветках `main` / `gamma` job `mobile-apk-test` собирает тот же signed
-test APK и публикует **Job Artifact** (14 дней). Скачать: Pipeline → job
+test APK и публикует **Job Artifact** (14 дней). В **lean** CI (default)
+job только **manual**; в full (`CI_PIPELINE_MODE=full`) — как в
+[ci-and-runners.md](ci-and-runners.md). Скачать: Pipeline → job
 `mobile-apk-test` → Artifacts → `dist/CrimeaTrip-test-api.apk`.
 
 Нужные **CI variables** на проекте `tourism-mobile` (masked / protected):

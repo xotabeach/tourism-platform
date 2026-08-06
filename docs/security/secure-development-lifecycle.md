@@ -17,7 +17,11 @@ per-phase security rows.
 
 ## CI gates (as-built)
 
-| Gate | Blocks |
+Default mode is **lean** CI (see [ci-and-runners.md](../ci-and-runners.md)):
+style/tests/scanners are **local** (`./scripts/validate.sh` + agent skill
+`travel-platform-local-ci`). Set `CI_PIPELINE_MODE=full` for GitLab gates:
+
+| Gate | Blocks (full mode) |
 | --- | --- |
 | Gitleaks (backend / mobile / platform) | merge via failed pipeline |
 | Semgrep ERROR (backend / mobile) | merge; publish/APK `needs` |

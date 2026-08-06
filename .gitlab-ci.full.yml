@@ -1,0 +1,78 @@
+# Full platform CI (markdown/yaml lint, compose config, gitleaks).
+# Not used by default during active development — see `.gitlab-ci.yml` (lean).
+# Enable: set GitLab CI/CD variable CI_PIPELINE_MODE=full (project or group).
+# Docs: tourism-platform/docs/ci-and-runners.md
+
+stages:
+  - code-style
+  - run-tests
+  - mirror
+
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+
+platform-gitleaks:
+  stage: code-style
+  image:
+    name: zricethezav/gitleaks:v8.24.2
+    entrypoint: [""]
+  script:
+    - gitleaks detect --source . --verbose --redact --exit-code 1
+  allow_failure: false
+
+platform-code-style:
+  stage: code-style
+  image: docker:27-cli
+  services:
+    - docker:27-dind
+  before_script:
+    # The linters must be installed here: a `command -v` guard would let the job
+    # pass green having checked nothing.
+    - apk add --no-cache bash git yamllint npm
+    - npm install --global --no-fund --no-audit markdownlint-cli2@0.18.1
+  script:
+    - |
+      for required_file in \
+        README.md \
+        CONTRIBUTING.md \
+        SECURITY.md \
+        compose.yaml \
+        docs/progress.md \
+        docs/implementation-plan.md \
+        docs/diagrams/container-diagram.md \
+        docs/diagrams/phase-and-screens-map.md; do
+        test -f "${required_file}"
+      done
+    - |
+      for shell_script in scripts/*.sh; do
+        bash -n "${shell_script}"
+      done
+    - markdownlint-cli2 "**/*.md"
+    - yamllint .gitlab-ci.yml .gitlab-ci.full.yml .github compose.yaml
+
+platform-run-tests:
+  stage: run-tests
+  image: docker:27-cli
+  services:
+    - docker:27-dind
+  before_script:
+    - apk add --no-cache bash git
+  script:
+    - docker compose --env-file .env.example config --quiet
+    - docker compose --env-file deploy/test/.env.example --file deploy/test/compose.yaml config --quiet
+
+# Public GitHub showcase mirror. GitLab remains source of truth.
+github-mirror:
+  stage: mirror
+  image: alpine:3.21
+  before_script:
+    - apk add --no-cache bash git
+  script:
+    - bash scripts/ci-mirror-to-github.sh
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "gamma" && $GITHUB_MIRROR_TOKEN'
+    - if: '$CI_COMMIT_BRANCH == "main" && $GITHUB_MIRROR_TOKEN'
+  needs:
+    - platform-gitleaks
+    - platform-code-style
+    - platform-run-tests

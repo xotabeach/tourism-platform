@@ -87,8 +87,11 @@ possible but does not turn the host into a production-capable server.
 
 ## Delivery flow
 
-1. Backend CI runs lint, type checks, tests, dependency audit, migration smoke,
-   and container build.
+1. **Lean CI (default):** on `main`/`gamma`, CI builds/pushes the image only.
+   Lint/tests/scanners are local (`./scripts/validate.sh`). See
+   [ci-and-runners.md](ci-and-runners.md).
+   **Full CI** (`CI_PIPELINE_MODE=full`): lint, types, tests, audits, scanners,
+   then the same publish path.
 2. On `gamma` or `main`, CI pushes an immutable image tagged with the commit
    SHA, plus a floating tip (`:stage` on `gamma`, `:production` on `main`).
 3. Deploy stage:

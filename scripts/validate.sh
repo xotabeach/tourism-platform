@@ -15,6 +15,8 @@ REQUIRED_FILES=(
   .github/ISSUE_TEMPLATE/feature_request.yml
   .github/pull_request_template.md
   .gitlab-ci.yml
+  .gitlab-ci.full.yml
+  docs/ci-and-runners.md
   README.md
   CONTRIBUTING.md
   SECURITY.md
@@ -134,9 +136,9 @@ fi
 printf 'Markdown lint: OK\n'
 
 if command -v yamllint >/dev/null 2>&1; then
-  yamllint .gitlab-ci.yml .github compose.yaml
+  yamllint .gitlab-ci.yml .gitlab-ci.full.yml .github compose.yaml
 elif python3 -c 'import yamllint' >/dev/null 2>&1; then
-  python3 -m yamllint .gitlab-ci.yml .github compose.yaml
+  python3 -m yamllint .gitlab-ci.yml .gitlab-ci.full.yml .github compose.yaml
 else
   printf 'Ошибка: нужен yamllint (pip install yamllint).\n' >&2
   exit 1

@@ -37,7 +37,12 @@ cd tourism-platform
 
 ## CI DevSecOps gates (as-built)
 
-OSS scanners (no paid GitLab Ultimate required). Fail-closed unless noted.
+**Mode:** default GitLab pipelines are **lean** (minutes saver). Full scanner
+gates below run when `CI_PIPELINE_MODE=full`, or locally via
+`./scripts/validate.sh`. See [ci-and-runners.md](../ci-and-runners.md).
+
+OSS scanners (no paid GitLab Ultimate required). Fail-closed in **full** mode
+unless noted.
 
 | Repo | Job | Gate |
 | --- | --- | --- |
@@ -54,6 +59,11 @@ OSS scanners (no paid GitLab Ultimate required). Fail-closed unless noted.
 
 Publish / deploy / APK jobs `needs` the security jobs above. Temporary
 waivers: [exceptions/](exceptions/) (`SEC-EX-*`).
+
+Gitleaks allowlists (non-secrets only):
+
+- `tourism-mobile/.gitleaks.toml` — Firebase client SDK config files
+- `tourism-platform/.gitleaks.toml` — Figma `fileKey` design inventory
 
 ## What to test
 

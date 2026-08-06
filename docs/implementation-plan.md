@@ -349,14 +349,11 @@ leaderboard place, profile likes и delayed +5 awards уже в API/mobile.
 | Docs | data-model + правила начисления тп / рангов / достижений |
 | Backend | ~~ранги + тп + leaderboard~~ done; catalog достижений; award pipeline |
 | Mobile | ~~rank card / тп / top from API~~ done; achievements carousel → API |
-| API | public user DTO + `/users/leaderboard` done; planned
-  `/achievements`, `/me/achievements` (or equivalent) still open |
-| Database | `travel_ranks`, `users.travel_points` / `rank_id`, `profile_likes`
-  done; still need `achievement_definitions`, `user_achievements` |
+| API | public user DTO + `/users/leaderboard` done; planned `/achievements`, `/me/achievements` (or equivalent) still open |
+| Database | `travel_ranks`, `users.travel_points` / `rank_id`, `profile_likes` done; still need `achievement_definitions`, `user_achievements` |
 | Events | like/favorite +5 done; execution-based awards after Phase 9 |
 | Tests | Award invariants; idempotent unlock; ownership; no cross-user leak |
-| Security | Только свой progress; catalog публичный read-only; anti-cheat:
-  server-side awards only |
+| Security | Только свой progress; catalog публичный read-only; anti-cheat: server-side awards only |
 | Acceptance | Профиль: звание/тп уже с API; достижения с API; mock только local |
 | Dependencies | Phase 6 (user); Phase 9 для execution awards |
 | Не входит | Социальный шаринг бейджей; PvP; сложные стрики; магазин за тп |
