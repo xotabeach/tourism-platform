@@ -5,7 +5,21 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5/6/7 polish + ops; next = Phase 8A / remaining 5.x
-**Последнее обновление:** 2026-08-05
+**Последнее обновление:** 2026-08-06
+
+### 2026-08-06 — FCM tray: egress + OAuth without requests
+
+- Root cause: backend on `private` (`internal: true`) could not reach Google
+  FCM/OAuth; in-app inbox still worked. Compose: backend also on `edge`.
+- FCM sender rewritten to PyJWT + httpx (no `requests` /
+  `google.auth.transport.requests`). Verified `fcm_send_ok` / `sent 1` on
+  test host with a live device token.
+
+### 2026-08-06 — Push toggle ↔ OS notification permission
+
+- Settings «Пуш-уведомления» reflects `AuthorizationStatus` (Android 13+ /
+  iOS); denied → subtitle + dialog to open system notification settings
+  (MethodChannel). Token sync only after OS grant.
 
 ### 2026-08-05 — Inbox badge + foreground toast
 

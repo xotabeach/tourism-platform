@@ -141,14 +141,22 @@ In-app inbox **не зависит** от FCM. Системный баннер A
 6. Приложение **на переднем плане**: системный баннер FCM на Android часто
    не рисуется (это нормально) — смотри tray при свёрнутом приложении;
    in-app тост/бейдж при открытом приложении — отдельный путь.
+7. **Backend без egress** — в `deploy/test/compose.yaml` сеть `private`
+   `internal: true`. Backend должен быть ещё и в `edge`, иначе
+   `oauth2.googleapis.com` / FCM недоступны (`fcm_oauth_failed` /
+   ConnectError), а inbox при этом создаётся. Postgres/Redis остаются
+   только в `private`.
 
 ### Быстрая проверка на сервере
 
 ```bash
-# после деплоя service account
+# после деплоя service account + egress
 # в логах API при approve отзыва/маршрута должно быть fcm_send_ok,
-# а не fcm_skipped_no_service_account / fcm_send_failed
+# а не fcm_skipped_no_service_account / fcm_oauth_failed / fcm_send_failed
 ```
+
+FCM sender использует **PyJWT + httpx** (без пакета `requests` /
+`google.auth.transport.requests`).
 
 Firebase Console → Project settings → Service accounts →
 **Generate new private key** → положить JSON в секрет деплоя

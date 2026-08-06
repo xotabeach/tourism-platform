@@ -85,7 +85,10 @@ services:
     volumes:
       - media-data:/app/data/media
     networks:
+      # private = DB/Redis (internal). edge = outbound HTTPS (FCM) + reachability
+      # from Caddy without publishing host ports.
       - private
+      - edge
     security_opt:
       - no-new-privileges:true
     logging: *default-logging
