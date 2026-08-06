@@ -145,10 +145,11 @@ flowchart LR
 
 ### Рекомендация другу-дизайнеру
 
-1. **Сейчас:** polish Welcome/Auth/Home/Places/Routes/Profile/Settings +
-   consistency жестов (swipe deck coach, guest back, sticky home brand).
-2. **Следом:** отдельный Favorites screen, форма подбора маршрута + результат.
-3. **Не блокировать MVP:** AI-чат, Trip Planner, публикация своих маршрутов.
+1. **Сейчас:** polish Home/Routes/Profile/Settings + consistency жестов.
+2. **Следом:** история в «Мои маршруты»; реальный результат подбора (8A);
+   Active Route (9); achievements API.
+3. **Уже as-built (не блочить):** публикация своих маршрутов + admin
+   moderation; тп/звания/leaderboard; inbox.
 4. Ops UI живёт только в `/admin` (SQLAdmin) — отдельные макеты mobile не нужны.
 
 ---
@@ -197,9 +198,10 @@ flowchart TB
     Ph3[Phase3_done]
     Ph4[Phase4_done]
     Ph5[Phase5_in_progress]
-    Ph6_7[Phase6_7_in_progress]
+    Ph6_7[Phase6_7_favorites_done]
     Ph65[Phase6_5_done]
-    Ph8_9[Phase8A_9]
+    Ph11[Phase11_publish_as_built]
+    Ph8_9[Phase8A_9_pending]
   end
 
   S_places --> Ph3
@@ -213,6 +215,9 @@ flowchart TB
   S_run --> Ph8_9
 ```
 
+*(Публикация user routes / модерация — as-built Phase 11 slice; на схеме
+отдельно не вынесена — живёт в Routes + Profile + `/admin`.)*
+
 ---
 
 ## 5. Типы маршрутов (важно для UI)
@@ -224,13 +229,15 @@ flowchart LR
   user[UserCreated_свои]
 
   editorial -->|public_каталог| catalog[RoutesCatalog]
-  user -->|public_если_опубликован| catalog
-  generated -->|private_после_формы| my[Мои_или_результат]
-  user -->|полный_CRUD_Phase11| my
+  user -->|public_после_approve| catalog
+  generated -->|private_после_формы| result[Match_или_результат]
+  user -->|drafts_mine_profile| profile[Profile_мои]
 ```
 
-В каталоге сейчас — редакционные + публичные `user_created`. Сгенерированный —
-личный результат builder. Полный CRUD своих маршрутов — Phase 11.
+В каталоге — редакционные + **published** `user_created`. Сгенерированный —
+личный результат builder (**Phase 8A**, пока UI режет каталог). Свои draft /
+pending / published — на профиле через `/routes/mine`; таб «Мои маршруты» =
+избранное / follows / history placeholder.
 
 ---
 

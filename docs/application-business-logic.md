@@ -90,13 +90,13 @@ flowchart LR
 - `generated` — результат route builder;
 - `user_created` — создан пользователем.
 
-В MVP:
+As-built / MVP:
 
 - editorial могут быть `public`;
-- generated — `private`;
-- user_created по умолчанию `private`; ранний seed-driven срез допускает
-  `public` + `active` в каталоге ленты (без UI создания и без модерации UGC);
-- публичная модерация user_created не реализуется.
+- generated — `private` (после Phase 8A; пока builder не реализован);
+- user_created: создаётся как draft → submit → `pending_review` → ops
+  approve (`public` + `active` в каталоге) или reject; seed-driven публичные
+  user_created по-прежнему допустимы в ленте.
 
 ## 6. Жизненный цикл маршрута
 
@@ -104,20 +104,23 @@ flowchart LR
 
 Жизненный цикл (`RouteLifecycleStatus`): `draft`, `active`, `archived`.
 
-Модерация (`ModerationStatus`, будущее): `not_submitted`, `pending`,
-`approved`, `rejected`, `changes_requested`.
+Модерация публикации маршрута (`publication_status`): `draft`,
+`pending_review`, `published`, `rejected`, `deleted`.
 
 ```mermaid
 stateDiagram-v2
   [*] --> draft
-  draft --> active: publish_or_generate
-  active --> archived: archive
-  draft --> archived: discard
+  draft --> pending_review: user_submit
+  pending_review --> published: admin_approve
+  pending_review --> rejected: admin_reject
+  rejected --> draft: edit_again
+  rejected --> pending_review: resubmit
+  published --> archived: archive
+  draft --> deleted: soft_delete
   archived --> [*]
 
   note right of draft
-    user_created starts here
-    moderation is future
+    user_created: draft → submit → ops
   end note
 ```
 
@@ -180,28 +183,38 @@ accessibility needs. Credentials живут только в module `identity`.
 
 ## 11. Публикация и модерация
 
-Полная пользовательская публикация с модерацией — Future. Ранний seed-driven
-срез: `user_created` может быть `public` + `active` и попадать в каталог (см.
-§5). Editorial публикует редакция без пользовательской модерации.
+Пользовательская публикация с ops-модерацией **реализована**:
+
+- mobile: экран публикации → `POST /routes/drafts`, media, `POST /routes/{id}/submit`;
+- admin SQLAdmin: одобрить / вернуть на доработку;
+- после approve маршрут в публичном каталоге; inbox
+  `route_published` / `route_rejected` (+ optional FCM).
+
+Свои маршруты владельца: `GET /routes/mine` (в т.ч. карусель на профиле).
+Таб «Мои маршруты» сейчас показывает избранное / follows / placeholder
+истории — не очередь черновиков. Editorial по-прежнему публикует редакция.
 
 ## 12. Достижения и прогресс путешественника
 
-Бейджи, звания и очки **тп** (travel points) — продуктовая геймификация
-профиля. UI-мок уже есть в Phase 5; durable реализация — **Phase 14**.
+Геймификация профиля:
 
-Не путать с рейтингом маршрута/места (отзывы, §10) и с leaderboard как
-социальной сетью.
+| Часть | Статус |
+| --- | --- |
+| Очки **тп**, звания (`travel_ranks`), место в топе | **as-built** — API + profile UI |
+| Leaderboard / public profile / profile likes | **as-built** |
+| Начисление тп за like профиля и favorite чужого маршрута (+5, 6h) | **as-built** |
+| Карусель **достижений** (бейджи) | **mock UI**; durable — остаток Phase 14 |
+| Начисление за `route_executions` (km, complete) | после Phase 9 |
 
-Минимальный контур Phase 14:
+Не путать с рейтингом маршрута/места (отзывы, §10).
 
-- каталог достижений (seed);
-- `user_progress` (тп, текущее звание, порог следующего);
-- `user_achievements` (unlock + timestamp);
-- начисление только на сервере по событиям `route_executions` (Phase 9);
-- mobile Profile читает API; mock — только local/demo.
+Остаток Phase 14:
 
-Сложные стрики, магазин за тп и публичный соревновательный топ — Future после
-Phase 14.
+- каталог достижений (seed) + `user_achievements`;
+- award pipeline по событиям прохождения;
+- mobile carousel читает API; mock — только `DATA_SOURCE=mock`.
+
+Сложные стрики, магазин за тп и соревновательный PvP-топ — Future.
 
 ## 13. Бизнес-логика Travel+
 
@@ -317,19 +330,24 @@ flowchart TD
 10. Запуск прохождения, отметка точек, история.
 11. Минимальный Flutter UI без финального дизайна.
 
-## 19. Что не входит в MVP
+## 19. Что не входит в MVP (или ещё не сделано)
 
-- многодневные поездки;
-- оплата подписки;
-- публичная публикация пользовательских маршрутов;
-- рейтинг путешественников;
-- сложные достижения;
+Уже **вне исходного MVP-списка, но as-built:** публикация user routes с
+модерацией; тп / звания / leaderboard / profile likes; отзывы маршрутов;
+in-app inbox (+ FCM на Android).
+
+По-прежнему вне MVP / не сделано:
+
+- многодневные поездки (Trip Planner);
+- оплата подписки Travel+ (UI paywall — mock);
+- сложные достижения (карусель mock; каталог API — Phase 14);
+- генерация маршрута и прохождение по точкам (Phase 8A / 9 — UI stubs);
 - социальная лента;
 - видео;
 - совместные поездки;
 - бронирование гостиниц и билетов;
-- полноценные офлайн-карты;
-- production AI Route Builder / conversational planner в MVP (архитектура
+- полноценные офлайн-карты (есть только in-memory API cache);
+- production AI Route Builder / conversational planner (архитектура
   задокументирована; реализация — Phase 8B+ / Future, см. ADR-006);
 - ML-рекомендации ленты и AI-генерация маркетингового текста;
 - рекламная система.

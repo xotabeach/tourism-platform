@@ -4,8 +4,38 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 5/6/7 polish + ops; next = Phase 8A / remaining 5.x
+**Текущая фаза:** Phase 5 polish + ops; next = Phase 8A (Route Builder)
 **Последнее обновление:** 2026-08-06
+
+## Changelog
+
+### 2026-08-06 — CI DevSecOps + signed APK artifacts
+
+- Backend: dropped redundant `backend-image`; `uv` cache; dedicated
+  `backend-security-tests`; gitleaks + Semgrep (ERROR) gate publish; Trivy
+  HIGH/CRITICAL after publish gates deploy.
+- Mobile: gitleaks + Semgrep + OSV on `pubspec.lock`; `mobile-apk-test` builds
+  signed test APK (CI keystore vars) → GitLab Job Artifact (14d) on
+  main/gamma. No public host download in this iteration.
+- Platform: `platform-gitleaks`.
+- Docs: [security-testing-guide.md](security/security-testing-guide.md),
+  [mobile-build-and-install.md](mobile-build-and-install.md).
+
+### 2026-08-06 — Doc sync with as-built code
+
+Code audit vs living docs. Corrected stale claims:
+
+- **Profile progress:** ranks (`travel_ranks`), тп, leaderboard, profile
+  likes — durable API + mobile (`DATA_SOURCE=api`). **Achievements** carousel
+  remains mock (deferred; rest of Phase 14).
+- **Route publication:** draft → media → submit → SQLAdmin approve/reject →
+  public catalog + inbox (`route_published` / `route_rejected`) — shipped;
+  not a stub / not “Phase 11 only”.
+- Still **stub / UI-only:** route builder/match results (catalog slice),
+  route execution CTA, Travel+ entitlements/billing, audio guide play,
+  offline download, «Мои маршруты → История». Favorites + profile follows
+  on that tab are real; own publications surface on **profile** via
+  `/routes/mine`.
 
 ### 2026-08-06 — FCM tray: egress + OAuth without requests
 
@@ -72,15 +102,15 @@
 | 5.6 | First remote test backend | in_progress |
 | 6 | Authentication | in_progress |
 | 6.5 | Internal ops admin (SQLAdmin) | done |
-| 7 | Favorites and profile | in_progress |
+| 7 | Favorites and profile | done |
 | 8A | Deterministic Route Builder | pending |
 | 8B | AI-assisted Route Planning (experimental) | pending |
 | 9 | Route execution | pending |
 | 10 | Stabilization and staging | pending |
-| 11 | User-created routes | pending |
+| 11 | User-created routes (publish + moderation) | in_progress |
 | 12 | Travel+ foundations | pending |
 | 13 | Trip Planner | pending |
-| 14 | Traveler progress (ranks, тп, achievements) | pending |
+| 14 | Traveler progress (achievements remain) | in_progress |
 
 Статусы: `pending` · `next` · `in_progress` · `done` · `blocked`.
 
@@ -143,6 +173,15 @@ envelope, JSON logs.
   passed; iOS Simulator build passed. Android SDK отсутствует.
 
 ## Что дальше
+
+### Ближайшие продуктовые приоритеты (2026-08)
+
+1. **Phase 8A** — deterministic Route Builder (сейчас match UI + срез каталога).
+2. **Phase 9** — прохождение маршрута («Пройти маршрут» → soon).
+3. Polish: «Мои маршруты → История»; SMS OTP provider; iOS APNs; Stage host /
+   backup smoke.
+4. **Phase 14 remainder** — achievements (отложено по продукту).
+5. Phase 12 Travel+ entitlements (paywall пока mock).
 
 ### Phase 5 — Flutter foundation (продолжение)
 
@@ -224,11 +263,11 @@ envelope, JSON logs.
 - Current mobile gate after native Liquid Glass controls: format/analyze
   passed, `63 tests` and all 13 macOS pixel goldens passed. Release mock
   build reinstalled on physical iPhone (iOS 26.5).
-- Profile tab (Phase 5 mock UI, durable profile/auth still Phase 6–7;
-  ranks/тп/achievements → **Phase 14**; published routes on profile →
-  Phase 11): Figma layout with cover/avatar, rank card (`тп` / top place),
-  achievements carousel, published routes carousel; name from session mock;
-  text-only rendering for untrusted display strings.
+- Profile tab: Figma layout with cover/avatar, rank card, achievements
+  carousel, published routes carousel; text-only for untrusted strings.
+  **As-built (api mode):** name/avatar/cover, favorites summary, ranks/тп/
+  leaderboard place, profile likes, own routes via `/routes/mine` — durable.
+  **Still mock:** achievements carousel only (Phase 14 remainder).
 - Home header avatar/greeting area now opens Profile; OTP consent rows are
   taller with centered checkbox/checkmark hit area for cleaner alignment.
 - Swipe deck no longer visually jumps after dismissing onboarding coach card:
@@ -313,8 +352,15 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
     `operator_reply`.
   - Theme polish: hub cards, chat shell, user media cells.
 - Mobile: secure refresh storage, Dio Bearer + single-flight refresh, OTP UI
-  wired to API, profile shows durable name + favorites summary; achievements/
-  ranks remain mock (Phase 14).
+  wired to API, profile shows durable name + favorites summary.
+- Follow-ups (through 2026-08): `travel_ranks` + delayed +5 тп (profile like /
+  route favorite); public profile/leaderboard/subscriptions APIs; ranks and
+  тп on profile are API-backed. Achievements carousel still mock.
+- Route publication (ahead of original Phase 11 plan): drafts, media upload,
+  submit for review, SQLAdmin approve/reject, inbox kinds, mobile
+  `route_publish` → `/routes/drafts` + `/routes/{id}/submit`; own routes on
+  profile. Remaining Phase 11 polish: owner drafts queue in «Мои маршруты»,
+  history tab (still catalog placeholder).
 - 2026-07-30: `media_attachments` table (canonical media links); public
   `GET /users/{id}` + `/routes`; catalog includes public `user_created`;
   seed three routes per user; mobile image disk/memory cache; author → view-only
@@ -358,12 +404,17 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
 См.
 [environment-and-backend-deployment.md](environment-and-backend-deployment.md).
 
-### Design handoff — новые экраны (2026-08-03)
+### Design handoff — новые экраны (2026-08-03 → as-built 2026-08-06)
 
 PNG-пакет: `docs/design/screens-figma/krymtrip-2/`.
 Gap backlog: [design-gap-backlog-2026-08-03.md](design/design-gap-backlog-2026-08-03.md).
-Начата верстка: nav compose (+ → Опубликовать/Подобрать), таб «Мои маршруты»,
-форма подбора, stubs публикации/результата; places убраны из tab bar.
+
+- Nav compose (+ → Опубликовать / Подобрать); places вне tab bar.
+- **Публикация** — полный API+UI flow (не stub).
+- **Подбор** — форма + UI результата; логика = срез каталога до Phase 8A.
+- **Мои маршруты** — избранное и подписки (follows) реальные; история —
+  placeholder.
+- Travel+ / AI-chat — UI mock only.
 
 ### Документировано (не реализовано): AI route planning
 
@@ -379,19 +430,23 @@ Home lab (Ollama + Qdrant, PostGIS vs RAG, Lab-0…5, RTX ~12 GB):
 
 ## Блокеры и заметки
 
-- Auth strategy: **ADR-007** (JWT access + opaque refresh for mobile; cookies
-  later for web/admin). Implementation still Phase 6.
-- Routing provider — open decision (ADR-004).
+- Auth strategy: **ADR-007** implemented for mobile (JWT + opaque refresh).
+  Remaining Phase 6: real SMS provider (test contour uses OTP/debug paths).
+  Cookies later for web (admin already cookie-session).
+- Routing provider — open decision (ADR-004); Phase 8A not started (empty
+  `route_builder` / `route_execution` / `subscriptions` packages).
 - Не коммитить `.tmp-ref-frames/` и локальные `.env`.
 - AI architecture + home-lab guide documented only; no Gemini/Gemma/MCP/
   Ollama/Qdrant code yet.
 - DX: style guides + Cursor workspace settings — see
   [development-environment.md](development-environment.md).
-- Security: docs + Cursor skill/rule documented under
+- Security: docs + Cursor skill/rule under
   [security/security-baseline.md](security/security-baseline.md). **Not**
-  claimed complete; auth/Redis ACL/prod hardening still open.
-- Release blockers: organization-owned Android signing and Android build check
-  требуют CI secrets/Android SDK; physical-device Impeller profile не выполнен.
+  claimed complete; Redis ACL/prod hardening still open.
+- Android CI APK job готов; для артефакта нужны GitLab CI variables
+  (`ANDROID_KEYSTORE_*`, `MOBILE_TEST_API_BASE_URL`). Physical-device
+  Impeller profile не выполнен.
+- iOS system push: Firebase/APNs credentials still needed beyond Android FCM.
 
 ## Документировано (не реализовано): Security Baseline
 

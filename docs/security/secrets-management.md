@@ -42,6 +42,19 @@ real `.env` files, CI_DEBUG dumps.
 No server/API secrets in APK/IPA. Public SDK keys restricted by package name,
 signing cert, API allowlist, quotas.
 
+### Android CI signing (tourism-mobile)
+
+GitLab CI variables for `mobile-apk-test` (masked; prefer protected on
+`main`/`gamma`):
+
+- `ANDROID_KEYSTORE_BASE64` — base64 of the upload `.jks` (never commit)
+- `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`
+- `MOBILE_TEST_API_BASE_URL` — HTTPS test API only (not a secret, but
+  environment-scoped)
+
+Job writes ephemeral `android/key.properties` + keystore, then deletes them
+before uploading the APK artifact. Keystore must **not** appear in artifacts.
+
 ## Rotation triggers
 
 Leak suspicion, staff offboarding, provider incident, scheduled cadence for

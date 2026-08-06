@@ -76,9 +76,13 @@ Git submodule общего superproject.
 
 ### Этап 3. MVP
 
-- [ ] Реализовать modules в согласованном порядке.
-- [ ] Добавить deterministic `RoutingProvider` stub.
-- [ ] Проверить сквозные сценарии с мобильным клиентом.
+- [x] Каталог places/routes, auth OTP/JWT, favorites, reviews, notifications,
+  user route publication + admin moderation, travel ranks/тп/leaderboard
+  (см. [progress.md](../progress.md)).
+- [ ] Deterministic Route Builder + `RoutingProvider` (Phase 8A).
+- [ ] Route execution (Phase 9).
+- [ ] Achievement catalog / unlock (остаток Phase 14).
+- [ ] Проверить сквозные сценарии 8A/9 с мобильным клиентом.
 
 ### Этап 4. Эксплуатация
 

@@ -67,27 +67,32 @@ Crimea Travel Platform — независимая цифровая платфо�
 - каталог мест и категорий;
 - карточка места с entrances, schedules, closure, seasonality и safety data;
 - PreparedRoute с упорядоченными остановками;
-- route builder через контракт `RoutingProvider`; на foundation-этапе вместо
-  внешнего provider используется deterministic stub;
+- route builder через контракт `RoutingProvider` (ещё не реализован; UI
+  подбора — facade);
 - регистрация, профиль, FavoritePlace и SavedRoute;
 - серверное API и редакционно управляемые данные;
 - mobile client для основных пользовательских сценариев.
 
-Текущая работа создаёт только foundation и не реализует перечисленные функции.
+**As-built сверх раннего MVP-среза (2026-08):** OTP auth, favorites, отзывы
+маршрутов + модерация, публикация user routes + SQLAdmin, тп/звания/
+leaderboard, in-app inbox и FCM (Android). Живой статус —
+[progress.md](progress.md).
 
-## Не входит в MVP
+## Не входит в MVP (или ещё не сделано)
 
 - production-развёртывание и круглосуточная эксплуатация;
-- платежи и бронирование;
-- социальная сеть и пользовательские отзывы;
-- собственный routing engine;
+- платежи и бронирование (Travel+ UI — mock);
+- полноценная социальная сеть / лента (лайки профиля и отзывы — as-built);
+- собственный routing engine / прохождение маршрута (Phase 8A / 9);
 - общественный транспорт и multimodal routing;
 - полноценная offline navigation и background synchronization;
-- push notifications об изменениях;
-- пользовательские публикации и marketplace;
-- production Admin Application;
+- marketplace / магазин за тп;
+- каталог достижений с server unlock (карусель пока mock);
 - автоматическое распространение на новые регионы без редакционной подготовки;
 - заявления о гарантированной безопасности или официальном статусе данных.
+
+*(Ранее здесь числились «пользовательские публикации», «отзывы», «push»,
+«Admin» — эти пункты as-built; см. progress.md.)*
 
 ## Критерии успеха MVP
 

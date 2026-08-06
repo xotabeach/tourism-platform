@@ -222,6 +222,27 @@ dist/CrimeaTrip-test-api.apk                           # копия с поня�
 и путь к `.jks`, прокинет `APP_ENV` / `DATA_SOURCE` / `API_BASE_URL`,
 соберёт **release + signing**.
 
+### 6.0.1. CI: скачать APK из GitLab
+
+На ветках `main` / `gamma` job `mobile-apk-test` собирает тот же signed
+test APK и публикует **Job Artifact** (14 дней). Скачать: Pipeline → job
+`mobile-apk-test` → Artifacts → `dist/CrimeaTrip-test-api.apk`.
+
+Нужные **CI variables** на проекте `tourism-mobile` (masked / protected):
+
+| Variable | Meaning |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | `base64 -w0` (or `-i` on macOS) of the `.jks` |
+| `ANDROID_KEY_ALIAS` | key alias |
+| `ANDROID_KEY_PASSWORD` | key password |
+| `ANDROID_STORE_PASSWORD` | keystore password |
+| `MOBILE_TEST_API_BASE_URL` | HTTPS test API (e.g. `https://….sslip.io`) |
+
+Prepare helpers: `scripts/ci-prepare-android-signing.sh` (writes ephemeral
+`android/key.properties` + `ci-upload.jks`, removed after build). Keystore
+is **never** an artifact. Without signing vars the job is manual /
+skipped — pipeline style/tests still green.
+
 ### 6.1. Подготовить keystore (один раз)
 
 Нужно только если ещё нет `android/key.properties` и `.jks`.

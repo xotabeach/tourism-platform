@@ -15,6 +15,19 @@ per-phase security rows.
 4. Add regression tests for security-sensitive behavior.
 5. Do not silence scanners with broad noqa without documented exception.
 
+## CI gates (as-built)
+
+| Gate | Blocks |
+| --- | --- |
+| Gitleaks (backend / mobile / platform) | merge via failed pipeline |
+| Semgrep ERROR (backend / mobile) | merge; publish/APK `needs` |
+| pip-audit / OSV-Scanner | merge; publish/APK `needs` |
+| `pytest tests/security` (dedicated job) | backend publish |
+| Trivy HIGH/CRITICAL on image | backend deploy (after publish) |
+| Flutter `test/security/` (in `flutter test`) | mobile APK job |
+
+Details: [security-testing-guide.md](security-testing-guide.md).
+
 ## Security exceptions
 
 No open-ended “fix later / safe enough / internal only”.

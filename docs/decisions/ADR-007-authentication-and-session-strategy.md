@@ -1,14 +1,15 @@
 # ADR-007: Authentication and session strategy
 
-- Статус: **принято** (направление; реализация — Phase 6)
-- Дата: 2026-07-23
+- Статус: **принято**; mobile JWT + opaque refresh **as-built** (Phase 6).
+  Remaining: real SMS provider. Admin cookie session — Phase 6.5 as-built.
+- Дата: 2026-07-23 (as-built note 2026-08-06)
 
 ## Контекст
 
 Нужна аутентификация для Flutter (Android/iOS) с последующей web/admin
 панелью. Требования: revoke, multi-device, logout, password change invalidation,
 защита от кражи refresh, масштабирование, auditability. Redis уже в local
-stack. Auth код пока отсутствует (`identity` / `users` — stubs).
+stack. *(Исходно auth был stub; реализация identity OTP/JWT — as-built.)*
 
 ## Решение
 

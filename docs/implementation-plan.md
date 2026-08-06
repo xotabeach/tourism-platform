@@ -209,8 +209,11 @@ OTP-коды (пока нет SMS), права, диалоги поддержк�
 ## Phase 7 — Favorites and profile
 
 **Цель:** сохранение мест и маршрутов, список избранного; каркас профиля
-из Phase 6 заполняется избранным. Геймификация (звание / тп / достижения) —
-отдельная Phase 14.
+из Phase 6 заполняется избранным.
+
+**Статус as-built (2026-08):** **done** — favorites API + mobile; profile
+entry points. Ранний срез тп/званий/лайков ушёл в код раньше Phase 14 (см.
+ниже); достижения — отдельно.
 
 | Область | Задачи |
 | --- | --- |
@@ -222,7 +225,7 @@ OTP-коды (пока нет SMS), права, диалоги поддержк�
 | Security | Object ownership; BOLA negative tests; private favorites authZ |
 | Acceptance | Save/unsave place and route |
 | Dependencies | Phase 4, Phase 6 |
-| Не входит | Social sharing; ranks/achievements (Phase 14) |
+| Не входит | Social sharing; achievements catalog (Phase 14 remainder) |
 
 ## Phase 8A — Deterministic Route Builder
 
@@ -302,11 +305,19 @@ production cutover.
 
 ## Phase 11 — User-created routes
 
-**Цель:** private user routes (draft/active), без публичной модерации.
+**Цель (исходная):** private user routes (draft/active).
 
-| Acceptance | Пользователь создаёт и сохраняет private route |
-| Dependencies | Phase 8–9 |
-| Не входит | Moderation, public listing |
+**Статус as-built (2026-08):** publish flow shipped early — drafts, media,
+submit, SQLAdmin moderation, public catalog after approve, inbox + mobile
+`route_publish`, own routes on profile (`/routes/mine`).
+
+| Acceptance (core) | Пользователь создаёт draft, сдаёт на модерацию, видит результат |
+| Remaining | Owner drafts/pending queue in «Мои маршруты»; history tab; tighter UX |
+| Dependencies | Auth + places/routes (Phase 8–9 больше не блочат publish) |
+| Не входит (ещё) | Store billing; full social feed of UGC |
+
+Исходная формулировка «без публичной модерации / Не входит: Moderation» —
+**устарела**; модерация в SQLAdmin есть.
 
 ## Phase 12 — Travel+ foundations
 
@@ -327,37 +338,41 @@ production cutover.
 
 ## Phase 14 — Traveler progress (ranks, тп, achievements)
 
-**Цель:** заменить mock-блоки профиля (звание, очки «тп», топ, достижения)
-данными из backend/БД. Начисление прогресса завязано на реальные события
-прохождения маршрутов, а не на клиентский хардкод.
+**Цель (исходная):** заменить mock-блоки профиля данными из backend.
+**Статус as-built (2026-08):** **partial** — тп, звания (`travel_ranks`),
+leaderboard place, profile likes и delayed +5 awards уже в API/mobile.
+**Остаётся:** каталог достижений + unlock pipeline (и awards от
+`route_executions` после Phase 9). Achievements carousel пока mock.
 
 | Область | Задачи |
 | --- | --- |
 | Docs | data-model + правила начисления тп / рангов / достижений |
-| Backend | catalog достижений; прогресс пользователя; ранги; award pipeline |
-| Mobile | Profile: rank card, achievements carousel, read API вместо mock |
-| API | `/api/v1/me/progress`, `/api/v1/achievements`, `/api/v1/me/achievements` |
-| Database | `achievement_definitions`, `user_achievements`, `user_progress` (тп, rank) |
-| Events | Начисление из Phase 9 `route_executions` (km, round-trip, complete) |
+| Backend | ~~ранги + тп + leaderboard~~ done; catalog достижений; award pipeline |
+| Mobile | ~~rank card / тп / top from API~~ done; achievements carousel → API |
+| API | public user DTO + `/users/leaderboard` done; planned
+  `/achievements`, `/me/achievements` (or equivalent) still open |
+| Database | `travel_ranks`, `users.travel_points` / `rank_id`, `profile_likes`
+  done; still need `achievement_definitions`, `user_achievements` |
+| Events | like/favorite +5 done; execution-based awards after Phase 9 |
 | Tests | Award invariants; idempotent unlock; ownership; no cross-user leak |
-| Security | Только свой progress; catalog публичный read-only; anti-cheat: server-side awards only |
-| Acceptance | Профиль показывает звание/тп/достижения с API; mock остаётся только local fallback |
-| Dependencies | Phase 6 (user), Phase 9 (execution events); Phase 7 желателен для единого profile |
-| Не входит | Социальный шаринг бейджей; PvP; сложные стрики как продукт MVP; магазин за тп |
+| Security | Только свой progress; catalog публичный read-only; anti-cheat:
+  server-side awards only |
+| Acceptance | Профиль: звание/тп уже с API; достижения с API; mock только local |
+| Dependencies | Phase 6 (user); Phase 9 для execution awards |
+| Не входит | Социальный шаринг бейджей; PvP; сложные стрики; магазин за тп |
 
-Правила MVP (preliminary, уточняются в data-model doc фазы):
+Правила as-built / MVP:
 
-- **тп** — целочисленные travel points; растут за завершённые executions и
-  отдельные achievement unlock (веса в конфиге/seed, не в mobile).
-- **Звание** — пороги по тп (например «Продвинутый пешеход»); клиент только
-  отображает `rank_title` + `progress/next`.
-- **Топ N** — опционально approximate place по тп; допускается отложенный
-  пересчёт; не P0-критично для первого merge.
-- **Достижения** — seed-каталог (код, title, description, rule_key); unlock
-  server-side при matching event; mobile карусель как сейчас в Figma.
+- **тп** — целочисленные travel points; сейчас +5 (lazy, 6h) за profile like
+  и за favorite чужого маршрута; позже — executions + achievement unlock.
+- **Звание** — пороги в `travel_ranks`; клиент показывает `rank_title` +
+  `next_rank_points`.
+- **Топ N** — `leaderboard_place` / `GET /users/leaderboard`.
+- **Достижения** — ещё seed-каталог + server unlock; mobile карусель Figma
+  остаётся mock до API.
 
-Опубликованные маршруты на профиле остаются Phase 11 (user-created +
-publication), не часть Phase 14.
+Опубликованные маршруты на профиле — as-built (Phase 11 slice), не блокер
+Phase 14.
 
 ## Future — Conversational Route Planner
 
@@ -429,7 +444,7 @@ ingest/TTL, security, чеклисты Lab-0…Lab-5):
 | user story | US6.5.1 | As an operator I reply to support from admin | P0 | tourism-backend | E6.5 | Thread visible and reply persisted |
 | technical task | T6.5.1 | Admin session auth + CSRF | P0 | tourism-backend | E6.5 | Cookie session, not mobile JWT |
 | technical task | T6.5.2 | OTP challenge list (debug_code gated) | P0 | tourism-backend | E6.5 | Test contour only |
-| EPIC | E7 | Favorites | P0 | tourism-backend, tourism-mobile | E4, E6 | Save place/route |
+| EPIC | E7 | Favorites | P0 | tourism-backend, tourism-mobile | E4, E6 | Save place/route — **done** |
 | EPIC | E8 | Route builder (8A deterministic) | P0 | tourism-backend, tourism-mobile | E3, E6 | Generate or failure_code |
 | technical task | T8.1 | RoutingProvider mock | P0 | tourism-backend | E8 | Swap-ready interface |
 | technical task | T8.2 | EntitlementService config free plan | P1 | tourism-backend | E8 | Quotas from config |
@@ -450,15 +465,15 @@ ingest/TTL, security, чеклисты Lab-0…Lab-5):
 | EPIC | E9 | Route execution | P0 | tourism-backend, tourism-mobile | E4, E6 | Start/complete/history |
 | user story | US9.1 | As a traveler I mark visited stops | P0 | tourism-mobile | E9 | Progress updates |
 | EPIC | E10 | Production readiness | P1 | tourism-platform, all | E5.6, E6–E9 | Production readiness review |
-| EPIC | E11 | User-created private routes | P1 | tourism-backend, tourism-mobile | E8 | Private CRUD |
+| EPIC | E11 | User-created routes + moderation | P1 | tourism-backend, tourism-mobile | E6 | Core publish **as-built**; UX polish open |
 | EPIC | E12 | Travel+ foundations | P2 | tourism-backend | E8 | Entitlements without billing |
 | EPIC | E13 | Trip Planner | Future | tourism-backend, tourism-mobile | E12 | Trip with Route items |
-| EPIC | E14 | Traveler progress / achievements | P1 | tourism-backend, tourism-mobile | E6, E9 | Rank + тп + achievements from API |
-| user story | US14.1 | As a traveler I see my rank and тп on profile | P1 | tourism-mobile | E14 | Values from `/me/progress`, not mock |
+| EPIC | E14 | Traveler progress / achievements | P1 | tourism-backend, tourism-mobile | E6, E9 | Rank+тп **as-built**; achievements remain |
+| user story | US14.1 | As a traveler I see my rank and тп on profile | P1 | tourism-mobile | E14 | **Done** via public user DTO / leaderboard |
 | user story | US14.2 | As a traveler I unlock an achievement after a route | P1 | tourism-backend | E14, E9 | Server awards idempotently on execution complete |
 | technical task | T14.1 | Achievement catalog seed + award rules | P1 | tourism-backend | E14 | rule_key mapped to execution events |
-| technical task | T14.2 | Replace profile mock progress providers | P1 | tourism-mobile | E14 | Mock only for `DATA_SOURCE=mock` |
-| user story | US-F1 | Publish route for moderation | Future | all | E11 | ModerationStatus flow |
+| technical task | T14.2 | Replace achievements mock carousel | P1 | tourism-mobile | E14 | Mock only for `DATA_SOURCE=mock` |
+| user story | US-F1 | Publish route for moderation | P1 | all | E11 | **As-built** draft→submit→admin→catalog |
 | user story | US-F2 | Subscribe to Travel+ | Future | all | E12 | Store purchase |
 | user story | US-F3 | Conversational route planner | Future | all | E8B, E12 | NL → NormalizedRouteRequest |
 | technical task | T-F1 | Kafka activation | Future | tourism-platform | ADR-005 | Only with real consumers |

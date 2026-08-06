@@ -28,10 +28,16 @@ lib/
 │       └── app_shell_screen.dart     # bottom navigation scaffold
 └── features/
     ├── home/
-    ├── places/                       # domain / data / application / presentation
-    ├── routes/                       # Phase 4+ catalog (placeholder OK in 5)
-    ├── favorites/                    # Phase 7 placeholder
-    └── profile/                      # Phase 6 placeholder
+    ├── places/
+    ├── routes/                       # catalog, reviews, publication
+    ├── route_publish/                # user draft → submit
+    ├── route_match/                  # form UI; builder API = Phase 8A
+    ├── my_routes/                    # favorites / follows / history stub
+    ├── favorites/                    # API favorites (also via my_routes)
+    ├── profile/                      # durable; achievements mock
+    ├── auth/
+    ├── settings/                     # support, notifications, Travel+ mock
+    └── search/
 ```
 
 Per feature (unchanged rule):
@@ -70,33 +76,33 @@ features/<name>/
 
 ## Navigation shell (MVP tabs)
 
-Onboarding (вне shell): `/welcome` → `/auth/identity` → `/auth/otp` (mock UI;
-реальный auth — Phase 6). После `onboardingCompleted` — shell.
+Onboarding (вне shell): `/welcome` → `/auth/identity` → `/auth/otp`.
+Реальный OTP/JWT — as-built (Phase 6); mock auth только при
+`DATA_SOURCE=mock`. После `onboardingCompleted` — shell.
 
-| Index | Branch | Path | Phase content |
+| Index | Branch | Path | Content (as-built 2026-08) |
 | --- | --- | --- | --- |
-| 0 | Home | `/` | Home feed (design) |
-| 1 | Routes | `/routes` | Editorial swipe slider (Phase 4/5) |
-| 2 | Route Builder | `/favorites` | Placeholder → Phase 8A |
-| 3 | Map / Places | `/places` | Catalog (Phase 3) |
-| 4 | Profile | `/profile` | Placeholder → Phase 6 |
+| 0 | Home | `/` | Home feed |
+| 1 | Routes | `/routes` | Editorial swipe + details |
+| 2 | Compose (+) | overlay | Опубликовать / Подобрать (не tab) |
+| 3 | My routes | `/my-routes` | Favorites + follows; history placeholder |
+| 4 | Profile | `/profile` | Durable profile; ranks/тп API; achievements mock |
+
+Places catalog — вне tab bar (push / deep link). Publish: `/publish`.
+Match form: `/match` (результат — facade до Phase 8A).
 
 Nav follows the Figma segmented model: leading inactive glass segment, active
 dark droplet, trailing inactive glass segment. Route details stay in the Routes
-branch, while the places catalog and place details stay in the Map branch.
-Consequently one keyed shell navbar remains mounted across catalogs and detail
+branch. One keyed shell navbar remains mounted across catalogs and detail
 screens. On route-details entry it morphs into a compact Home droplet with the
-route CTA in the released space; expanding it moves the CTA above the restored
-full navbar. Opening a route stop switches to the Map branch and selects its
-destination without creating a page-local navbar. Swipe onboarding is a
-standalone first card in the route deck, so its blur and interaction lock do
-not cover search, filters or bottom navigation.
+route CTA; expanding restores the full navbar. Swipe onboarding is a
+standalone first card in the route deck.
 
-## Security hooks (Phase 5 foundation)
+## Security hooks
 
-- Secure storage adapter ready; **no tokens written** until Phase 6.
+- Secure storage holds refresh tokens (Phase 6 as-built).
 - Staging/production `AppConfig` HTTPS-only (tested).
-- Dio timeouts kept; auth interceptor stubbed/documented for Phase 6.
+- Dio Bearer + single-flight refresh interceptor.
 - No debug credentials in release paths.
 
 ## Freezed / codegen

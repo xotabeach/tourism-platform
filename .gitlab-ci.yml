@@ -6,6 +6,15 @@ stages:
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
 
+platform-gitleaks:
+  stage: code-style
+  image:
+    name: zricethezav/gitleaks:v8.24.2
+    entrypoint: [""]
+  script:
+    - gitleaks detect --source . --verbose --redact --exit-code 1
+  allow_failure: false
+
 platform-code-style:
   stage: code-style
   image: docker:27-cli
@@ -59,5 +68,6 @@ github-mirror:
     - if: '$CI_COMMIT_BRANCH == "gamma" && $GITHUB_MIRROR_TOKEN'
     - if: '$CI_COMMIT_BRANCH == "main" && $GITHUB_MIRROR_TOKEN'
   needs:
+    - platform-gitleaks
     - platform-code-style
     - platform-run-tests
