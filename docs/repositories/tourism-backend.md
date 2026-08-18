@@ -26,7 +26,7 @@ superproject. Стек: [stack.md](../stack.md).
 - Python 3.13, FastAPI, Pydantic v2, SQLAlchemy 2, Alembic.
 - `uv`, Ruff, MyPy, Pytest.
 - Redis; MinIO локально; bundled media на test host.
-- JWT + opaque refresh (ADR-007); OTP (SMS provider ещё не прод).
+- JWT + opaque refresh (ADR-007); OTP (один живой код на телефон; SMS ещё не прод).
 - AI (план): `AIPlanningProvider` — mock / Gemini / Ollama `gemma4:12b`.
 - Kafka только после ADR-005.
 
@@ -41,8 +41,9 @@ superproject. Стек: [stack.md](../stack.md).
 
 ## As-built vs stub
 
-С API: identity, geography, places, routes (в т.ч. publication + reviews),
-favorites, support, notifications, admin, media.
+С API: identity (в т.ч. achievements catalog + follow counts), geography,
+places, routes (в т.ч. publication + reviews), favorites, support,
+notifications, admin, media.
 
 Stub-пакеты: `route_builder`, `route_execution`, `subscriptions`.
 
@@ -59,7 +60,7 @@ Stub-пакеты: `route_builder`, `route_execution`, `subscriptions`.
   moderation, ranks/тп/leaderboard.
 - [ ] Deterministic Route Builder (Phase 8A).
 - [ ] Route execution (Phase 9).
-- [ ] Achievement catalog / unlock (остаток Phase 14).
+- [x] Achievement catalog + starter grant; event unlock — остаток Phase 14.
 - [ ] `AIPlanningProvider` + Ollama Gemma 4 (Phase 8B / Future).
 
 ### Этап 4. Эксплуатация

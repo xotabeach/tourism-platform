@@ -87,7 +87,7 @@ leaderboard, in-app inbox и FCM (Android). Живой статус —
 - общественный транспорт и multimodal routing;
 - полноценная offline navigation и background synchronization;
 - marketplace / магазин за тп;
-- каталог достижений с server unlock (карусель пока mock);
+- event unlock достижений по прохождениям (каталог и карусель — as-built);
 - автоматическое распространение на новые регионы без редакционной подготовки;
 - заявления о гарантированной безопасности или официальном статусе данных.
 

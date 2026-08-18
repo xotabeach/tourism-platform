@@ -56,6 +56,8 @@ flowchart LR
 - OTP в Postgres хранится как **SHA-256 digest**; сравнение — constant-time
 - TTL challenge ~10 минут, max attempts ~8
 - Rate-limit в Redis по IP и телефону (request / verify)
+- Повторный `otp/request` при живом challenge **не выпускает второй код**
+  (reuse + Redis lock); предыдущие активные гасятся
 - Ответ request — `204`, код **никогда** не возвращается API и не логируется
 - SMS gateway — TODO. Пока нет провайдера:
   - `AUTH_OTP_ACCEPT_ANY` defaults **on only for `APP_ENV=local`**; test contour

@@ -203,16 +203,15 @@ accessibility needs. Credentials живут только в module `identity`.
 | Очки **тп**, звания (`travel_ranks`), место в топе | **as-built** — API + profile UI |
 | Leaderboard / public profile / profile likes | **as-built** |
 | Начисление тп за like профиля и favorite чужого маршрута (+5, 6h) | **as-built** |
-| Карусель **достижений** (бейджи) | **mock UI**; durable — остаток Phase 14 |
+| Карусель **достижений** (бейджи) | **as-built** — API catalog + earned-only carousel |
 | Начисление за `route_executions` (km, complete) | после Phase 9 |
 
 Не путать с рейтингом маршрута/места (отзывы, §10).
 
 Остаток Phase 14:
 
-- каталог достижений (seed) + `user_achievements`;
-- award pipeline по событиям прохождения;
-- mobile carousel читает API; mock — только `DATA_SOURCE=mock`.
+- award pipeline по событиям прохождения (сейчас starter-grant при регистрации);
+- mock карусель — только `DATA_SOURCE=mock`.
 
 Сложные стрики, магазин за тп и соревновательный PvP-топ — Future.
 
@@ -340,7 +339,7 @@ in-app inbox (+ FCM на Android).
 
 - многодневные поездки (Trip Planner);
 - оплата подписки Travel+ (UI paywall — mock);
-- сложные достижения (карусель mock; каталог API — Phase 14);
+- сложные стрики / event unlock достижений (каталог и карусель — as-built);
 - генерация маршрута и прохождение по точкам (Phase 8A / 9 — UI stubs);
 - социальная лента;
 - видео;

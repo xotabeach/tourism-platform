@@ -9,6 +9,21 @@
 
 ## Changelog
 
+### 2026-08-18 — Achievements API, OTP reuse, profile/search polish
+
+- Backend: каталог `achievements` + `user_achievements` (migration `0019`);
+  `GET /users/{id}/achievements`; starter-grant 5–15 бейджей при регистрации
+  и inbox/push `achievement_unlocked`. Award-правила по прохождениям —
+  по-прежнему после Phase 9.
+- Public profile: реальные `followers_count` / `following_count` из
+  `profile_likes`; дефолтные avatar/cover, если медиа нет.
+- Auth: повторный `POST /auth/otp/request` при живом challenge **не**
+  выпускает второй код (reuse + Redis lock); то же для смены телефона.
+- Mobile: fullscreen-поиск (история — последний запрос сессии, карусели
+  на всю ширину, шторка фильтров); профиль без Travel+ баннера; карусель
+  только полученных ачивок; отзывы маршрута по макету; серый placeholder
+  вместо вспышки mock-фото.
+
 ### 2026-08-18 — Docs: as-built stack + Gemma 4 home lab
 
 - Канон стека: [stack.md](stack.md) — local DX, test host (Caddy/PostGIS/
@@ -140,7 +155,7 @@ Code audit vs living docs. Corrected stale claims:
 | 11 | User-created routes (publish + moderation) | in_progress |
 | 12 | Travel+ foundations | pending |
 | 13 | Trip Planner | pending |
-| 14 | Traveler progress (achievements remain) | in_progress |
+| 14 | Traveler progress (catalog as-built; award rules remain) | in_progress |
 
 Статусы: `pending` · `next` · `in_progress` · `done` · `blocked`.
 
@@ -210,7 +225,8 @@ envelope, JSON logs.
 2. **Phase 9** — прохождение маршрута («Пройти маршрут» → soon).
 3. Polish: «Мои маршруты → История»; SMS OTP provider; iOS APNs; Stage host /
    backup smoke.
-4. **Phase 14 remainder** — achievements (отложено по продукту).
+4. **Phase 14 remainder** — award pipeline достижений (события / Phase 9
+   executions); каталог и карусель уже с API.
 5. Phase 12 Travel+ entitlements (paywall пока mock).
 
 ### Phase 5 — Flutter foundation (продолжение)
@@ -255,12 +271,12 @@ envelope, JSON logs.
   каталогу не пересоздаёт navbar. На подробностях точки navbar теперь плавно
   схлопывается до активной Map-капли; первое нажатие раскрывает все сегменты,
   повторное нажатие «Карта» возвращает каталог с сохранённым branch state.
-- Поиск на Home стал интерактивным и фильтрует текущие маршрутные карточки
-  совместно с chips. Поиск в «Места Крыма» использует debounce и параметр
-  backend API `q`; mock repository поддерживает тот же контракт. Оба поля
-  имеют явную очистку и состояния «ничего не найдено». Закрытие поиска:
-  крестик в поле и tap outside (`TapRegion`). Routes catalog — inline search
-  (без fullscreen `showSearch`).
+- Поиск на Home теперь открывает отдельный fullscreen-экран с секциями
+  маршрутов, мест и путешественников. Поиск в «Места Крыма» использует
+  debounce и параметр backend API `q`; mock repository поддерживает тот же
+  контракт. Оба поля имеют явную очистку и состояния «ничего не найдено».
+  Закрытие поиска: крестик в поле и tap outside (`TapRegion`). Routes catalog
+  остаётся inline-search (без fullscreen `showSearch`).
 - Назад с места, открытого из маршрута, возвращает в route details
   (`/routes/:id/place/:placeId`), а не в каталог мест. Detail pages —
   `CupertinoPage` для iOS edge-swipe.
@@ -296,8 +312,8 @@ envelope, JSON logs.
 - Profile tab: Figma layout with cover/avatar, rank card, achievements
   carousel, published routes carousel; text-only for untrusted strings.
   **As-built (api mode):** name/avatar/cover, favorites summary, ranks/тп/
-  leaderboard place, profile likes, own routes via `/routes/mine` — durable.
-  **Still mock:** achievements carousel only (Phase 14 remainder).
+  leaderboard place, profile likes, own routes via `/routes/mine`,
+  achievements carousel from API — durable.
 - Home header avatar/greeting area now opens Profile; OTP consent rows are
   taller with centered checkbox/checkmark hit area for cleaner alignment.
 - Swipe deck no longer visually jumps after dismissing onboarding coach card:
@@ -385,7 +401,8 @@ immutable image, migrate + Crimea seed, Caddy HTTPS. SSH на нестандар
   wired to API, profile shows durable name + favorites summary.
 - Follow-ups (through 2026-08): `travel_ranks` + delayed +5 тп (profile like /
   route favorite); public profile/leaderboard/subscriptions APIs; ranks and
-  тп on profile are API-backed. Achievements carousel still mock.
+  тп on profile are API-backed. Achievements catalog + carousel — as-built
+  2026-08-18; event unlock rules remain.
 - Route publication (ahead of original Phase 11 plan): drafts, media upload,
   submit for review, SQLAdmin approve/reject, inbox kinds, mobile
   `route_publish` → `/routes/drafts` + `/routes/{id}/submit`; own routes on

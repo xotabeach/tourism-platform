@@ -343,16 +343,17 @@ submit, SQLAdmin moderation, public catalog after approve, inbox + mobile
 **Цель (исходная):** заменить mock-блоки профиля данными из backend.
 **Статус as-built (2026-08):** **partial** — тп, звания (`travel_ranks`),
 leaderboard place, profile likes и delayed +5 awards уже в API/mobile.
-**Остаётся:** каталог достижений + unlock pipeline (и awards от
-`route_executions` после Phase 9). Achievements carousel пока mock.
+**Остаётся:** event unlock pipeline (и awards от `route_executions` после
+Phase 9). Каталог, `user_achievements` и карусель — as-built; при
+регистрации выдаётся случайный starter-набор (не правила прохождения).
 
 | Область | Задачи |
 | --- | --- |
 | Docs | data-model + правила начисления тп / рангов / достижений |
-| Backend | ~~ранги + тп + leaderboard~~ done; catalog достижений; award pipeline |
-| Mobile | ~~rank card / тп / top from API~~ done; achievements carousel → API |
-| API | public user DTO + `/users/leaderboard` done; planned `/achievements`, `/me/achievements` (or equivalent) still open |
-| Database | `travel_ranks`, `users.travel_points` / `rank_id`, `profile_likes` done; still need `achievement_definitions`, `user_achievements` |
+| Backend | ~~ранги + тп + leaderboard~~ done; ~~catalog + `user_achievements`~~ done; award pipeline still open |
+| Mobile | ~~rank card / тп / top from API~~ done; ~~achievements carousel → API~~ done |
+| API | public user DTO + `/users/leaderboard` done; `GET /users/{id}/achievements` done |
+| Database | `travel_ranks`, `users.travel_points` / `rank_id`, `profile_likes` done; `achievements`, `user_achievements` done |
 | Events | like/favorite +5 done; execution-based awards after Phase 9 |
 | Tests | Award invariants; idempotent unlock; ownership; no cross-user leak |
 | Security | Только свой progress; catalog публичный read-only; anti-cheat: server-side awards only |
@@ -367,8 +368,9 @@ leaderboard place, profile likes и delayed +5 awards уже в API/mobile.
 - **Звание** — пороги в `travel_ranks`; клиент показывает `rank_title` +
   `next_rank_points`.
 - **Топ N** — `leaderboard_place` / `GET /users/leaderboard`.
-- **Достижения** — ещё seed-каталог + server unlock; mobile карусель Figma
-  остаётся mock до API.
+- **Достижения** — seed-каталог + `user_achievements`; профиль показывает
+  полученные, полный экран — все (locked/earned). Unlock по прохождениям —
+  после Phase 9; сейчас starter-grant при регистрации.
 
 Опубликованные маршруты на профиле — as-built (Phase 11 slice), не блокер
 Phase 14.
@@ -468,11 +470,11 @@ ingest/TTL, security, чеклисты Lab-0…Lab-5):
 | EPIC | E11 | User-created routes + moderation | P1 | tourism-backend, tourism-mobile | E6 | Core publish **as-built**; UX polish open |
 | EPIC | E12 | Travel+ foundations | P2 | tourism-backend | E8 | Entitlements without billing |
 | EPIC | E13 | Trip Planner | Future | tourism-backend, tourism-mobile | E12 | Trip with Route items |
-| EPIC | E14 | Traveler progress / achievements | P1 | tourism-backend, tourism-mobile | E6, E9 | Rank+тп **as-built**; achievements remain |
+| EPIC | E14 | Traveler progress / achievements | P1 | tourism-backend, tourism-mobile | E6, E9 | Rank+тп+catalog **as-built**; event awards remain |
 | user story | US14.1 | As a traveler I see my rank and тп on profile | P1 | tourism-mobile | E14 | **Done** via public user DTO / leaderboard |
 | user story | US14.2 | As a traveler I unlock an achievement after a route | P1 | tourism-backend | E14, E9 | Server awards idempotently on execution complete |
-| technical task | T14.1 | Achievement catalog seed + award rules | P1 | tourism-backend | E14 | rule_key mapped to execution events |
-| technical task | T14.2 | Replace achievements mock carousel | P1 | tourism-mobile | E14 | Mock only for `DATA_SOURCE=mock` |
+| technical task | T14.1 | Achievement catalog seed + award rules | P1 | tourism-backend | E14 | **Catalog seeded**; rule_key → execution events still open |
+| technical task | T14.2 | Replace achievements mock carousel | P1 | tourism-mobile | E14 | **Done**; mock only for `DATA_SOURCE=mock` |
 | user story | US-F1 | Publish route for moderation | P1 | all | E11 | **As-built** draft→submit→admin→catalog |
 | user story | US-F2 | Subscribe to Travel+ | Future | all | E12 | Store purchase |
 | user story | US-F3 | Conversational route planner | Future | all | E8B, E12 | NL → NormalizedRouteRequest |

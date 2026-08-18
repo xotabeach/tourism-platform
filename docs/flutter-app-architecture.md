@@ -34,7 +34,7 @@ lib/
     ├── route_match/                  # form UI; builder API = Phase 8A
     ├── my_routes/                    # favorites / follows / history stub
     ├── favorites/                    # API favorites (also via my_routes)
-    ├── profile/                      # durable; achievements mock
+    ├── profile/                      # durable; achievements from API
     ├── auth/
     ├── settings/                     # support, notifications, Travel+ mock
     └── search/
@@ -86,7 +86,7 @@ Onboarding (вне shell): `/welcome` → `/auth/identity` → `/auth/otp`.
 | 1 | Routes | `/routes` | Editorial swipe + details |
 | 2 | Compose (+) | overlay | Опубликовать / Подобрать (не tab) |
 | 3 | My routes | `/my-routes` | Favorites + follows; history placeholder |
-| 4 | Profile | `/profile` | Durable profile; ranks/тп API; achievements mock |
+| 4 | Profile | `/profile` | Durable profile; ranks/тп/achievements API |
 
 Places catalog — вне tab bar (push / deep link). Publish: `/publish`.
 Match form: `/match` (результат — facade до Phase 8A).
