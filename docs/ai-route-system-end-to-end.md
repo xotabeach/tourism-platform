@@ -10,6 +10,7 @@
 
 - [ai-route-planning-architecture.md](ai-route-planning-architecture.md)
 - [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md)
+- [stack.md](stack.md)
 - [ADR-006](decisions/ADR-006-ai-assisted-route-planning.md)
 - [ADR-004](decisions/ADR-004-routing-provider-abstraction.md)
 - [diagrams/route-generation-flow.md](diagrams/route-generation-flow.md)

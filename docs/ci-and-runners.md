@@ -79,7 +79,7 @@ but discouraged:
 - A compromised dependency or malicious MR can reach the prod host.
 
 Recommended: cheap separate VPS (or a home lab box) with only `gitlab-runner`
-+ Docker, no production `.env`, no deploy SSH private keys on that machine
+and Docker; no production `.env`, no deploy SSH private keys on that machine
 unless you intentionally isolate a **deploy** runner with tags.
 
 ### Register a runner (outline)

@@ -1,31 +1,39 @@
 # Crimea Travel Platform
 
-Crimea Travel Platform — рабочее название новой мобильной туристической
-платформы. Первый контентный контур посвящён Республике Крым, но доменная модель
-проектируется для нескольких стран, регионов и населённых пунктов.
+Crimea Travel Platform — рабочее название мобильной туристической платформы
+(CrimeaTrip). Первый контентный контур — Республика Крым; доменная модель
+для нескольких стран и регионов.
 
 Проект не является официальным государственным приложением и не заявляет об
 официальном партнёрстве с государственными организациями.
 
 ## Текущий статус
 
-Репозиторий находится на стадии foundation. Здесь размещены верхнеуровневая
-документация, решения об архитектуре, локальная инфраструктура и инструменты
-управления репозиториями workspace. Skeleton `tourism-backend` и
-`tourism-mobile` уже подключены как submodules superproject.
+Канонические docs, ADR, local Compose и test-deploy (`deploy/test`) живут
+здесь. Backend и mobile — отдельные submodules, не skeleton.
+
+As-built: каталог, auth, избранное, публикация маршрутов + SQLAdmin,
+профиль (тп/звания), отзывы, inbox/FCM. Дальше — Phase 8A (Route Builder).
+AI Gemma 4 / Ollama — целевой home lab, ещё не в Compose.
+
+- Стек: [docs/stack.md](docs/stack.md)
+- Прогресс: [docs/progress.md](docs/progress.md)
 
 ## Архитектурное направление
 
-- Flutter-клиент с feature-first architecture.
-- Python 3.13, FastAPI и modular monolith на первом этапе.
-- PostgreSQL с PostGIS для географических данных.
-- Чёткие границы `identity`, `users`, `geography`, `places`, `routes`,
-  `route_builder`, `route_execution`, `favorites`, `subscriptions` и `media`.
-- Независимая от поставщика абстракция `RoutingProvider`.
-- Kafka как планируемый conditional event backbone для будущих services.
-- Возможность последующего выделения модулей в микросервисы.
+- Flutter-клиент, feature-first, Riverpod / GoRouter / Dio.
+- Python 3.13, FastAPI, modular monolith.
+- PostgreSQL/PostGIS, Redis; MinIO + Mailpit локально.
+- Test host: Caddy + backend + PostGIS + Redis.
+- Границы модулей: `identity`, `geography`, `places`, `routes`, `favorites`,
+  `support`, `notifications`, `admin`, `media`; stub — `route_builder`,
+  `route_execution`, `subscriptions`.
+- `RoutingProvider` — абстракция (ADR-004); реализация — Phase 8A.
+- AI: port `AIPlanningProvider` → mock / Gemini / **Ollama Gemma 4**
+  ([ai-self-hosted-home-lab.md](docs/ai-self-hosted-home-lab.md)).
+- Kafka — только после ADR-005. Helm — позже в этом repo.
 
-Ключевые решения описаны в [docs/decisions](docs/decisions).
+Ключевые решения: [docs/decisions](docs/decisions).
 
 Продуктовая логика и план:
 [application-business-logic.md](docs/application-business-logic.md),
@@ -37,12 +45,12 @@ Crimea Travel Platform — рабочее название новой мобил
 | Repository | Назначение |
 | --- | --- |
 | `workspace` | Git superproject, Makefile, submodule pointers |
-| `tourism-platform` | Документация, local Compose, будущие Helm/K8s |
-| `tourism-mobile` | Flutter-приложение для Android и iOS |
+| `tourism-platform` | Документация, local Compose, `deploy/test` |
+| `tourism-mobile` | Flutter Android и iOS |
 | `tourism-backend` | Модульный Python backend |
 
-Дополнительные repositories не создаются. Infra и расширенная документация
-живут здесь. Superproject фиксирует совместимые commits submodules.
+Дополнительные repositories не создаются. Superproject фиксирует совместимые
+commits submodules.
 
 ## Требования
 
@@ -61,13 +69,12 @@ make up
 make ps
 ```
 
-Локально запускаются только PostgreSQL/PostGIS, Redis, MinIO и Mailpit. Backend
-и Flutter намеренно отсутствуют в Compose. Kafka также не запускается до
-выполнения критериев ADR-005.
+Локально поднимаются PostgreSQL/PostGIS, Redis, MinIO и Mailpit. Backend и
+Flutter в этот Compose не входят. Kafka не запускается до ADR-005.
 
-После запуска:
+После запуска (порты из `.env.example`):
 
-- PostgreSQL: `localhost:5433` (см. `.env.example`; избегает конфликтов);
+- PostgreSQL: `localhost:5433`;
 - Redis: `localhost:6380`;
 - MinIO API: `http://localhost:9000`;
 - MinIO Console: `http://localhost:9001`;
@@ -75,7 +82,7 @@ make ps
 
 Image Postgres: `postgis/postgis:16-3.4` (linux/arm64 + amd64).
 
-Все порты настраиваются через `.env`.
+Все порты настраиваются через `.env`. Стек целиком: [docs/stack.md](docs/stack.md).
 
 ## Команды Makefile
 
@@ -89,25 +96,29 @@ Image Postgres: `postgis/postgis:16-3.4` (linux/arm64 + amd64).
 | `make ps` | Показать состояние контейнеров |
 | `make logs` | Следить за логами |
 | `make clean CONFIRM=yes` | Удалить контейнеры и локальные volumes |
-| `make validate` | Выполнить безопасные локальные проверки |
-| `make clone-repositories` | Добавить repositories как submodules |
+| `make validate` | Локальные проверки docs/compose |
+| `make clone-repositories` | Legacy helper; infra/docs repos не создаются |
 
 `make clean` без `CONFIRM=yes` никогда не удаляет volumes.
+
+Перед commit: `./scripts/validate.sh`. GitLab CI по умолчанию lean —
+[ci-and-runners.md](docs/ci-and-runners.md).
 
 ## Структура
 
 ```text
 .
-├── .gitlab-ci.yml    # CI validation
-├── .github/          # Issue forms и PR template
-├── docs/             # Видение, модель, ADR, диаграммы и паспорта
-├── scripts/          # Bootstrap, validation и управление submodules
-├── compose.yaml      # Только локальные инфраструктурные зависимости
+├── .gitlab-ci.yml      # lean CI
+├── .gitlab-ci.full.yml # полный DevSecOps
+├── deploy/test/        # Caddy + backend + PostGIS + Redis
+├── docs/               # канон: стек, ADR, фазы, security
+├── scripts/
+├── compose.yaml        # local DX: PostGIS, Redis, MinIO, Mailpit
 ├── Makefile
 └── README.md
 ```
 
-Ожидаемая локальная структура уровнем выше (`workspace`):
+Ожидаемая структура workspace:
 
 ```text
 workspace/
@@ -117,8 +128,6 @@ workspace/
 └── tourism-backend/
 ```
 
-Корневая папка — Git superproject; каталоги регистрируются в `.gitmodules`.
-
 ## Legacy reference
 
 Исходная продуктовая идея изучена по
@@ -127,12 +136,13 @@ workspace/
 
 Старые Java-классы, Android UI, ресурсы, изображения, тексты, API-ключи,
 структура и технические решения не переносятся. Новая система создаётся с нуля.
-Подробности доступны в
+Подробности:
 [legacy-project-analysis.md](docs/legacy-project-analysis.md).
 
 ## Документация
 
-- [Progress — что сделано / дальше](docs/progress.md)
+- [Стек](docs/stack.md)
+- [Progress](docs/progress.md)
 - [Business logic](docs/application-business-logic.md)
 - [Implementation plan](docs/implementation-plan.md)
 - [Development conventions](docs/development-conventions.md)
@@ -141,15 +151,13 @@ workspace/
 - [Domain model](docs/domain-model.md)
 - [Repository strategy](docs/repository-strategy.md)
 - [Local development](docs/local-development.md)
+- [Home lab Gemma 4](docs/ai-self-hosted-home-lab.md)
 - [Architecture decisions](docs/decisions)
-- [Preliminary event catalog](docs/events/event-catalog.md)
-- [Repository profiles](docs/repositories)
-- [Domain service profiles](docs/services)
+- [CI / runners](docs/ci-and-runners.md)
 
 ## Дальнейшие шаги
 
-1. Завершить Phase 1 foundation gaps (Redis ready, Dockerfile) — в работе.
-2. Phase 2–3: backend layers, geography и places.
-3. Editorial routes и Flutter shell.
-4. Auth, favorites, route builder, route execution.
-5. Staging manifests в этом repository (без отдельного infra repo).
+1. Phase 8A — deterministic Route Builder + `RoutingProvider`.
+2. Phase 8B — `AIPlanningProvider` (mock, затем Gemini).
+3. Home lab: Ollama **`gemma4:12b`** + Qdrant на GPU-хосте, не на test-VPS.
+4. Остатки UX/ops: SMS provider, iOS push, Travel+ billing, offline.

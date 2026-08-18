@@ -3,7 +3,8 @@
 План разбит на фазы. Phase 0–1 — foundation. Последующие фазы зависят от
 принятия предыдущих acceptance criteria. Backlog в конце файла.
 
-См. также: [application-business-logic.md](application-business-logic.md),
+См. также: [stack.md](stack.md),
+[application-business-logic.md](application-business-logic.md),
 [development-conventions.md](development-conventions.md),
 [progress.md](progress.md) (живой статус: что сделано / что дальше),
 [security/security-baseline.md](security/security-baseline.md).
@@ -23,7 +24,8 @@ security skill/rule, CI foundation. **Не** считать security «done» т
 | Acceptance | Docs + skill present; local security tests green; CI job documented |
 | Не входит | Full auth implementation, prod NetworkPolicy, DAST vs production |
 
-Статус: documented + foundation checks; auth/authZ implementation — later phases.
+Статус: documented + foundation checks; **auth/authZ as-built** (OTP/JWT,
+SQLAdmin). Prod NetworkPolicy / DAST — later. Стек: [stack.md](stack.md).
 
 ## Phase 0 — Repository audit and conventions
 
@@ -388,6 +390,7 @@ MCP adapter для тех же tools.
 Практическая инструкция (Compose, модели под ~12 GB VRAM, PostGIS vs chunks,
 ingest/TTL, security, чеклисты Lab-0…Lab-5):
 [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
+Контуры платформы: [stack.md](stack.md).
 
 | Область | Задачи |
 | --- | --- |

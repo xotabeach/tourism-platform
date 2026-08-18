@@ -5,9 +5,18 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 5 polish + ops; next = Phase 8A (Route Builder)
-**Последнее обновление:** 2026-08-06
+**Последнее обновление:** 2026-08-18
 
 ## Changelog
+
+### 2026-08-18 — Docs: as-built stack + Gemma 4 home lab
+
+- Канон стека: [stack.md](stack.md) — local DX, test host (Caddy/PostGIS/
+  Redis), CI lean, целевой Ollama **`gemma4:12b`** (не на test-VPS).
+- README workspace/platform/backend/mobile, container diagram, system
+  context, local-development, repository profiles — сняты claims
+  «foundation skeleton» / «deploy не реализован».
+- `AI_PROVIDER`: `mock|gemini|ollama` (алиас `self_hosted` устарел).
 
 ### 2026-08-06 — Lean CI default (shared-runner minutes)
 
@@ -457,8 +466,8 @@ Home lab (Ollama + Qdrant, PostGIS vs RAG, Lab-0…5, RTX ~12 GB):
 - Routing provider — open decision (ADR-004); Phase 8A not started (empty
   `route_builder` / `route_execution` / `subscriptions` packages).
 - Не коммитить `.tmp-ref-frames/` и локальные `.env`.
-- AI architecture + home-lab guide documented only; no Gemini/Gemma/MCP/
-  Ollama/Qdrant code yet.
+- AI architecture + home-lab guide documented; adapters not in backend yet.
+  Сводка: [stack.md](stack.md). Test-VPS без Ollama.
 - DX: style guides + Cursor workspace settings — see
   [development-environment.md](development-environment.md).
 - Security: docs + Cursor skill/rule under

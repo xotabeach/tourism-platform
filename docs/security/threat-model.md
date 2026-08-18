@@ -1,9 +1,15 @@
 # Threat model — КрымТрип
 
-Метод: **STRIDE** по assets и trust boundaries. Модель отражает текущий
-skeleton (Phase 3 done, auth не реализован) и запланированные фазы.
+Метод: **STRIDE** по assets и trust boundaries.
 
-Последнее обновление: 2026-07-23.
+**As-built (2026-08):** OTP/JWT, SQLAdmin, user routes, inbox/FCM. Модель ниже
+изначально писалась 2026-07-23 (Phase 3, «auth не реализован») — строки
+«Phase 6+» в таблицах assets частично устарели; актуальный стек —
+[stack.md](../stack.md), living status — [progress.md](../progress.md).
+Полный STRIDE-пересмотр — отдельная задача, не этот sync.
+
+Последнее обновление преамбулы: 2026-08-18. Исторический срез таблиц:
+2026-07-23.
 
 ## Assets
 

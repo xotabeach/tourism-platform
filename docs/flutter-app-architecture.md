@@ -1,8 +1,8 @@
 # Flutter application architecture (Phase 5)
 
 Целевая структура `tourism-mobile`. Стек остаётся **Riverpod + GoRouter + Dio**;
-паттерны взяты из референса `set_up_flutter_app` (feature modules, shell
-router, theme tokens, secure storage, error facade) **без** миграции на BLoC.
+паттерны из референса `set_up_flutter_app` **без** миграции на BLoC.
+As-built features — [progress.md](progress.md); контуры — [stack.md](stack.md).
 
 См. также: [flutter-code-style.md](flutter-code-style.md),
 [flutter-design-system.md](flutter-design-system.md),
@@ -19,7 +19,7 @@ lib/
 │   ├── config/                       # AppFlavor, AppConfig
 │   ├── design/                       # semantic tokens, glass, controls, motion
 │   ├── theme/                        # Material ThemeData + compatibility exports
-│   ├── network/                      # Dio + interceptors (auth later)
+    │   ├── network/                      # Dio + interceptors (JWT)
 │   ├── errors/                       # AppFailure, mapping helpers
 │   └── storage/                      # SecureStorage port + Keychain/Keystore impl
 ├── routing/
@@ -107,9 +107,8 @@ standalone first card in the route deck.
 
 ## Freezed / codegen
 
-Phase 5 may introduce Freezed + `json_serializable` for API models after the
-shell/theme/storage foundation lands. Until then, hand-written immutable
-models remain valid.
+Freezed + `json_serializable` остаются опциональны; as-built модели в основном
+hand-written immutable. Не блокер для текущих экранов.
 
 ## Offline / local CRUD
 

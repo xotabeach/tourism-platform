@@ -30,8 +30,9 @@ Remote: private GitLab group
 [`travel-platform2`](https://gitlab.com/travel-platform2). Group создаётся в UI;
 `scripts/setup-gitlab-group.sh` переносит projects. Primary CI — GitLab CI.
 
-Local Compose остаётся в `tourism-platform`. Production deployment manifests
-также принадлежат `tourism-platform` (не отдельному infra repo).
+Local Compose остаётся в `tourism-platform`. Test-deploy manifests
+(`deploy/test`, as-built) тоже здесь. Целевой GPU-стек Gemma 4 —
+[stack.md](stack.md), не test host.
 
 ## Правила зависимостей
 

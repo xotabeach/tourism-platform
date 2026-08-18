@@ -2,86 +2,64 @@
 
 ## Назначение
 
-`tourism-mobile` предназначен для мобильного клиентского приложения
-платформы. После создания private remote он клонируется рядом с
-`tourism-platform` как Git submodule общего superproject.
+Flutter-клиент Android/iOS (CrimeaTrip). Private GitLab repo, submodule
+workspace. Стек: [stack.md](../stack.md).
 
 ## Ответственность
 
-- Реализовывать пользовательские сценарии поиска мест и работы с маршрутами.
-- Отображать карты, геоданные, медиа и состояние учётной записи.
-- Инкапсулировать сетевой клиент и обработку ошибок программного интерфейса.
-- Поддерживать безопасное локальное хранение и ограниченный автономный режим.
-- Собирать клиентские метрики с соблюдением требований приватности.
+- Пользовательские сценарии: каталог, маршруты, профиль, публикация, inbox.
+- Сетевой клиент и ошибки API.
+- Secure storage токенов (Keychain/Keystore).
+- Ограниченный offline — позже; сейчас не SoT.
 
 ## Вне целей
 
-- Владение доменной логикой, являющейся источником истины на сервере.
-- Прямой доступ к PostgreSQL, PostGIS или Redis.
-- Импорт серверных ORM-моделей.
-- Управление облачной инфраструктурой и серверными миграциями.
-- Позиционирование продукта как официального государственного приложения.
+- Доменная логика как источник истины.
+- Прямой доступ к PostgreSQL / Redis / Ollama.
+- Импорт ORM backend.
+- Облачная infra.
+- Официальное госприложение.
 
-## Будущая реализация и стек
+## Стек
 
-- Flutter и Dart для Android и iOS с feature-first architecture.
-- Riverpod для dependency injection и state management.
-- GoRouter для navigation и Dio для HTTP.
-- Freezed и `json_serializable` для immutable models и DTO.
-- Drift или Isar выбирается коротким offline-storage spike.
-- `flutter_secure_storage` используется только для tokens и credentials.
-- Карты и навигационные возможности скрываются за адаптером поставщика.
-- Dev, staging и production configurations не содержат встроенных secrets.
-- Централизованные errors, localization foundation и offline-first contracts.
-- Сборки, статический анализ и автоматические проверки выполняются в CI.
+- Flutter/Dart, feature-first, Riverpod, GoRouter, Dio.
+- `flutter_secure_storage` только для credentials.
+- Карты — адаптер (сейчас preview, не полноценный routing UI).
+- Env через `--dart-define`; secrets не в bundle.
+- Lean CI: локально `./scripts/validate.sh`; APK job manual.
+
+Freezed/`json_serializable` — опционально Phase 5, не блокер as-built.
+Drift/Isar — после offline spike.
 
 ## Интеграции
 
-- Публичный OpenAPI contract `tourism-backend`.
-- Контракты доменов `identity`, `users`, `geography`, `places`, `routes`,
-  `route_builder` и `media`.
-- Картографический комплект разработки через клиентский адаптер.
-- Системные службы геолокации, уведомлений и защищённого хранилища.
-- `tourism-infrastructure` для доставки конфигурации окружений.
-
-## Результаты
-
-- Устанавливаемые сборки для поддерживаемых мобильных платформ.
-- Основные экраны минимального продукта и обработка крайних состояний.
-- Типизированный сетевой слой с контрактными проверками.
-- Инструкция по локальному запуску, сборке и выпуску.
-- Набор модульных, интерфейсных и сквозных проверок.
+- OpenAPI `tourism-backend`.
+- FCM (Android); iOS APNs — ещё credentials.
+- Не ходит в Gemma/Gemini.
 
 ## Поэтапный план
 
 ### Этап 1. Проектирование
 
-- [x] Создать Flutter project и feature-first boundaries.
-- [x] Зафиксировать навигацию и управление состоянием (GoRouter, Riverpod).
-- [x] Shell + theme + secure storage foundation (Phase 5 structure).
-- [x] Зафиксировать screenshot-aligned design tokens, glass and motion system.
-- [ ] Сверить approximate tokens и SVG с исходным Figma Dev Mode.
-- [ ] Выбрать Drift или Isar по измеримому offline-storage spike.
+- [x] Feature-first, GoRouter, Riverpod, shell, tokens, secure storage.
+- [ ] Сверка части SVG/token с Figma Dev Mode.
+- [ ] Offline storage spike (Drift vs Isar).
 
 ### Этап 2. Минимальный продукт
 
-- [ ] Реализовать вход и управление сессией.
-- [ ] Реализовать профиль пользователя.
-- [ ] Добавить карту, поиск и карточку места.
-- [ ] Добавить просмотр, создание и сохранение маршрута.
-- [ ] Добавить загрузку и просмотр разрешённых медиа.
+- [x] OTP session, профиль (тп/звания; достижения mock).
+- [x] Поиск, карточка места, каталог маршрутов, избранное.
+- [x] Публикация user route + отзывы.
+- [ ] Route builder / execution (Phase 8A/9).
+- [ ] Offline download.
 
 ### Этап 3. Надёжность
 
-- [x] Добавить typed network/decoding failures и безопасный retry UI.
-- [ ] Обработать истечение сессии и concurrency-safe refresh.
-- [ ] Добавить доступность и локализацию интерфейса.
-- [ ] Настроить отчёты о сбоях без чувствительных данных.
-- [ ] Провести проверку энергопотребления и производительности.
+- [x] Typed network failures, retry UI.
+- [ ] Полный refresh concurrency + a11y/l10n.
+- [ ] Crash reporting без токенов.
 
-### Этап 4. Размещение в workspace
+### Этап 4. Workspace
 
-- [x] Создать приватный удалённый репозиторий отдельным процессом.
-- [x] Настроить проверки и правила выпуска.
-- [x] Добавить repository в superproject как submodule.
-- [ ] Зафиксировать совместимую версию серверного контракта.
+- [x] Private remote, submodule, lean/full CI files.
+- [ ] Зафиксировать semver контракта с backend для первого staging.

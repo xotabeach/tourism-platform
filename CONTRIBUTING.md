@@ -24,7 +24,8 @@ Conventional Commits, например `docs: describe geography domain`.
 
 Перед открытием pull request:
 
-1. Выполните `make validate`.
+1. Выполните `./scripts/validate.sh` в затронутом repo (`make validate` для
+   platform). GitLab CI по умолчанию **lean** и не гоняет style/tests.
 2. Проверьте отсутствие секретов и случайных generated files.
 3. Обновите документацию и ADR, если изменилось архитектурное решение.
 4. Заполните summary и test plan в шаблоне pull request.

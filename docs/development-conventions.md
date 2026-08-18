@@ -7,21 +7,23 @@
 Primary CI/CD: **GitLab CI**. GitHub Actions в репозиториях могут оставаться как
 legacy/mirror и не являются источником истины.
 
-Базовый CI-паттерн для репозиториев:
+Базовый CI-паттерн:
 
-- `code-style` — формат/линт/статический анализ;
-- `run-tests` — unit/integration/security tests и проверка runtime configs;
-- дополнительные `build`/`publish` stages — только где действительно нужны;
-- `mirror` — автопубликация public showcase на GitHub после зелёных checks
-  (ветки `gamma` / `main`).
+- Default **lean** `.gitlab-ci.yml` — notice / publish / manual deploy; не
+  style+tests на shared runners. Локально: `./scripts/validate.sh`.
+- Полный набор (`code-style`, `run-tests`, scanners) — `.gitlab-ci.full.yml`
+  при `CI_PIPELINE_MODE=full`.
+- `mirror` — GitHub showcase после успешного job, если токен задан.
+
+См. [ci-and-runners.md](ci-and-runners.md).
 
 ## GitHub showcase mirror
 
 Источник истины — GitLab (`travel-platform2`). GitHub (`xotabeach/*`) —
 read-only витрина.
 
-После успешного `code-style` + `run-tests` job `github-mirror` пушит
-текущий commit:
+После успешного pipeline (lean: notice/publish; full: `code-style` +
+`run-tests`) job `github-mirror` может пушить текущий commit:
 
 - `HEAD → github/<branch>` (обычно `gamma`);
 - дополнительно `HEAD → github/main`, если ветка `gamma` или `main`.
@@ -41,7 +43,7 @@ read-only витрина.
 | Repository | Ответственность |
 | --- | --- |
 | `workspace` (superproject) | Точка входа, Makefile, submodule pointers, migrate/mirror scripts |
-| `tourism-platform` | Docs, ADR, local Compose, будущие Helm/K8s/CI templates, env configs |
+| `tourism-platform` | Docs, ADR, local Compose, `deploy/test`, будущие Helm |
 | `tourism-backend` | FastAPI modular monolith, DB migrations, API, tests |
 | `tourism-mobile` | Flutter Android/iOS, UI, client state |
 
@@ -117,16 +119,16 @@ versioned staging release.
 
 | Name | Назначение |
 | --- | --- |
-| `local` | Developer machine + Compose |
-| `ci` | GitLab runners |
-| `staging` | Shared pre-production |
-| `production` | Production |
+| `local` | Developer machine + Compose (`APP_ENV=local`) |
+| `test` | Constrained remote test host (`APP_ENV=test`) |
+| `staging` | Shared pre-production (host ещё не заведён) |
+| `production` | Production (отдельный контур; GitLab env name ≠ APP_ENV) |
 
-Переменная backend: `ENVIRONMENT` (`development` допустим как синоним `local`
-на этапе foundation; новые конфиги предпочитают `local`).
+Переменная runtime: **`APP_ENV`** (`local` / `test` / `staging` /
+`production`). Синоним `ENVIRONMENT=development` не используется в коде.
 
 Не использовать production secrets локально. `.env.example` — только safe local
-defaults.
+defaults. AI Gemma 4 не ставится на test-VPS: [stack.md](stack.md).
 
 ## Progress log
 
@@ -149,7 +151,8 @@ defaults.
 
 - Modular monolith; без Kafka до подтверждённого сценария (ADR-005).
 - Без service mesh и отдельного Python API Gateway.
-- Одна PostgreSQL БД на MVP.
-- `RoutingProvider` — абстракция; mock на foundation.
+- Одна PostgreSQL БД на контур.
+- `RoutingProvider` — абстракция; реализация Phase 8A.
+- LLM только за `AIPlanningProvider`; default home-lab model **`gemma4:12b`**.
 - Entitlements через сервис разрешений, не `user.is_premium`.
 - Не копировать код/UI legacy Android-проекта.

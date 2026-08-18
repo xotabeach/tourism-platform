@@ -2,8 +2,9 @@
 
 ## Поддерживаемая версия
 
-Проект находится на стадии foundation и пока не имеет production-релизов.
-Исправления безопасности применяются только к актуальной ветке `main`.
+Проект не имеет production-релиза. Есть constrained **test** contour и
+as-built auth (OTP/JWT), SQLAdmin, FCM. Исправления безопасности — ветка
+`main`.
 
 ## Канонические security docs
 
@@ -40,6 +41,6 @@
 
 ## Scope проверок
 
-Security Baseline (docs + foundation CI) существует; full auth, RLS, prod
-NetworkPolicy, staging DAST — по фазам в implementation-plan. Не считать
-проект «полностью защищённым» на основании только документации.
+Security Baseline (docs + local/full CI jobs) существует; на test host есть
+auth, admin cookie session, input limits. RLS, prod NetworkPolicy, staging
+DAST — по фазам. Не считать проект «полностью защищённым» из‑за документации.

@@ -25,17 +25,14 @@
 
 ## Эволюция стека
 
-- Первый remote `test`: constrained Docker Compose на одном сервере,
-  HTTPS reverse proxy, swap и private data network.
-- `staging` и `production` требуют отдельного, правильно рассчитанного
-  контура.
-- GitLab CI с protected deploy job, immutable image, migration, smoke и
-  rollback.
-- Kubernetes и Helm только после появления подтверждённой потребности в
-  multi-node scheduling или независимом scaling.
-- PostgreSQL/PostGIS, Redis, S3-compatible storage.
-- Kafka только после ADR-005 activation.
-- Точки Prometheus/Grafana/Loki/Sentry.
+- Test host **as-built**: Caddy + backend image + PostGIS + Redis
+  (`deploy/test/`). Lean GitLab CI; publish + manual deploy.
+- `staging` и полноценный `production` — отдельный контур, не этот VPS.
+- Kubernetes/Helm только после multi-node нужды.
+- Local DX: PostGIS, Redis, MinIO, Mailpit.
+- **Gemma 4 / Ollama / Qdrant** — GPU home lab, не test-сервер
+  ([stack.md](../stack.md)).
+- Kafka только после ADR-005.
 - Terraform на текущем этапе не добавляется.
 
 ## Связь с local Compose

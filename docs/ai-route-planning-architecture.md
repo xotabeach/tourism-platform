@@ -8,7 +8,8 @@
 [application-business-logic.md](application-business-logic.md),
 сквозной поток запрос→маршрут→данные:
 [ai-route-system-end-to-end.md](ai-route-system-end-to-end.md),
-home lab: [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
+home lab: [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md),
+сводка контуров: [stack.md](stack.md).
 
 ## 1. Purpose
 

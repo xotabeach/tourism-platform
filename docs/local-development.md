@@ -2,47 +2,54 @@
 
 ## Область применения
 
-Локальный контур предназначен для разработки и интеграционных проверок на
-macOS. Он не является production environment и не задаёт production topology,
-security hardening, backup или scaling policy.
+Локальный контур — developer machine (macOS/Linux). Это не production и не
+test-сервер. Полная картина контуров (включая Gemma 4 home lab):
+[stack.md](stack.md).
 
 ## Предварительные требования
 
 - macOS или Linux;
 - Git и Make;
 - Docker Desktop с Compose v2;
-- GitLab CLI для подключения private submodules;
-- PowerShell 7 только для запуска `.ps1` scripts.
+- GitLab CLI для private submodules;
+- PowerShell 7 только для `.ps1` scripts.
 
 ## Base services
 
-`compose.yaml` поднимает только локальные infrastructure dependencies:
+`compose.yaml` поднимает только local infrastructure:
 
-- `postgres` — PostgreSQL database `tourism` с доступным PostGIS;
+- `postgres` — PostgreSQL `tourism` с PostGIS;
 - `redis` — cache и краткоживущее состояние;
-- `minio` — S3-compatible local storage;
-- `minio-init` — one-shot создание bucket `tourism-media`;
+- `minio` — S3-compatible storage;
+- `minio-init` — one-shot bucket `tourism-media`;
 - `mailpit` — SMTP catcher и web UI.
 
-Сервисы используют healthchecks, named volumes и отдельную bridge network.
-Backend и Flutter в этот Compose не входят: они находятся в отдельных
-repositories `tourism-backend` и `tourism-mobile` и подключаются к local stack
-через published ports PostgreSQL и Redis.
+Healthchecks, named volumes, bridge network. Bind портов — `127.0.0.1`.
 
-Kafka также не входит в текущий Compose. Согласно ADR-005 broker добавляется
-только после появления подтверждённого producer/consumer flow и отдельного
-activation decision. До этого domain events обрабатываются in-process.
+Backend и Flutter **не** в этом Compose: `tourism-backend` / `tourism-mobile`
+на хосте, порты Postgres/Redis.
+
+**Не входят** в local Compose: Caddy, Kafka, Ollama, Qdrant. AI inference —
+отдельный GPU home lab, не эта машина по умолчанию
+([ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md)).
+
+Kafka — только после ADR-005. До этого domain events in-process.
+
+Test-сервер (Caddy + backend + PostGIS + Redis):
+[environment-and-backend-deployment.md](environment-and-backend-deployment.md),
+каталог `deploy/test/`.
 
 ## Environment
 
-Команда `make init` проверяет Docker Compose и копирует `.env.example` в `.env`
-только при отсутствии `.env`. Существующий файл не перезаписывается.
+`make init` проверяет Docker Compose и копирует `.env.example` → `.env`,
+если `.env` ещё нет. Существующий файл не перезаписывается.
 
-Файл `.env.example` содержит image tags, local ports, имя database, имя MinIO
-bucket и безопасные только для developer machine credentials. `.env` исключён
-из Git. Эти значения нельзя использовать в staging или production.
+`.env.example` — image tags, local ports, credentials только для developer
+machine. `.env` в Git не коммитится. Эти значения нельзя использовать в
+staging/production.
 
-Foundation не требует credentials внешнего routing provider.
+Foundation-эпохи «нет routing credentials» по-прежнему верно: Phase 8A ещё
+не подключает внешний `RoutingProvider`.
 
 ## Make commands
 
@@ -59,32 +66,31 @@ make clone-repositories
 make clean CONFIRM=yes
 ```
 
-Команды должны быть повторяемыми, завершаться с ненулевым code при ошибке и не
-зависеть от production credentials.
+Команды повторяемые, ненулевой code при ошибке, без production credentials.
 
-`make clean` удаляет named volumes и локальные данные. Без точного
-`CONFIRM=yes` команда обязана завершиться с ошибкой до вызова Docker.
+`make clean` удаляет named volumes. Без `CONFIRM=yes` — ошибка до Docker.
+
+`make clone-repositories` — legacy helper. Репозитории
+`tourism-infrastructure` / `tourism-documentation` **не создаются**; infra и
+docs живут в этом repo.
 
 ## Первый запуск
 
-1. Выполнить `make init`.
-2. При необходимости изменить только local ports в `.env`.
-3. Выполнить `make up`.
-4. Проверить состояние через `make ps`.
-5. Открыть MinIO Console на `http://localhost:9001`.
-6. Открыть Mailpit на `http://localhost:8025`.
-7. Выполнить `make validate` перед pull request.
+1. `make init`.
+2. При необходимости — только local ports в `.env`.
+3. `make up`.
+4. `make ps`.
+5. MinIO Console: `http://localhost:9001`.
+6. Mailpit: `http://localhost:8025`.
+7. Backend из `tourism-backend/`; SQLAdmin: `http://localhost:8000/admin`.
+8. `make validate` / `./scripts/validate.sh` перед MR.
 
-## Submodules implementation repositories
+## Submodules
 
-`tourism-backend` и `tourism-mobile` уже доступны как private Git submodules
-superproject. Канонические docs: [application-business-logic.md](application-business-logic.md),
+`tourism-backend` и `tourism-mobile` — private Git submodules superproject.
+Канон: [application-business-logic.md](application-business-logic.md),
 [implementation-plan.md](implementation-plan.md),
 [development-conventions.md](development-conventions.md).
-superproject. Для `tourism-infrastructure` и `tourism-documentation` команда
-`make clone-repositories` проверит `git`, `gh`, authorization, superproject и
-доступность всех remotes, затем добавит их как Git submodules рядом с
-`tourism-platform`. Скрипт не перезаписывает существующие каталоги.
 
 ### Backend и mobile после `make init`
 
@@ -103,16 +109,15 @@ flutter pub get
 flutter run
 ```
 
+GitLab CI lean: стиль и тесты backend/mobile гонять локально
+(`./scripts/validate.sh`). См. [ci-and-runners.md](ci-and-runners.md).
+
 ## Ограничения
 
-- Demo data не должны содержать реальные персональные данные.
-- Local object storage и database считаются расходными.
-- Compose credentials допустимы только для local environment.
-- `minio-init` является one-shot container и после успешного создания bucket
-  завершается с code `0`.
-- Local Kafka profile не создаётся заранее. При активации он должен повторять
-  production-relevant KRaft и security assumptions в разумных для developer
-  machine пределах.
-- Server deployment, certificates, secret management и backups описываются в
-  [environment-and-backend-deployment.md](environment-and-backend-deployment.md)
-  и security-разделе этого repository.
+- Demo data без реальных ПДн.
+- Local object storage и database расходные.
+- Compose credentials только для local.
+- `minio-init` — one-shot, после успеха code `0`.
+- Local Kafka profile заранее не создаётся.
+- Server deploy, TLS, secrets, backups:
+  [environment-and-backend-deployment.md](environment-and-backend-deployment.md).

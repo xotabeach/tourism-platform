@@ -19,8 +19,8 @@ Canonical runtime environments:
 | --- | --- | --- | --- |
 | `local` | `mock` by default; `api` selectable | Local Compose | `mock` by default; provider selectable explicitly |
 | `test` | Deployed app uses API; automated tests use fakes | Isolated, resettable test services | Gemini only in explicit external-provider checks; normal tests use `mock` |
-| `staging` | API only | Isolated staging services and credentials | Self-hosted when available; otherwise disabled or explicitly configured Gemini |
-| `production` | API only | Isolated production services and credentials | Self-hosted only when AI planning is enabled |
+| `staging` | API only | Isolated staging services and credentials | Ollama/Gemma when a GPU host exists; else off or explicit Gemini |
+| `production` | API only | Isolated production services and credentials | Self-hosted Gemma only when AI planning is enabled; not on the first test VPS |
 
 GitLab CD environments map to branches:
 
@@ -41,10 +41,17 @@ DATA_SOURCE=mock|api
 API_BASE_URL=https://...
 
 AI_PLANNING_ENABLED=false
-AI_PROVIDER=mock|gemini|self_hosted
+AI_PROVIDER=mock|gemini|ollama
 AI_MODEL=...
 AI_BASE_URL=...
+# Home lab (not on the constrained test VPS):
+# OLLAMA_BASE_URL=http://127.0.0.1:11434
+# OLLAMA_CHAT_MODEL=gemma4:12b
+# QDRANT_URL=http://127.0.0.1:6333
 ```
+
+`AI_PROVIDER=self_hosted` в старых черновиках = `ollama` (Gemma 4). Код
+адаптера ещё не вшит; см. [stack.md](stack.md).
 
 Secrets such as database passwords, signing keys, and `GEMINI_API_KEY` are
 environment-scoped CI/server secrets and never mobile compile-time values.
@@ -73,9 +80,12 @@ Internet
 ```
 
 Only ports `80/443` and an explicitly restricted SSH port are public.
-PostgreSQL and Redis remain private. MinIO, Mailpit, AI inference, authentication
-mail delivery, and production data are excluded to preserve memory and disk.
-Bundled test media are served by the backend image.
+PostgreSQL and Redis remain private. MinIO, Mailpit, **Ollama/Gemma/Qdrant**,
+authentication mail delivery, and production data are excluded to preserve
+memory and disk. Bundled test media are served by the backend image.
+
+Local Gemma 4 inference belongs on a GPU home lab, not this host
+([stack.md](stack.md), [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md)).
 
 Use Docker Engine and a deployment-specific Compose file for the first server.
 Kubernetes and Helm remain optional future migration paths after a real need

@@ -33,6 +33,7 @@ REQUIRED_FILES=(
   docs/implementation-plan.md
   docs/development-conventions.md
   docs/progress.md
+  docs/stack.md
   docs/data-model-geography-places.md
   docs/data-model-routes.md
   docs/ai-route-planning-architecture.md

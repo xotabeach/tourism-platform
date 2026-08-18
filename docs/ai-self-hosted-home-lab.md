@@ -1,8 +1,11 @@
 # Self-hosted Tourism AI — home lab guide
 
 Практическая инструкция по локальному inference + RAG на домашнем ПК.
-**Статус:** documented, not implemented. Код и Compose AI-сервисов ещё не
-заведены.
+
+**Статус кода:** documented, not implemented (нет Compose overlay и adapter
+в backend). **Статус архитектуры:** целевой self-host стек платформы —
+Ollama + **Gemma 4** (`gemma4:12b` default) + Qdrant; не test-VPS.
+Сводка контуров: [stack.md](stack.md).
 
 Связанные документы:
 
