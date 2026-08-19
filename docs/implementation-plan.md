@@ -208,6 +208,16 @@ OTP-коды (пока нет SMS), права, диалоги поддержк�
 | Не входит | Full CMS, billing, Travel+ entitlements UI, public web app |
 | Status | **done** (2026-08-01); see [progress.md](progress.md) and [ADR-008](decisions/ADR-008-ops-admin-sqladmin.md) |
 
+**Ближайший ops-срез (T6.5.3, ещё не реализован):** убрать новые
+управляемые тексты/рассылки из hardcode. Добавить таблицы
+`notification_templates` и `notification_campaigns` с версией, аудиторией,
+статусами draft/scheduled/sent и SQLAdmin ModelViews для preview,
+тестовой отправки и запуска. Доставка раскладывает кампанию в
+существующие per-user `notifications`; push обязан уважать
+`notify_push_enabled`. Требования: RBAC + CSRF, audit кто/когда
+отправил, idempotency запуска, лимит аудитории, allowlist
+`target_type` и запрет произвольных URL/JSON payload.
+
 ## Phase 7 — Favorites and profile
 
 **Цель:** сохранение мест и маршрутов, список избранного; каркас профиля
@@ -449,6 +459,7 @@ ingest/TTL, security, чеклисты Lab-0…Lab-5):
 | user story | US6.5.1 | As an operator I reply to support from admin | P0 | tourism-backend | E6.5 | Thread visible and reply persisted |
 | technical task | T6.5.1 | Admin session auth + CSRF | P0 | tourism-backend | E6.5 | Cookie session, not mobile JWT |
 | technical task | T6.5.2 | OTP challenge list (debug_code gated) | P0 | tourism-backend | E6.5 | Test contour only |
+| technical task | T6.5.3 | DB-managed notification templates/campaigns in SQLAdmin | P1 | tourism-backend | E6.5 | Authorized operator previews and idempotently sends an audited in-app/push campaign; push opt-out is respected |
 | EPIC | E7 | Favorites | P0 | tourism-backend, tourism-mobile | E4, E6 | Save place/route — **done** |
 | EPIC | E8 | Route builder (8A deterministic) | P0 | tourism-backend, tourism-mobile | E3, E6 | Generate or failure_code |
 | technical task | T8.1 | RoutingProvider mock | P0 | tourism-backend | E8 | Swap-ready interface |

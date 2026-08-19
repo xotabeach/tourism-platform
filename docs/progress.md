@@ -4,7 +4,9 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 5 polish + ops; next = Phase 8A (Route Builder)
+**Текущая фаза:** Phase 5 polish + ops; next = managed notifications
+(T6.5.3), then Phase 8A (Route Builder)
+
 **Последнее обновление:** 2026-08-19
 
 ## Changelog
@@ -28,6 +30,9 @@
   collapsed by default; expert status can be changed in the user form or by
   audited bulk actions. Both paths create an in-app notification and attempt
   FCM delivery when the user enabled push and has a registered token.
+- Planned next, not implemented: DB-managed notification templates/campaigns
+  with SQLAdmin preview/test/send, audit and idempotent audience delivery
+  (`T6.5.3`). Existing event notifications remain code-defined for now.
 - Profile/search UI: expert gradient avatar/rank borders, own vs public
   follower stats, corrected follower SVG and 2 px stat borders; search
   carousels use the full viewport. Top-traveler cards now paint shadows on a
