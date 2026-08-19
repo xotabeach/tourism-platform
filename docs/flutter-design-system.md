@@ -39,6 +39,22 @@ exports for older feature imports.
 Raw colors and timing values belong in tokens. Feature widgets should not
 create parallel palettes or motion constants.
 
+## Shadows and rounded surfaces
+
+Shared shadows live in `AppShadows`; every shadow has a negative spread to
+keep the blur inset from rounded corners. Do not attach a card shadow to an
+`Ink` decoration: on small-radius tiles it can read as a rectangular halo.
+Interactive tiles use two layers instead:
+
+1. outer transparent `DecoratedBox` with the shadow and a slightly larger
+   shadow radius;
+2. inner colored `Material` with the actual design radius,
+   `clipBehavior: Clip.antiAlias`, and `InkWell`.
+
+Home «Топ путешественников» and the full leaderboard are the reference
+implementation. Their structural/golden test asserts the rounded shadow layer
+and clipped Material surface.
+
 The shared search/filter row has a stable `58 px` height. The outlined search
 surface stretches to that full height; the filter uses the same square
 dimension so text or icon loading cannot collapse the field.
@@ -57,6 +73,9 @@ under `assets/icons/source/settings/` with matching PNG exports.
 notification, profile, route actions and swipe indicators use these assets.
 Material icons remain only where the supplied set has no corresponding glyph.
 Golden tests precache the complete runtime icon list before capture.
+The profile follower glyph supplied as `Group.svg` is rendered as a vector
+`CustomPainter` in the stat card to preserve its 26×26 geometry without adding
+an SVG runtime dependency.
 
 ## Glass
 

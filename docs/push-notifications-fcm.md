@@ -22,11 +22,19 @@
   (`enable-swift-package-manager: false`) — плагины идут через CocoaPods
   (иначе Xcode ломается на путях вроде `image_picker_ios-0.8.13+6`).
   Deployment target **iOS 15+** (требование Firebase SDK 12.x).
+- iOS target уже содержит capability **Push Notifications**,
+  `Runner.entitlements` и Background Mode `remote-notification`. Для реальной
+  Клиентский `GoogleService-Info.plist` уже добавлен локально; для реальной
+  доставки всё ещё нужен Apple Developer membership и APNs key в Firebase.
 - Approve/reject маршрута и отзыва создают in-app notification автору
   (`route_published` / `route_rejected` / `review_published` /
   `review_rejected`); approve чужого отзыва — ещё `route_review` владельцу.
   Лайк профиля (подписка) — `profile_like` получателю. FCM send включается,
   когда на бэкенде задан `FCM_SERVICE_ACCOUNT_JSON` (или путь к файлу).
+- Опубликованный ответ на отзыв создаёт `review_reply` автору исходного
+  комментария; до прохождения модерации уведомление не отправляется.
+- Ответ оператора поддержки создаёт `support_reply` в inbox и отправляет FCM;
+  foreground-сообщение сразу обновляет inbox, тап открывает чат поддержки.
 
 ## Что сделать руками (пошагово, один раз)
 
@@ -61,9 +69,8 @@ ios-options. Пока для платформы placeholder — `getToken()` н�
 3. Download `GoogleService-Info.plist` →
    `tourism-mobile/ios/Runner/GoogleService-Info.plist`
    (и добавь файл в target Runner в Xcode, если не подхватился).
-4. Xcode → Runner → Signing & Capabilities:
-   - **Push Notifications**
-   - **Background Modes** → Remote notifications
+4. Xcode → Runner → Signing & Capabilities: проверь уже добавленные
+   **Push Notifications** и **Background Modes → Remote notifications**.
 5. Firebase Console → Project settings → Cloud Messaging →
    **Apple app configuration**: загрузи APNs Authentication Key
    (`.p8` из [Apple Developer](https://developer.apple.com/account/resources/authkeys/list)
@@ -117,7 +124,7 @@ FCM HTTP v1 через `google-auth` + `httpx`
 | --- | --- |
 | In-app inbox | Всегда при событии (например, опубликован отзыв) |
 | System push | Если у пользователя `notify_push_enabled`, есть device token, и FCM настроен |
-| Тап по push | Deep link `target_type`/`target_id` → экран маршрута / профиля (как inbox) |
+| Тап по push | Deep link `target_type`/`target_id` → маршрут / профиль / достижение / чат поддержки |
 
 ## Почему in-app есть, а Firebase tray нет
 

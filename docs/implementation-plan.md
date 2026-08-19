@@ -199,9 +199,9 @@ OTP-коды (пока нет SMS), права, диалоги поддержк�
 | Область | Задачи |
 | --- | --- |
 | Backend | SQLAdmin at `/admin`; session cookie + Origin/Referer/Sec-Fetch-Site CSRF; roles allowlist |
-| UI | ModelViews: users (edit + avatar/cover), OTP (newest-first, phone/user_id filters, `debug_code` gated), phone-change, principals/roles, support bubble chat + operator reply |
+| UI | ModelViews: users (edit + avatar/cover + expert status/bulk actions), OTP (newest-first, phone/user_id filters, `debug_code` gated), phone-change, principals/roles, support bubble chat + operator reply; review photo gallery; filter sidebar collapsed by default |
 | API | Internal `/admin/*` + `/admin/api/user-brief/{id}`; no ORM dump of secrets; audit log of admin actions |
-| Database | `admin_principals`, `admin_role_bindings`, `admin_audit_events`; reuse support + media tables |
+| Database | `admin_principals`, `admin_role_bindings`, `admin_audit_events`; reuse support + media tables; expert-status audit events |
 | Security | Separate from mobile JWT (Argon2id principals); login rate limits; no OTP codes in staging/prod; media thumbs only `/media/` |
 | Acceptance | Operator can look up a test user (with media), read a live OTP on the test contour, filter OTP by phone/user, edit user fields, and reply in support chat |
 | Dependencies | Phase 6 (identity + OTP), existing support chat persistence |

@@ -164,16 +164,26 @@ accessibility needs. Credentials живут только в module `identity`.
   списке), пока ops в SQLAdmin не одобрит или не отклонит;
 - автор может **удалить** свой отзыв (`DELETE …/reviews/{id}`, soft-delete)
   только в течение **6 часов** с `created_at`;
+- к отзыву можно прикрепить до шести JPEG/PNG/WebP фотографий. Выбранные фото
+  удаляются локально в composer до отправки. После публикации media immutable;
+  прямой DELETE возвращает `review_media_locked`. Чужое media ID не даёт
+  доступа к файлу или записи;
+- ответ — отдельный модерируемый `route_review` с nullable
+  `reply_to_review_id`. Цель должна быть опубликована и относиться к тому же
+  маршруту. API возвращает безопасный snapshot автора/текста в `reply_to`;
+  ответы участвуют в публичном списке комментариев, но не в среднем рейтинге
+  и `rating_count` маршрута;
 - in-app уведомления (`notifications`):
   - `route_review` — владельцу маршрута, если отзыв оставил **другой**
     пользователь и его одобрили (deep link на маршрут);
   - `review_published` / `review_rejected` — автору отзыва после модерации;
+  - `review_reply` — автору исходного отзыва после публикации ответа;
   - `route_published` / `route_rejected` — владельцу маршрута после
     модерации публикации;
   - `profile_like` — владельцу профиля при первом лайке/«подписке»
     (deep link на профиль лайкнувшего);
-- публичный `GET /routes/{id}/reviews` отдаёт только `published` + средний
-  рейтинг.
+- публичный `GET /routes/{id}/reviews` отдаёт только `published`, media,
+  reply-context и средний рейтинг корневых отзывов.
 
 Системные push (FCM/APNs) подключаются следом: см.
 [push-notifications-fcm.md](push-notifications-fcm.md). In-app inbox уже
