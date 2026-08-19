@@ -259,7 +259,9 @@ foundation для fallback (без LLM).
 | Не входит | LLM/Gemini, conversational chat, paid plans |
 
 См. [ai-route-planning-architecture.md](ai-route-planning-architecture.md),
-[ADR-006](decisions/ADR-006-ai-assisted-route-planning.md).
+[ADR-006](decisions/ADR-006-ai-assisted-route-planning.md). Будущий мобильный
+чат и точный контракт кнопки генерации:
+[ai-route-chat-mobile-implementation.md](ai-route-chat-mobile-implementation.md).
 
 ## Phase 8B — AI-assisted Route Planning (experimental)
 

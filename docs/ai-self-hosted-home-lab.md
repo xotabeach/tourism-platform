@@ -2,9 +2,15 @@
 
 Практическая инструкция по локальному inference + RAG на домашнем ПК.
 
-**Статус кода:** documented, not implemented (нет Compose overlay и adapter
-в backend). **Статус архитектуры:** целевой self-host стек платформы —
-Ollama + **Gemma 4** (`gemma4:12b` default) + Qdrant; не test-VPS.
+Связанные практические документы:
+
+- [Windows + LM Studio + Gemma 4 26B](ai-lm-studio-windows-gemma4.md)
+- [AI-чат подбора и кнопка генерации](ai-route-chat-mobile-implementation.md)
+
+**Статус кода:** adapter ещё не implemented. **Статус архитектуры:**
+self-host transport может быть Ollama или OpenAI-compatible LM Studio;
+выбранный Windows quality probe — **Gemma 4 26B A4B QAT**, Qdrant остаётся
+отдельным RAG-компонентом; не test-VPS.
 Сводка контуров: [stack.md](stack.md).
 
 Связанные документы:
@@ -177,26 +183,27 @@ macOS: GPU passthrough в Docker ограничен; для серьёзного
 
 | Роль | Рекомендация home lab | Заметки |
 | --- | --- | --- |
-| **Default chat / planning** | **`gemma4:12b`** (Q4/Q5) | целевой daily-driver на ~12 GB VRAM |
+| **Выбранный Windows planning** | **Gemma 4 26B A4B it QAT Q4_0** | LM Studio; hybrid 12 GB VRAM + RAM |
+| A/B fallback | `gemma4:12b` (Q4/Q5) | если latency/стабильность 26B не проходят gold set |
 | Smoke / слабое железо | `gemma4:e4b` | быстро, для отладки адаптера |
-| Quality probe (если влезет) | `gemma4:26b` Q4 | MoE; замерить VRAM + latency |
 | Обычно слишком тесно | `gemma4:31b` | нужен запас VRAM / offload; не default |
 | Embeddings | `nomic-embed-text` или `bge-m3` | отдельно; можно CPU |
 | Не делать | откат на `gemma2` / `gemma3` ради VRAM | хуже intelligence-per-param при том же железе |
 
 Практика выбора:
 
-1. Поднять **`gemma4:12b`** + embed; замерить VRAM (`nvidia-smi`) на generate
-   с вашим prompt (candidates table + optional RAG).
+1. Поднять выбранную **Gemma 4 26B A4B QAT Q4_0** в LM Studio с context 8K;
+   замерить VRAM/RAM/tok/s на candidates table + optional RAG.
 2. Прогнать gold set: valid JSON %, hard-constraint compliance, latency p50.
-3. Если 12B стабильно зелёный — это **production-lab default**.
-4. Опционально A/B с `gemma4:26b` на тех же кейсах; брать 26B только если
-   метрики реально лучше *и* VRAM/latency приемлемы.
+3. Сравнить с 12B Q4 на тех же кейсах; сохранить 26B default только если
+   качество выше, а hybrid-offload latency приемлема.
+4. Не увеличивать context до 16K до стабильного smoke без OOM.
 5. Hosted **Gemini** (Phase 8B) остаётся ceiling для сравнения; local не обязан
    сразу бить cloud — обязан стабильно проходить validation/fallback.
 
-Имена в env: `OLLAMA_CHAT_MODEL=gemma4:12b`, `OLLAMA_EMBED_MODEL=...`.
-Конкретный tag (quant) фиксируем после первого бенча на твоей карте.
+Для Windows используются `LM_STUDIO_BASE_URL`, `LM_STUDIO_MODEL` и
+`LM_STUDIO_API_KEY`; точные шаги — в
+[ai-lm-studio-windows-gemma4.md](ai-lm-studio-windows-gemma4.md).
 
 ---
 

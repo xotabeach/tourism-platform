@@ -4,7 +4,7 @@
 фич — [progress.md](progress.md). Инференс Gemma — подробно в
 [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
 
-**Последнее обновление:** 2026-08-18.
+**Последнее обновление:** 2026-08-19.
 
 ## Репозитории
 
@@ -95,11 +95,12 @@ RAG (Qdrant) — отдельно, после стабильного adapter. Po
 
 | Сервис | Роль | Host bind |
 | --- | --- | --- |
-| Ollama | Chat + embeddings | `127.0.0.1:11434` |
+| LM Studio на Windows | выбранный chat/reasoning transport | `127.0.0.1:1234` |
+| Ollama | альтернативный chat + embeddings transport | `127.0.0.1:11434` |
 | Qdrant | Vector RAG (Future) | `127.0.0.1:6333` |
 | tourism-backend | Оркестратор, validation, fallback | как сейчас |
 
-Mobile **не** ходит в Ollama. Только HTTPS backend.
+Mobile **не** ходит в LM Studio/Ollama. Только HTTPS backend.
 
 ### Модели (Gemma 4 only)
 
@@ -107,7 +108,8 @@ Mobile **не** ходит в Ollama. Только HTTPS backend.
 
 | Роль | Модель | Когда |
 | --- | --- | --- |
-| Default planning / chat | **`gemma4:12b`** (Q4/Q5) | daily-driver на ~12 GB |
+| Выбранный Windows planning | **Gemma 4 26B A4B it QAT Q4_0** | LM Studio; hybrid VRAM/RAM |
+| Fallback / A-B baseline | `gemma4:12b` (Q4/Q5) | если latency 26B неприемлема |
 | Smoke | `gemma4:e4b` | отладка adapter |
 | Quality probe | `gemma4:26b` Q4 | если влезает VRAM и latency |
 | Embeddings | `nomic-embed-text` или `bge-m3` | RAG; можно CPU |
@@ -123,6 +125,18 @@ OLLAMA_EMBED_MODEL=nomic-embed-text
 QDRANT_URL=http://127.0.0.1:6333
 RAG_ENABLED=false
 ```
+
+LM Studio-вариант:
+
+```text
+AI_PROVIDER=lmstudio
+LM_STUDIO_BASE_URL=http://<PRIVATE_WINDOWS_IP>:1234/v1
+LM_STUDIO_MODEL=<id из /v1/models>
+LM_STUDIO_API_KEY=<secret>
+```
+
+Точная Windows-инструкция:
+[ai-lm-studio-windows-gemma4.md](ai-lm-studio-windows-gemma4.md).
 
 Compose-фрагмент Ollama/Qdrant, PostGIS vs RAG, Lab-0…5:
 [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).

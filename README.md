@@ -14,7 +14,9 @@ Crimea Travel Platform — рабочее название мобильной т
 
 As-built: каталог, auth, избранное, публикация маршрутов + SQLAdmin,
 профиль (тп/звания), отзывы, inbox/FCM. Дальше — Phase 8A (Route Builder).
-AI Gemma 4 / Ollama — целевой home lab, ещё не в Compose.
+Выбранный home lab — Windows LM Studio + Gemma 4 26B A4B QAT; adapter ещё не
+в backend. В локальном и серверном PostGIS импортировано по 1000 OSM drafts
+для quality gate.
 
 - Стек: [docs/stack.md](docs/stack.md)
 - Прогресс: [docs/progress.md](docs/progress.md)
@@ -29,7 +31,7 @@ AI Gemma 4 / Ollama — целевой home lab, ещё не в Compose.
   `support`, `notifications`, `admin`, `media`; stub — `route_builder`,
   `route_execution`, `subscriptions`.
 - `RoutingProvider` — абстракция (ADR-004); реализация — Phase 8A.
-- AI: port `AIPlanningProvider` → mock / Gemini / **Ollama Gemma 4**
+- AI: port `AIPlanningProvider` → mock / Gemini / **LM Studio Gemma 4**
   ([ai-self-hosted-home-lab.md](docs/ai-self-hosted-home-lab.md)).
 - Kafka — только после ADR-005. Helm — позже в этом repo.
 
@@ -152,6 +154,9 @@ workspace/
 - [Repository strategy](docs/repository-strategy.md)
 - [Local development](docs/local-development.md)
 - [Home lab Gemma 4](docs/ai-self-hosted-home-lab.md)
+- [Windows LM Studio + Gemma 4 26B](docs/ai-lm-studio-windows-gemma4.md)
+- [PostGIS bulk import 1000+](docs/crimea-places-bulk-import-plan.md)
+- [AI-чат и генерация маршрута](docs/ai-route-chat-mobile-implementation.md)
 - [Architecture decisions](docs/decisions)
 - [CI / runners](docs/ci-and-runners.md)
 
@@ -159,5 +164,6 @@ workspace/
 
 1. Phase 8A — deterministic Route Builder + `RoutingProvider`.
 2. Phase 8B — `AIPlanningProvider` (mock, затем Gemini).
-3. Home lab: Ollama **`gemma4:12b`** + Qdrant на GPU-хосте, не на test-VPS.
+3. Home lab: LM Studio + **Gemma 4 26B A4B QAT** на Windows GPU-ПК;
+   Qdrant после provider adapter, не на test-VPS.
 4. Остатки UX/ops: SMS provider, iOS push, Travel+ billing, offline.

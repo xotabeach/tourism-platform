@@ -11,6 +11,27 @@
 
 ## Changelog
 
+### 2026-08-19 — PostGIS bulk import и Windows LM Studio home lab
+
+- Добавлена инструкция для Windows AI-ПК: LM Studio + Gemma 4 26B A4B it QAT
+  GGUF Q4_0, localhost smoke, API token и private-network подключение backend
+  без прямого доступа модели к БД.
+- Реализован фундамент импорта 1000+ мест: provenance/source identity, честный
+  `payment_status`, planning-поля, data quality status и серверные фильтры.
+- Добавлен OSM/Overpass normalizer и CLI: dry-run по умолчанию, `--apply`
+  создаёт только unpublished drafts; сырой payload и лицензия сохраняются.
+- Зафиксирован будущий mobile AI-чат: session API, typed progress, состояния
+  кнопки генерации, idempotency и deterministic fallback.
+- Миграция `0025` применена локально; импортировано 1000 уникальных OSM places
+  как `draft/auto_validated`. Повторный импорт дал `created=0, updated=1000`.
+  Все 169 backend tests зелёные, coverage 75.01%, Ruff/MyPy зелёные.
+- Backend `354a466` развёрнут на test/production-контуре. Ручной job собрал
+  13 647 OSM-объектов непосредственно на сервере и записал 1000 новых places;
+  SQL-контроль: `draft/auto_validated = 1000`. Public health ready, каталог
+  продолжает возвращать только 20 опубликованных редакционных мест.
+- Следом: authoritative region boundary, spatial containment, dedup и
+  редакционный quality gate перед публикацией.
+
 ### 2026-08-19 — Expert profiles, review media/replies and admin polish
 
 - Backend migrations `0020`–`0024`: durable `users.is_expert` with
