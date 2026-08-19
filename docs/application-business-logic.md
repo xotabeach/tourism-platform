@@ -182,6 +182,9 @@ accessibility needs. Credentials живут только в module `identity`.
     модерации публикации;
   - `profile_like` — владельцу профиля при первом лайке/«подписке»
     (deep link на профиль лайкнувшего);
+  - `expert_granted` / `expert_revoked` — пользователю после
+    фактического изменения expert-статуса в админке; повторное
+    сохранение того же статуса событие не создаёт;
 - публичный `GET /routes/{id}/reviews` отдаёт только `published`, media,
   reply-context и средний рейтинг корневых отзывов.
 

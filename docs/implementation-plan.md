@@ -371,6 +371,9 @@ Phase 9). Каталог, `user_achievements` и карусель — as-built; 
 - **Достижения** — seed-каталог + `user_achievements`; профиль показывает
   полученные, полный экран — все (locked/earned). Unlock по прохождениям —
   после Phase 9; сейчас starter-grant при регистрации.
+- **Expert** — `users.is_expert` и аудит `user_expert_status_events`;
+  фактический переход статуса из формы или bulk-action админки
+  создаёт inbox/push-уведомление.
 
 Опубликованные маршруты на профиле — as-built (Phase 11 slice), не блокер
 Phase 14.

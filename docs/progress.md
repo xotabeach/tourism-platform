@@ -11,10 +11,11 @@
 
 ### 2026-08-19 — Expert profiles, review media/replies and admin polish
 
-- Backend migrations `0020`–`0023`: durable `users.is_expert` with
+- Backend migrations `0020`–`0024`: durable `users.is_expert` with
   `user_expert_status_events`; review photos in `media_attachments`; nullable
   `route_reviews.reply_to_review_id`; inbox/push kind `review_reply` after
-  moderation. Reply targets must be a published review of the same route.
+  moderation; `expert_granted` / `expert_revoked` after an actual expert-status
+  transition. Reply targets must be a published review of the same route.
 - Review media: JPEG/PNG/WebP validation, 10 MB input and six-photo limit.
   Selected local photos can be removed only in the composer before sending;
   server media mutation is locked after publication. Deletion of the whole
@@ -25,14 +26,16 @@
   no delete control on submitted cards.
 - Admin: review photo thumbnails + fullscreen viewer; filter sidebars are
   collapsed by default; expert status can be changed in the user form or by
-  audited bulk actions.
+  audited bulk actions. Both paths create an in-app notification and attempt
+  FCM delivery when the user enabled push and has a registered token.
 - Profile/search UI: expert gradient avatar/rank borders, own vs public
   follower stats, corrected follower SVG and 2 px stat borders; search
   carousels use the full viewport. Top-traveler cards now paint shadows on a
-  separate rounded layer and clip their Material surface.
-- Verification: mobile `flutter analyze` clean and 183 Flutter tests green;
-  backend Ruff/compile green. Backend commit `05d15ae` deployed through the
-  normal GitLab pipeline; release installed on the physical iPhone target.
+  separate rounded layer and clip their Material surface. Pull-to-refresh moves
+  the expanded identity and rank/follower card as one group with the cover.
+- Verification: mobile `flutter analyze` clean and Flutter tests green;
+  backend Ruff/compile green. Backend changes deploy through the normal GitLab
+  pipeline; release verified on the physical iPhone target.
 
 ### 2026-08-18 — Achievements API, OTP reuse, profile/search polish
 

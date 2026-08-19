@@ -55,6 +55,10 @@ Home «Топ путешественников» and the full leaderboard are th
 implementation. Their structural/golden test asserts the rounded shadow layer
 and clipped Material surface.
 
+The expanded profile identity and its rank/follower card form one pull group.
+During negative scroll offset they translate by the same factor as the cover
+parallax, preserving the designed overlap throughout pull-to-refresh.
+
 The shared search/filter row has a stable `58 px` height. The outlined search
 surface stretches to that full height; the filter uses the same square
 dimension so text or icon loading cannot collapse the field.

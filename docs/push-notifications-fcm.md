@@ -23,7 +23,7 @@
   (иначе Xcode ломается на путях вроде `image_picker_ios-0.8.13+6`).
   Deployment target **iOS 15+** (требование Firebase SDK 12.x).
 - iOS target уже содержит capability **Push Notifications**,
-  `Runner.entitlements` и Background Mode `remote-notification`. Для реальной
+  `Runner.entitlements` и Background Mode `remote-notification`.
   Клиентский `GoogleService-Info.plist` уже добавлен локально; для реальной
   доставки всё ещё нужен Apple Developer membership и APNs key в Firebase.
 - Approve/reject маршрута и отзыва создают in-app notification автору
@@ -33,6 +33,9 @@
   когда на бэкенде задан `FCM_SERVICE_ACCOUNT_JSON` (или путь к файлу).
 - Опубликованный ответ на отзыв создаёт `review_reply` автору исходного
   комментария; до прохождения модерации уведомление не отправляется.
+- Выдача и снятие expert-статуса создают `expert_granted` /
+  `expert_revoked` в inbox и пытаются отправить FCM. Неизменившийся
+  статус не создаёт дубль.
 - Ответ оператора поддержки создаёт `support_reply` в inbox и отправляет FCM;
   foreground-сообщение сразу обновляет inbox, тап открывает чат поддержки.
 
