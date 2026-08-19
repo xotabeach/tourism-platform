@@ -38,6 +38,10 @@
   carousels use the full viewport. Top-traveler cards now paint shadows on a
   separate rounded layer and clip their Material surface. Pull-to-refresh moves
   the expanded identity and rank/follower card as one group with the cover.
+- Mobile release `0.1.12+13`: temporary «Крымская коровка» launcher
+  artwork is installed for Android and iOS; the home-screen label is
+  `КРЫМТРИП`. A signed, obfuscated production/API arm64 APK was built for
+  Xiaomi/Redmi, and the same release was installed on the physical iPhone.
 - Verification: mobile `flutter analyze` clean and Flutter tests green;
   backend Ruff/compile green. Backend changes deploy through the normal GitLab
   pipeline; release verified on the physical iPhone target.
