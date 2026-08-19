@@ -6,7 +6,7 @@
 - NVIDIA RTX 5070, 12 GB VRAM;
 - AMD Ryzen 5 7500F;
 - 32 GB DDR5 RAM;
-- LM Studio;
+- LM Studio Bionic и обычный LM Studio Desktop;
 - Gemma 4 26B A4B как reasoning/chat-модель.
 
 Мобильное приложение не обращается к этому ПК напрямую. Gemma не получает
@@ -14,11 +14,53 @@
 backend выполняет разрешённые запросы к PostGIS и передаёт модели ограниченный
 контекст.
 
+## 0. Важно: Bionic — отдельное приложение
+
+LM Studio Bionic — не новая тема и не очередная версия интерфейса обычного
+LM Studio, а отдельное приложение. Оно рассчитано прежде всего на работу с
+локальными coding-агентами. Раздел Bionic
+`Settings → Local Models → Local Model API` не заменяет описанный ниже экран
+управления OpenAI-compatible сервером.
+
+Для КрымТрип используем оба приложения:
+
+- **Bionic** можно оставить для чатов, агентов и уже загруженной модели;
+- **обычный LM Studio Desktop** нужен для управляемого API: `Developer`,
+  `Start Server`, токены, порт и сетевые ограничения;
+- удалять Bionic и заново скачивать модель заранее не нужно.
+
+WireGuard не заменяет LM Studio Desktop: VPN создаёт только защищённый путь
+`backend → Windows`, а HTTP API модели всё равно должен быть запущен на
+Windows. От Desktop можно будет отказаться лишь тогда, когда Bionic или
+отдельный `llmster` предоставит и мы проверим тот же authenticated API,
+network bind, `/v1/models` и `/v1/chat/completions`.
+
+Сначала открыть PowerShell и проверить, доступна ли модель общему runtime:
+
+```powershell
+lms --version
+lms ls
+```
+
+Если в выводе есть
+`unsloth/gemma-4-26b-a4b-it-ud-iq4-xs`, повторная загрузка не требуется. Если
+модели нет, не удалять и не переносить GGUF: найти путь к файлу модели в
+Bionic и добавить этот файл в библиотеку обычного LM Studio. В спорном случае
+сначала сохранить путь и скриншот экрана модели — это безопаснее повторной
+загрузки 13+ GB или ручного перемещения файла.
+
+Официальное описание различий:
+
+- <https://lmstudio.ai/blog/introducing-lm-studio-bionic>;
+- <https://lmstudio.ai/docs/bionic>;
+- <https://lmstudio.ai/docs/app/basics/lmstudio-vs-llmster-vs-lms>.
+
 ## 1. Подготовка Windows
 
 1. Обновить NVIDIA Driver до актуального стабильного Game Ready или Studio
    Driver с официального сайта NVIDIA.
-2. Установить LM Studio: <https://lmstudio.ai/download>.
+2. Не удаляя Bionic, установить обычный **LM Studio Desktop**:
+   <https://lmstudio.ai/download>.
 3. Перезагрузить ПК после обновления драйвера.
 4. Выбрать для LM Studio высокопроизводительный GPU:
    `Параметры → Система → Дисплей → Графика → LM Studio → Высокая
@@ -101,13 +143,25 @@ gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
 
 ## 5. Локальный API
 
-1. Открыть `Developer`.
+Следующие пункты выполняются в обычном LM Studio Desktop, не в настройке
+`Local Model API` приложения Bionic.
+
+1. Открыть вкладку `Developer` (`</>`).
 2. Загрузить Unsloth Gemma 4 26B A4B it UD-IQ4_XS.
-3. Открыть Local Server settings.
-4. Оставить порт `1234`.
-5. Сначала слушать только `localhost`.
-6. Включить API authentication и создать отдельный backend token.
-7. Нажать `Start Server`.
+3. При загрузке задать Context Length `8192`, GPU Offload `Auto` и включить
+   Flash Attention, если настройка доступна.
+4. Открыть `Server Settings` и оставить порт `1234`.
+5. Включить `Require Authentication`.
+6. Открыть `Manage Tokens`, создать токен с названием
+   `crimeatrip-backend` и сразу скопировать его: повторно значение не
+   показывается.
+7. Для первого теста оставить выключенными:
+   `Serve on Local Network`, CORS, оба переключателя MCP, JIT loading и
+   auto-unload.
+8. Нажать `Start Server`.
+
+Токен хранится только как секрет backend с именем `LM_STUDIO_API_KEY`. Его
+нельзя отправлять в чат, встраивать в Flutter, сохранять в БД или коммитить.
 
 Документация:
 
@@ -115,17 +169,17 @@ gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
 - <https://lmstudio.ai/docs/developer/core/authentication>;
 - <https://lmstudio.ai/docs/developer/openai-compat>.
 
-Токен не отправлять в чат и не коммитить.
-
 ### Проверка `/v1/models`
 
 ```powershell
 $LmToken = "ВСТАВИТЬ_ЛОКАЛЬНЫЙ_ТОКЕН"
 $Headers = @{ Authorization = "Bearer $LmToken" }
 
-Invoke-RestMethod `
+$Models = Invoke-RestMethod `
   -Uri "http://127.0.0.1:1234/v1/models" `
   -Headers $Headers
+
+$Models.data | Select-Object id
 ```
 
 Скопировать точный `id` модели из ответа.
@@ -151,20 +205,87 @@ Invoke-RestMethod `
   -Body $Body
 ```
 
+Если интерфейс сервера уже был настроен, его можно запускать из PowerShell:
+
+```powershell
+lms server start --port 1234
+```
+
+Создание токена и проверку сетевых переключателей всё равно выполнить в
+`Developer → Server Settings` обычного LM Studio Desktop.
+
 ## 6. Приватное подключение backend
 
 Порт `1234` нельзя пробрасывать на роутере или публиковать в интернете. Для
-удалённого backend используем Tailscale или WireGuard.
+удалённого backend используем WireGuard. Backend уже находится на VPN-сервере,
+поэтому маршрутизация чужого трафика и доступ Windows к подсети Docker не
+нужны: создаётся только узкий tunnel `server ↔ AI-PC`.
 
-1. Установить Tailscale на Windows AI-ПК.
-2. Подключить backend-host к той же tailnet.
-3. Только после создания API token включить в LM Studio
+План адресов:
+
+| Узел | WireGuard IP | Что слушает |
+| --- | --- | --- |
+| backend-сервер | `10.77.0.1/24` | WireGuard UDP `51820` |
+| Windows AI-ПК | `10.77.0.2/32` | LM Studio TCP `1234` |
+
+### 6.1. Windows: создать peer
+
+1. Установить официальный WireGuard for Windows.
+2. Выбрать `Add Tunnel → Add empty tunnel` и назвать tunnel
+   `CrimeaTrip-AI`.
+3. WireGuard сам создаст пару ключей. **PrivateKey не отправлять и нигде не
+   публиковать**. Для сервера нужен только показанный PublicKey Windows.
+4. После получения публичного ключа сервера заполнить tunnel:
+
+```ini
+[Interface]
+PrivateKey = <WINDOWS_PRIVATE_KEY_ALREADY_GENERATED_BY_WIREGUARD>
+Address = 10.77.0.2/32
+
+[Peer]
+PublicKey = <SERVER_PUBLIC_KEY>
+Endpoint = 86.106.20.132:51820
+AllowedIPs = 10.77.0.1/32
+PersistentKeepalive = 25
+```
+
+`AllowedIPs = 10.77.0.1/32` делает tunnel split-tunnel: обычный интернет
+Windows через сервер не идёт.
+
+### 6.2. Сервер: добавить Windows peer
+
+Ключи генерируются **на сервере** и не попадают в Git. Шаблон
+`/etc/wireguard/wg0.conf`:
+
+```ini
+[Interface]
+Address = 10.77.0.1/24
+ListenPort = 51820
+PrivateKey = <SERVER_PRIVATE_KEY>
+
+[Peer]
+PublicKey = <WINDOWS_PUBLIC_KEY>
+AllowedIPs = 10.77.0.2/32
+```
+
+В host firewall открыть только `51820/udp`. Порт `1234/tcp` на публичном
+сервере открывать не нужно. После запуска `wg0` проверить на сервере
+`wg show` и `ping 10.77.0.2`.
+
+### 6.3. Ограничить LM Studio
+
+1. Сначала создать API token, затем включить в LM Studio
    `Serve on Local Network`.
-4. В Windows Firewall разрешить TCP 1234 только для приватного интерфейса и
-   адреса backend-host.
-5. Проверить с backend:
-   `http://<TAILSCALE_IP_WINDOWS>:1234/v1/models`.
-6. Postgres для Windows не открывать: к БД обращается backend, а не Gemma.
+2. В Windows Firewall разрешить входящий TCP `1234` только от
+   `10.77.0.1`. Не принимать стандартное широкое правило для Public network.
+3. На backend использовать
+   `http://10.77.0.2:1234/v1` и созданный API token.
+4. Проверить `/v1/models`, затем `scripts/check_lm_studio.py`.
+5. Postgres для Windows не открывать: к БД обращается backend, а не Gemma.
+
+WireGuard-конфигурация сервера создаётся только после получения **публичного**
+ключа Windows. Приватные ключи и LM Studio token в переписку и Git не
+отправляются.
 
 Сетевой режим LM Studio:
 <https://lmstudio.ai/docs/developer/core/server/serve-on-network>.
@@ -174,7 +295,7 @@ Backend-конфигурация, без реального секрета в Gi
 ```env
 AI_PLANNING_ENABLED=false
 AI_PROVIDER=lmstudio
-LM_STUDIO_BASE_URL=http://<TAILSCALE_IP_WINDOWS>:1234/v1
+LM_STUDIO_BASE_URL=http://10.77.0.2:1234/v1
 LM_STUDIO_MODEL=<ТОЧНЫЙ_ID_ИЗ_V1_MODELS>
 LM_STUDIO_API_KEY=<SECRET>
 AI_REQUEST_TIMEOUT_SECONDS=60
@@ -190,7 +311,7 @@ Settings и OpenAI-compatible connectivity probe реализованы в backe
 
 ```bash
 cd tourism-backend
-LM_STUDIO_BASE_URL=http://<TAILSCALE_IP_WINDOWS>:1234/v1 \
+LM_STUDIO_BASE_URL=http://10.77.0.2:1234/v1 \
 LM_STUDIO_MODEL='<ТОЧНЫЙ_ID_ИЗ_V1_MODELS>' \
 LM_STUDIO_API_KEY='<SECRET>' \
 uv run python scripts/check_lm_studio.py
@@ -239,14 +360,14 @@ LoRA рассматриваем после gold-set тестов. Датасет
 ## 10. Чеклист готовности
 
 - [ ] NVIDIA driver обновлён.
-- [ ] LM Studio установлен.
+- [ ] Bionic оставлен для агентов, обычный LM Studio Desktop установлен для API.
 - [ ] Загружена Unsloth Gemma 4 26B A4B it UD-IQ4_XS GGUF.
 - [ ] Context 8192 стабилен.
 - [ ] Записаны tok/s, VRAM и RAM.
 - [ ] `/v1/models` отвечает на localhost.
 - [ ] `/v1/chat/completions` отвечает с API token.
 - [ ] Порт 1234 не открыт в WAN.
-- [ ] Tailscale/WireGuard настроен до LAN serve.
+- [ ] WireGuard `10.77.0.1 ↔ 10.77.0.2` настроен до LAN serve.
 - [ ] Backend-host видит API по приватному адресу.
 - [ ] Секрет не хранится в Git.
 

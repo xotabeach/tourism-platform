@@ -16,6 +16,10 @@
 - Добавлена инструкция для Windows AI-ПК: LM Studio + фактически выбранная
   Unsloth Gemma 4 26B A4B it UD-IQ4_XS, localhost smoke, API token и
   private-network подключение backend без прямого доступа модели к БД.
+- Уточнено, что LM Studio Bionic — отдельное приложение: Bionic остаётся для
+  агентов, а управляемый OpenAI-compatible API запускается в обычном LM Studio
+  Desktop. Зафиксирован split-tunnel WireGuard
+  `server 10.77.0.1 ↔ Windows 10.77.0.2` без публикации порта 1234.
 - Реализован фундамент импорта 1000+ мест: provenance/source identity, честный
   `payment_status`, planning-поля, data quality status и серверные фильтры.
 - Добавлен OSM/Overpass normalizer и CLI: dry-run по умолчанию, `--apply`
