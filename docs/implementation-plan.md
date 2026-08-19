@@ -480,6 +480,7 @@ ingest/TTL, security, чеклисты Lab-0…Lab-5):
 | technical task | AI-ARCH-11 | Gemma inference adapter | Future | tourism-backend | AI-ARCH-1 | Ollama/HTTP; see home-lab guide |
 | technical task | AI-ARCH-12 | Tourism RAG | Future | tourism-backend | AI-ARCH-11 | Qdrant + ingest; home-lab Lab-2+ |
 | technical task | AI-ARCH-13 | Optional MCP adapter | Future | tourism-backend | AI-ARCH-4 | Same tools, MCP transport |
+| technical task | PLACE-CONTENT-1 | Human-readable stable slugs + AI description drafts with provenance/admin review | P0 | tourism-backend, tourism-platform | 1000-place import, AI-ARCH-11 | Never auto-publish generated copy |
 | EPIC | E9 | Route execution | P0 | tourism-backend, tourism-mobile | E4, E6 | Start/complete/history |
 | user story | US9.1 | As a traveler I mark visited stops | P0 | tourism-mobile | E9 | Progress updates |
 | EPIC | E10 | Production readiness | P1 | tourism-platform, all | E5.6, E6–E9 | Production readiness review |

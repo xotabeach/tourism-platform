@@ -169,7 +169,7 @@ Invoke-RestMethod `
 Сетевой режим LM Studio:
 <https://lmstudio.ai/docs/developer/core/server/serve-on-network>.
 
-Будущая backend-конфигурация, без реального секрета в Git:
+Backend-конфигурация, без реального секрета в Git:
 
 ```env
 AI_PLANNING_ENABLED=false
@@ -182,8 +182,23 @@ AI_MAX_REPAIR_ATTEMPTS=1
 RAG_ENABLED=false
 ```
 
-Названия env — контракт плана; adapter ещё предстоит реализовать. Флаги по
+Settings и OpenAI-compatible connectivity probe реализованы в backend
+`0aee04c`; пользовательские planning endpoints пока не включены. Флаги по
 умолчанию выключены.
+
+Проверка с машины, которая должна обращаться к LM Studio:
+
+```bash
+cd tourism-backend
+LM_STUDIO_BASE_URL=http://<TAILSCALE_IP_WINDOWS>:1234/v1 \
+LM_STUDIO_MODEL='<ТОЧНЫЙ_ID_ИЗ_V1_MODELS>' \
+LM_STUDIO_API_KEY='<SECRET>' \
+uv run python scripts/check_lm_studio.py
+```
+
+Команда сначала сверяет model ID через `/v1/models`, затем выполняет один
+ограниченный нестриминговый structured chat request. Секрет в вывод не
+попадает.
 
 ## 7. Поток данных
 
@@ -235,5 +250,5 @@ LoRA рассматриваем после gold-set тестов. Датасет
 - [ ] Backend-host видит API по приватному адресу.
 - [ ] Секрет не хранится в Git.
 
-Следующий этап — provider-neutral adapter, JSON-schema validator и
+Следующий этап — retrieval опубликованных places, JSON-schema validator и
 deterministic fallback. RAG включается после стабильного каталога PostGIS.

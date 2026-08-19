@@ -14,9 +14,9 @@ Crimea Travel Platform — рабочее название мобильной т
 
 As-built: каталог, auth, избранное, публикация маршрутов + SQLAdmin,
 профиль (тп/звания), отзывы, inbox/FCM. Дальше — Phase 8A (Route Builder).
-Выбранный home lab — Windows LM Studio + Gemma 4 26B A4B QAT; adapter ещё не
-в backend. В локальном и серверном PostGIS импортировано по 1000 OSM drafts
-для quality gate.
+Выбранный home lab — Windows LM Studio + Gemma 4 26B A4B QAT; connectivity
+adapter/probe есть, planning API ещё нет. В локальном и серверном PostGIS
+импортировано по 1000 OSM drafts для quality gate.
 
 - Стек: [docs/stack.md](docs/stack.md)
 - Прогресс: [docs/progress.md](docs/progress.md)

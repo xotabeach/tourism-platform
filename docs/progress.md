@@ -29,8 +29,13 @@
   13 647 OSM-объектов непосредственно на сервере и записал 1000 новых places;
   SQL-контроль: `draft/auto_validated = 1000`. Public health ready, каталог
   продолжает возвращать только 20 опубликованных редакционных мест.
+- Backend `0aee04c`: добавлены реальные LM Studio settings, provider-neutral
+  contract и smoke probe `/v1/models` + `/v1/chat/completions`. Токен не
+  логируется; planning endpoint ещё выключен. Backend gate: 175 tests,
+  coverage 75.30%, Ruff/MyPy зелёные.
 - Следом: authoritative region boundary, spatial containment, dedup и
-  редакционный quality gate перед публикацией.
+  enrichment человекочитаемых slug/описаний через Gemma с provenance,
+  затем редакционный quality gate перед публикацией.
 
 ### 2026-08-19 — Expert profiles, review media/replies and admin polish
 
