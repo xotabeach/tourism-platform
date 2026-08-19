@@ -228,22 +228,24 @@ lms server start --port 1234
 | backend-сервер | `10.77.0.1/24` | WireGuard UDP `51820` |
 | Windows AI-ПК | `10.77.0.2/32` | LM Studio TCP `1234` |
 
-### 6.1. Windows: создать peer
+### 6.1. Windows: импортировать tunnel
 
 1. Установить официальный WireGuard for Windows.
-2. Выбрать `Add Tunnel → Add empty tunnel` и назвать tunnel
-   `CrimeaTrip-AI`.
-3. WireGuard сам создаст пару ключей. **PrivateKey не отправлять и нигде не
-   публиковать**. Для сервера нужен только показанный PublicKey Windows.
-4. После получения публичного ключа сервера заполнить tunnel:
+2. Выбрать `Add Tunnel → Import tunnel(s) from file`.
+3. Импортировать полученный файл `crimeatrip-ai-windows.conf` и включить
+   tunnel.
+4. Не открывать и не отправлять содержимое файла: внутри находится приватный
+   ключ Windows peer.
+
+Фактически подготовленный клиентский tunnel имеет вид:
 
 ```ini
 [Interface]
-PrivateKey = <WINDOWS_PRIVATE_KEY_ALREADY_GENERATED_BY_WIREGUARD>
+PrivateKey = <GENERATED_WINDOWS_PRIVATE_KEY>
 Address = 10.77.0.2/32
 
 [Peer]
-PublicKey = <SERVER_PUBLIC_KEY>
+PublicKey = <GENERATED_SERVER_PUBLIC_KEY>
 Endpoint = 86.106.20.132:51820
 AllowedIPs = 10.77.0.1/32
 PersistentKeepalive = 25
@@ -252,9 +254,9 @@ PersistentKeepalive = 25
 `AllowedIPs = 10.77.0.1/32` делает tunnel split-tunnel: обычный интернет
 Windows через сервер не идёт.
 
-### 6.2. Сервер: добавить Windows peer
+### 6.2. Серверный peer
 
-Ключи генерируются **на сервере** и не попадают в Git. Шаблон
+Ключи сгенерированы **на сервере** и не попадают в Git. Конфигурация
 `/etc/wireguard/wg0.conf`:
 
 ```ini
@@ -283,8 +285,10 @@ AllowedIPs = 10.77.0.2/32
 4. Проверить `/v1/models`, затем `scripts/check_lm_studio.py`.
 5. Postgres для Windows не открывать: к БД обращается backend, а не Gemma.
 
-WireGuard-конфигурация сервера создаётся только после получения **публичного**
-ключа Windows. Приватные ключи и LM Studio token в переписку и Git не
+По состоянию на 2026-08-19 `wg0` установлен, включён в автозапуск и слушает
+`10.77.0.1:51820/udp`; peer `10.77.0.2/32` добавлен. Клиентский конфиг передан
+отдельным локальным файлом, после чего его приватный ключ и копия конфига
+удалены с сервера. Приватные ключи и LM Studio token в переписку и Git не
 отправляются.
 
 Сетевой режим LM Studio:
