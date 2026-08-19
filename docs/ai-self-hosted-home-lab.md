@@ -9,7 +9,8 @@
 
 **Статус кода:** adapter ещё не implemented. **Статус архитектуры:**
 self-host transport может быть Ollama или OpenAI-compatible LM Studio;
-выбранный Windows quality probe — **Gemma 4 26B A4B QAT**, Qdrant остаётся
+выбранный Windows quality probe — **Unsloth Gemma 4 26B A4B it UD-IQ4_XS**,
+Qdrant остаётся
 отдельным RAG-компонентом; не test-VPS.
 Сводка контуров: [stack.md](stack.md).
 
@@ -183,7 +184,7 @@ macOS: GPU passthrough в Docker ограничен; для серьёзного
 
 | Роль | Рекомендация home lab | Заметки |
 | --- | --- | --- |
-| **Выбранный Windows planning** | **Gemma 4 26B A4B it QAT Q4_0** | LM Studio; hybrid 12 GB VRAM + RAM |
+| **Выбранный Windows planning** | **Unsloth Gemma 4 26B A4B it UD-IQ4_XS** | LM Studio; hybrid 12 GB VRAM + RAM |
 | A/B fallback | `gemma4:12b` (Q4/Q5) | если latency/стабильность 26B не проходят gold set |
 | Smoke / слабое железо | `gemma4:e4b` | быстро, для отладки адаптера |
 | Обычно слишком тесно | `gemma4:31b` | нужен запас VRAM / offload; не default |
@@ -192,7 +193,8 @@ macOS: GPU passthrough в Docker ограничен; для серьёзного
 
 Практика выбора:
 
-1. Поднять выбранную **Gemma 4 26B A4B QAT Q4_0** в LM Studio с context 8K;
+1. Поднять выбранную **Unsloth Gemma 4 26B A4B it UD-IQ4_XS** в LM Studio с
+   context 8K;
    замерить VRAM/RAM/tok/s на candidates table + optional RAG.
 2. Прогнать gold set: valid JSON %, hard-constraint compliance, latency p50.
 3. Сравнить с 12B Q4 на тех же кейсах; сохранить 26B default только если

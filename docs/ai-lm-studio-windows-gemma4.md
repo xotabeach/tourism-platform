@@ -30,24 +30,24 @@ backend выполняет разрешённые запросы к PostGIS и �
 
 ## 2. Модель
 
-В поиске LM Studio открыть:
+Фактически установленная модель:
 
 ```text
-google/gemma-4-26b-a4b-qat
+unsloth/gemma-4-26b-a4b-it-ud-iq4-xs
 ```
 
-Выбрать:
+Репозиторий/файл:
 
 ```text
-lmstudio-community/gemma-4-26B-A4B-it-QAT-GGUF
-Q4_0
+unsloth/gemma-4-26B-A4B-it-GGUF
+gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
 ```
 
 Важно:
 
 - нужен **GGUF**, не MLX;
 - `it` — instruction-tuned вариант;
-- QAT Q4_0 занимает около 14.4 GB;
+- Unsloth Dynamic `UD-IQ4_XS` GGUF занимает около 13.4 GB;
 - модель целиком не помещается в 12 GB VRAM, поэтому часть весов будет в
   32 GB системной RAM;
 - 26B A4B — MoE: всего около 25.2B параметров, активно около 3.8B на токен.
@@ -55,7 +55,7 @@ Q4_0
 Карточки модели:
 
 - <https://lmstudio.ai/models/google/gemma-4-26b-a4b>
-- <https://huggingface.co/lmstudio-community/gemma-4-26B-A4B-it-QAT-GGUF>
+- <https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF>
 
 ## 3. Первая загрузка
 
@@ -102,7 +102,7 @@ Q4_0
 ## 5. Локальный API
 
 1. Открыть `Developer`.
-2. Загрузить Gemma 4 26B A4B QAT.
+2. Загрузить Unsloth Gemma 4 26B A4B it UD-IQ4_XS.
 3. Открыть Local Server settings.
 4. Оставить порт `1234`.
 5. Сначала слушать только `localhost`.
@@ -175,7 +175,7 @@ Backend-конфигурация, без реального секрета в Gi
 AI_PLANNING_ENABLED=false
 AI_PROVIDER=lmstudio
 LM_STUDIO_BASE_URL=http://<TAILSCALE_IP_WINDOWS>:1234/v1
-LM_STUDIO_MODEL=<ID_ИЗ_V1_MODELS>
+LM_STUDIO_MODEL=<ТОЧНЫЙ_ID_ИЗ_V1_MODELS>
 LM_STUDIO_API_KEY=<SECRET>
 AI_REQUEST_TIMEOUT_SECONDS=60
 AI_MAX_REPAIR_ATTEMPTS=1
@@ -240,7 +240,7 @@ LoRA рассматриваем после gold-set тестов. Датасет
 
 - [ ] NVIDIA driver обновлён.
 - [ ] LM Studio установлен.
-- [ ] Загружена Gemma 4 26B A4B it QAT GGUF Q4_0.
+- [ ] Загружена Unsloth Gemma 4 26B A4B it UD-IQ4_XS GGUF.
 - [ ] Context 8192 стабилен.
 - [ ] Записаны tok/s, VRAM и RAM.
 - [ ] `/v1/models` отвечает на localhost.

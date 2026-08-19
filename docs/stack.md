@@ -108,7 +108,7 @@ Mobile **не** ходит в LM Studio/Ollama. Только HTTPS backend.
 
 | Роль | Модель | Когда |
 | --- | --- | --- |
-| Выбранный Windows planning | **Gemma 4 26B A4B it QAT Q4_0** | LM Studio; hybrid VRAM/RAM |
+| Выбранный Windows planning | **Unsloth Gemma 4 26B A4B it UD-IQ4_XS** | LM Studio; hybrid VRAM/RAM |
 | Fallback / A-B baseline | `gemma4:12b` (Q4/Q5) | если latency 26B неприемлема |
 | Smoke | `gemma4:e4b` | отладка adapter |
 | Quality probe | `gemma4:26b` Q4 | если влезает VRAM и latency |

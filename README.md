@@ -14,9 +14,9 @@ Crimea Travel Platform — рабочее название мобильной т
 
 As-built: каталог, auth, избранное, публикация маршрутов + SQLAdmin,
 профиль (тп/звания), отзывы, inbox/FCM. Дальше — Phase 8A (Route Builder).
-Выбранный home lab — Windows LM Studio + Gemma 4 26B A4B QAT; connectivity
-adapter/probe есть, planning API ещё нет. В локальном и серверном PostGIS
-импортировано по 1000 OSM drafts для quality gate.
+Выбранный home lab — Windows LM Studio + Unsloth Gemma 4 26B A4B it
+UD-IQ4_XS; connectivity adapter/probe есть, planning API ещё нет. В локальном
+и серверном PostGIS импортировано по 1000 OSM drafts для quality gate.
 
 - Стек: [docs/stack.md](docs/stack.md)
 - Прогресс: [docs/progress.md](docs/progress.md)
@@ -164,6 +164,7 @@ workspace/
 
 1. Phase 8A — deterministic Route Builder + `RoutingProvider`.
 2. Phase 8B — `AIPlanningProvider` (mock, затем Gemini).
-3. Home lab: LM Studio + **Gemma 4 26B A4B QAT** на Windows GPU-ПК;
+3. Home lab: LM Studio + **Unsloth Gemma 4 26B A4B it UD-IQ4_XS** на Windows
+   GPU-ПК;
    Qdrant после provider adapter, не на test-VPS.
 4. Остатки UX/ops: SMS provider, iOS push, Travel+ billing, offline.
