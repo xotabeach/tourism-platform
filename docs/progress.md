@@ -11,6 +11,16 @@ stub as-built; next = self-host OSRM Crimea + home-lab LM Studio / RAG
 
 ## Changelog
 
+### 2026-08-20 — Match catalog seed (прод)
+
+- Удалены mock `source_name=seed_user_routes` (15 шт. на проде).
+- Добавлены 18 редакционных маршрутов `seed_match_catalog` под оси
+  формы подбора (город, длительность, интересы, темп, транспорт, сезон,
+  дети/питомцы). Реальные user_created (6) сохранены.
+- Скрипт: `tourism-backend/scripts/seed_match_catalog_routes.py`.
+- Scoring: алиасы `walk`/`walking`, `public`/`public_transport`, сезоны
+  RU↔EN.
+
 ### 2026-08-20 — RoutingProvider stub + план OSRM по Крыму
 
 - Application port `RoutingProvider` + `StubRoutingProvider` (haversine ×
