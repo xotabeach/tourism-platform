@@ -26,7 +26,7 @@ workspace. Стек: [stack.md](../stack.md).
 - `flutter_secure_storage` только для credentials.
 - Карты — адаптер (сейчас preview, не полноценный routing UI).
 - Env через `--dart-define`; secrets не в bundle.
-- Lean CI: локально `./scripts/validate.sh`; APK job manual.
+- Локально `./scripts/validate.sh`; APK job остаётся manual в mobile CI.
 
 Freezed/`json_serializable` — опционально Phase 5, не блокер as-built.
 Drift/Isar — после offline spike.
@@ -48,8 +48,14 @@ Drift/Isar — после offline spike.
 ### Этап 2. Минимальный продукт
 
 - [x] OTP session, профиль (тп/звания/достижения API).
-- [x] Поиск (fullscreen + история сессии), карточка места, каталог маршрутов, избранное.
-- [x] Публикация user route + отзывы.
+- [x] Поиск (fullscreen + история сессии), карточка места с галереей, картой,
+  связанными маршрутами и отдельными отзывами; каталог маршрутов, избранное.
+- [x] Публикация user route + отзывы маршрутов/локаций с фото и ответами.
+- [x] Топ путешественников по макету: текущая позиция, podium top-3, тп и
+  публичные профили.
+- [x] «Моё избранное»: маршруты/места/подписки, поздний auto-remove threshold,
+  фиксированное swipe-состояние с кнопкой «Убрать» и undo; единый контур
+  активного/неактивного сердца.
 - [x] Единое отображение экспертного статуса в общих карточках пользователя
   и маршрута (`author_is_expert`, градиентная рамка и бейдж).
 - [ ] Route builder / execution (Phase 8A/9).
@@ -63,5 +69,5 @@ Drift/Isar — после offline spike.
 
 ### Этап 4. Workspace
 
-- [x] Private remote, submodule, lean/full CI files.
+- [x] Private remote, submodule, local validation and manual APK CI.
 - [ ] Зафиксировать semver контракта с backend для первого staging.

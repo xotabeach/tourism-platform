@@ -17,11 +17,13 @@ per-phase security rows.
 
 ## CI gates (as-built)
 
-Default mode is **lean** CI (see [ci-and-runners.md](../ci-and-runners.md)):
-style/tests/scanners are **local** (`./scripts/validate.sh` + agent skill
-`travel-platform-local-ci`). Set `CI_PIPELINE_MODE=full` for GitLab gates:
+Backend push pipelines are disabled in the current low-minutes mode (see
+[ci-and-runners.md](../ci-and-runners.md)). Style/tests/scanners are therefore
+mandatory **local** gates (`./scripts/validate.sh` plus the targeted commands
+below). The archived CI definitions describe gates to restore on a
+self-hosted runner:
 
-| Gate | Blocks (full mode) |
+| Gate | Must block a restored release pipeline |
 | --- | --- |
 | Gitleaks (backend / mobile / platform) | merge via failed pipeline |
 | Semgrep ERROR (backend / mobile) | merge; publish/APK `needs` |

@@ -45,6 +45,10 @@ superproject. Стек: [stack.md](../stack.md).
 places, routes (в т.ч. publication + reviews), favorites, support,
 notifications, admin, media.
 
+Отзывы маршрутов и локаций — отдельные модерируемые таблицы/API; admin явно
+показывает тип и целевой объект. `GET /routes?place_id=...` обслуживает
+связанные маршруты карточки локации.
+
 Stub-пакеты: `route_builder`, `route_execution`, `subscriptions`.
 
 ## Поэтапный план
@@ -66,5 +70,7 @@ Stub-пакеты: `route_builder`, `route_execution`, `subscriptions`.
 ### Этап 4. Эксплуатация
 
 - [x] Constrained test deploy (Caddy + image).
+- [x] Low-minutes mode: backend push pipelines disabled; explicit local
+  `scripts/deploy-production-local.sh` builds/pushes/deploys production.
 - [ ] Staging host, backup/restore drills как production-ready.
 - [ ] Outbox / Kafka только после подтверждённого async flow.

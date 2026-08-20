@@ -109,8 +109,9 @@ flutter pub get
 flutter run
 ```
 
-GitLab CI lean: стиль и тесты backend/mobile гонять локально
-(`./scripts/validate.sh`). См. [ci-and-runners.md](ci-and-runners.md).
+Стиль и тесты backend/mobile гонять локально (`./scripts/validate.sh`).
+Backend push pipeline отключён; локальная разработка сама по себе ничего не
+деплоит. См. [ci-and-runners.md](ci-and-runners.md).
 
 ## Ограничения
 

@@ -11,6 +11,36 @@
 
 ## Changelog
 
+### 2026-08-20 — Топ путешественников, карточка локации и CI без push pipelines
+
+- Экран «Топ путешественников» перевёрстан по макету: отдельная позиция
+  текущего пользователя, пьедестал топ-3, целевые тп, экспертный стиль и
+  переходы в публичный профиль.
+- Карточка локации получила высокую галерею, действия «поделиться/избранное»,
+  просмотр на карте, полное описание, предупреждения и реальные связанные
+  маршруты через `GET /routes?place_id=...`.
+- Отзывы локаций реализованы как отдельная сущность `place_reviews` (миграция
+  `0026`): собственный закреплённый отзыв, модерация, ответы, до шести безопасно
+  проверяемых фотографий, просмотр фото на весь экран и временное удаление
+  собственного отзыва. Медиа опубликованного отзыва отдельно не удаляется.
+- В SQLAdmin отзывы маршрутов и локаций разделены и явно показывают целевой
+  маршрут/локацию; фотографии доступны в списке и деталях.
+- Backend push pipelines полностью отключены на период малого остатка минут.
+  Production теперь собирается и разворачивается локальной командой
+  `tourism-backend/scripts/deploy-production-local.sh`; GitLab сохраняет лишь
+  ручной registry-build через Run pipeline.
+- 4-й раздел переименован в «Избранное», заголовок экрана — «Моё избранное»,
+  а первая вкладка — «Маршруты». Маршруты, места и подписки используют общий
+  двухступенчатый swipe: короткий жест фиксирует кнопку «Убрать», автоматическое
+  удаление начинается только после 72% ширины; у каждого удаления есть undo.
+- Активное и неактивное сердце теперь рисуются одним общим контуром: выбранное
+  состояние лишь заполняет его белым, поэтому форма не меняется при toggle.
+- Следом для карточки места: завести проверенный контракт аудиогида; для
+  отзывов локаций — inbox/push о модерации и ответах.
+- Проверки: mobile `flutter analyze` и полный `flutter test` — 190 passed,
+  включая обновлённые pixel-goldens; backend полный `validate.sh` — Ruff,
+  MyPy, pip-audit, 177 passed и coverage 75.08%; platform validate — green.
+
 ### 2026-08-20 — Design alignment: profile, cards and expert routes
 
 - Убрана лишняя разделительная линия в подборе маршрута; у фильтров на
@@ -148,7 +178,7 @@
   «foundation skeleton» / «deploy не реализован».
 - `AI_PROVIDER`: `mock|gemini|ollama` (алиас `self_hosted` устарел).
 
-### 2026-08-06 — Lean CI default (shared-runner minutes)
+### 2026-08-06 — Lean CI default (историческая запись)
 
 - Default `.gitlab-ci.yml` is **lean**: notice + backend publish/manual
   deploy; mobile APK manual-only; platform notice. Feature branches skip CI.
@@ -157,6 +187,8 @@
 - Local gates: `./scripts/validate.sh` + Cursor skill
   `travel-platform-local-ci`. Doc: [ci-and-runners.md](ci-and-runners.md)
   (includes self-hosted runner notes — prefer not on prod host).
+- С 2026-08-20 эта схема заменена более строгим режимом: backend push pipeline
+  не создаётся вовсе, а deploy выполняется локальной отдельной командой.
 
 ### 2026-08-06 — CI DevSecOps green-up + admin datetime format
 
@@ -463,10 +495,11 @@ ports, миграционный job, health/smoke checks и off-host test backup
 пользовательские данные и AI в этот контур не входят.
 
 Подготовлено в коде: backend `APP_ENV` enum и immutable image с seed/media;
-mobile `APP_ENV` + `DATA_SOURCE` с запретом mock вне local; GitLab publication
-image по commit SHA; constrained Compose и `deploy-remote.sh`. CI:
-`backend-publish` на `main`/`gamma`, `backend-deploy-stage` на `gamma`,
-`backend-deploy-production` (SSH) только на `main`.
+mobile `APP_ENV` + `DATA_SOURCE` с запретом mock вне local; publication image
+по commit SHA; constrained Compose и `deploy-remote.sh`. Первоначальная схема
+CI имела publish/deploy jobs на `main`/`gamma`; с 2026-08-20 backend push
+pipelines отключены, а та же безопасная доставка вызывается локальным
+`deploy-production-local.sh`.
 
 Проверки 2026-07-26: backend validation `42 passed`, coverage 89.11%,
 pip-audit без известных уязвимостей; runtime image собран локально, seed/media
@@ -574,8 +607,8 @@ Gap backlog: [design-gap-backlog-2026-08-03.md](design/design-gap-backlog-2026-0
 - Nav compose (+ → Опубликовать / Подобрать); places вне tab bar.
 - **Публикация** — полный API+UI flow (не stub).
 - **Подбор** — форма + UI результата; логика = срез каталога до Phase 8A.
-- **Мои маршруты** — избранное и подписки (follows) реальные; история —
-  placeholder.
+- **Моё избранное** — маршруты, места и подписки реальные; для всех трёх
+  разделов есть безопасное swipe/remove + undo. История — placeholder.
 - Travel+ / AI-chat — UI mock only.
 
 ### Документировано (не реализовано): AI route planning

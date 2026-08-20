@@ -97,18 +97,13 @@ possible but does not turn the host into a production-capable server.
 
 ## Delivery flow
 
-1. **Lean CI (default):** on `main`/`gamma`, CI builds/pushes the image only.
-   Lint/tests/scanners are local (`./scripts/validate.sh`). See
-   [ci-and-runners.md](ci-and-runners.md).
-   **Full CI** (`CI_PIPELINE_MODE=full`): lint, types, tests, audits, scanners,
-   then the same publish path.
-2. On `gamma` or `main`, CI pushes an immutable image tagged with the commit
-   SHA, plus a floating tip (`:stage` on `gamma`, `:production` on `main`).
-3. Deploy stage:
-   - `gamma` → GitLab environment `stage` (records the published image; no SSH).
-   - `main` → GitLab environment `production` SSHes with a restricted non-root
-     deploy identity and updates the remote server.
-4. On production deploy, the server pulls the exact image, runs database
+1. Run backend lint, types and tests locally with `./scripts/validate.sh`.
+2. Run `./scripts/deploy-production-local.sh` from a trusted developer machine.
+   Backend push pipelines are disabled while GitLab minutes are low.
+3. The script builds `linux/amd64` and pushes an immutable image tagged with
+   the current commit SHA plus the floating `:production` tag.
+4. The local script SSHes with the restricted non-root deploy identity. The
+   server pulls the exact SHA image, runs database
    migrations once, and recreates the backend container.
 5. Deployment waits for container health (`/health/ready` inside the image),
    then optionally hits the public readiness URL.
@@ -117,16 +112,18 @@ possible but does not turn the host into a production-capable server.
    is not automatic unless the migration has an explicitly reviewed downgrade
    path.
 
-Protected GitLab CI variables for production deploy (names only; values stay in
-GitLab, never Git):
+Local environment variables for production deploy (names only; values stay in
+the operator's shell/password manager, never Git):
 
 ```text
 DEPLOY_SSH_HOST
 DEPLOY_SSH_PORT
 DEPLOY_SSH_USER
-DEPLOY_SSH_PRIVATE_KEY   # type: file
-DEPLOY_SSH_KNOWN_HOSTS   # type: file
+DEPLOY_SSH_PRIVATE_KEY   # path to a file
+DEPLOY_SSH_KNOWN_HOSTS   # path to a file
 DEPLOY_HEALTH_URL        # optional public smoke URL
+CI_REGISTRY_USER
+CI_REGISTRY_PASSWORD
 ```
 
 No source checkout, compiler toolchain, or long-lived GitLab personal token is

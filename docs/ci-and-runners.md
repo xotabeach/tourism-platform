@@ -1,35 +1,48 @@
 # CI modes and runners
 
-How we use GitLab CI while shared-runner minutes are limited, and how to
-bring back the full DevSecOps pipeline or a self-hosted runner later.
+How we avoid GitLab shared-runner usage while the August 2026 minute quota is
+low, and how to bring back automated checks with a self-hosted runner later.
 
-## Two pipeline modes
+## Current low-minutes mode
 
-| Mode | When | What runs on GitLab shared runners |
-| --- | --- | --- |
-| **Lean** (default) | Active day-to-day development | Tiny notice job; backend image publish + manual production deploy; optional manual mobile APK; GitHub mirror |
-| **Full** | Major releases / security push / when minutes allow | Style, tests, gitleaks, Semgrep, pip-audit/OSV, Trivy, APK on main/gamma, then publish/deploy |
+Backend push pipelines are disabled completely. A regular push therefore uses
+zero GitLab runner minutes and does not publish or deploy anything.
 
-Per-repo files:
+The backend `.gitlab-ci.yml` keeps one escape hatch: a pipeline created
+manually through **Build → Pipelines → Run pipeline** exposes a manual
+`backend-publish-manual` job. It builds and pushes the registry image only;
+it does not SSH to production.
 
-- `.gitlab-ci.yml` — lean entrypoint + `include` of full when enabled
-- `.gitlab-ci.full.yml` — archived full DevSecOps definition
+Normal production delivery now runs from a trusted developer machine:
 
-### Switch to full mode
+```bash
+cd tourism-backend
+./scripts/deploy-production-local.sh
+```
 
-GitLab → group `travel-platform2` or a project → **Settings → CI/CD →
-Variables** → add:
+This builds a `linux/amd64` image, pushes immutable `:<git-sha>` and
+`:production` tags, and reuses the pinned-host-key SSH deploy script. It
+consumes no GitLab minutes. Required values are injected only into the local
+shell and never committed:
 
-| Key | Value | Notes |
-| --- | --- | --- |
-| `CI_PIPELINE_MODE` | `full` | Unset or any other value → lean |
+```text
+CI_REGISTRY_USER
+CI_REGISTRY_PASSWORD
+DEPLOY_SSH_HOST
+DEPLOY_SSH_PORT
+DEPLOY_SSH_USER
+DEPLOY_SSH_PRIVATE_KEY
+DEPLOY_SSH_KNOWN_HOSTS
+DEPLOY_HEALTH_URL          # optional
+```
 
-Remove or clear the variable to return to lean. You can also set it only on
-`main` / protected branches if you want lean everywhere else.
+`DEPLOY_SSH_PRIVATE_KEY` and `DEPLOY_SSH_KNOWN_HOSTS` are paths to local files,
+not pasted key bodies. Use `--import-osm-crimea` only for an intentional OSM
+import after deployment.
 
 ### Local quality gates (mandatory in lean mode)
 
-CI no longer blocks merge on style/tests. Before push / before claiming work
+CI does not block merge on style/tests. Before push / before claiming work
 done, run in the touched repo:
 
 ```bash
@@ -50,7 +63,7 @@ must not claim they passed without running them.
 Security-sensitive changes: still follow
 [security/secure-development-lifecycle.md](security/secure-development-lifecycle.md)
 and run `pytest tests/security` / `flutter test test/security` as applicable.
-Prefer enabling **full** CI once before a production release.
+Run the full local validation set before a production release.
 
 ## Shared-runner minutes
 
@@ -59,9 +72,9 @@ retried pipelines still consume the quota. When the namespace hits 0 minutes,
 no new jobs run until the period resets, minutes are purchased, or a
 self-hosted runner is used.
 
-Lean mode exists to keep deploy/APK/mirror possible without burning the
-quota on every push. Feature-branch pushes do **not** start lean pipelines
-(only `main` / `gamma`, manual web/API pipelines, or `CI_PIPELINE_MODE=full`).
+Backend pushes do **not** start pipelines on any branch. A manual web pipeline
+still spends minutes, so it is an emergency registry-build fallback, not the
+default deploy path. Automatic GitHub mirroring is also paused in this mode.
 
 ## Self-hosted runner
 
@@ -103,20 +116,19 @@ unless you intentionally isolate a **deploy** runner with tags.
    shared runners on the group when ready.
 5. Lock the runner to your group; do not enable it for public forks.
 
-Deploy jobs that SSH to production should use a **separate** runner tag and
-minimal privileges (or stay on GitLab shared runners with protected
-variables only on `main`).
+If automatic deploy returns later, its SSH job should use a **separate** runner
+tag and minimal privileges.
 
 ### Until a runner exists
 
-Stay on **lean** CI + local `./scripts/validate.sh`. Buy extra compute
-minutes in GitLab if you need full mode before a self-hosted runner is
-ready.
+Use local `./scripts/validate.sh` and the explicit local deploy command. Buy
+extra compute minutes only if a manual registry build is genuinely needed
+before a self-hosted runner is ready.
 
 ## Related docs
 
 - [security/security-testing-guide.md](security/security-testing-guide.md) —
-  scanner inventory (applies in full mode)
+  scanner inventory for local/re-enabled CI gates
 - [environment-and-backend-deployment.md](environment-and-backend-deployment.md)
   — production deploy variables
 - [mobile-build-and-install.md](mobile-build-and-install.md) — CI APK artifact

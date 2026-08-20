@@ -31,7 +31,7 @@ superproject `workspace`.
 - Markdown, Mermaid.
 - Docker Compose local DX и constrained test host.
 - Bash, PowerShell, Make.
-- GitLab CI lean + `.gitlab-ci.full.yml`.
+- Документация low-minutes CI; backend deploy выполняется локальным скриптом.
 - Целевой home lab: Ollama **Gemma 4** + Qdrant — документы, не этот Compose.
 - Kubernetes/Helm позже **в этом** repository.
 

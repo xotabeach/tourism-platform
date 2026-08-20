@@ -326,7 +326,7 @@ submit, SQLAdmin moderation, public catalog after approve, inbox + mobile
 `route_publish`, own routes on profile (`/routes/mine`).
 
 | Acceptance (core) | Пользователь создаёт draft, сдаёт на модерацию, видит результат |
-| Remaining | Owner drafts/pending queue in «Мои маршруты»; history tab; tighter UX |
+| Remaining | Owner drafts/pending queue; history tab в «Моём избранном»; tighter UX |
 | Dependencies | Auth + places/routes (Phase 8–9 больше не блочат publish) |
 | Не входит (ещё) | Store billing; full social feed of UGC |
 

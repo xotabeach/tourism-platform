@@ -28,7 +28,7 @@ Figma). Живой статус фаз: [progress.md](../progress.md).
 | --- | --- | --- | --- |
 | Nav bar базовый | `00-nav-bar` | есть | polish |
 | Nav + compose (Опубликовать / Подобрать) | `00-nav-plus-compose` | есть | ok |
-| Мои маршруты (избранное / подписки / история) | `10-*` | избранное + follows API; история = placeholder | **partial** |
+| Моё избранное (маршруты / места / подписки / история) | `10-*` | favorites + follows API, двухступенчатый remove; история = placeholder | **partial** |
 | Подбор маршрута (по параметрам) | `20-route-match` | форма UI; без Route Builder API | **UI only** |
 | Подбор (тревел+) параметры | `21-*` | нет | после базового подбора / Phase 12 |
 | Подбор с ИИ (чат) | `22-route-match-ai-chat` | canned local replies | Phase 8B / mock UI |

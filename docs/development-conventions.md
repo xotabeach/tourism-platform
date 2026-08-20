@@ -7,13 +7,16 @@
 Primary CI/CD: **GitLab CI**. GitHub Actions в репозиториях могут оставаться как
 legacy/mirror и не являются источником истины.
 
-Базовый CI-паттерн:
+Текущий CI-паттерн:
 
-- Default **lean** `.gitlab-ci.yml` — notice / publish / manual deploy; не
-  style+tests на shared runners. Локально: `./scripts/validate.sh`.
-- Полный набор (`code-style`, `run-tests`, scanners) — `.gitlab-ci.full.yml`
-  при `CI_PIPELINE_MODE=full`.
-- `mirror` — GitHub showcase после успешного job, если токен задан.
+- Во всех репозиториях quality gates запускаются локально через
+  `./scripts/validate.sh`.
+- В backend push pipelines отключены полностью; deploy — явный локальный
+  `scripts/deploy-production-local.sh`. Web pipeline оставляет только ручную
+  сборку registry image.
+- Mobile/platform пока сохраняют собственные manual/lean jobs; сверяй их
+  `.gitlab-ci.yml`, не предполагай единый режим для всей группы.
+- Автоматический backend `mirror` при push приостановлен вместе с pipeline.
 
 См. [ci-and-runners.md](ci-and-runners.md).
 
@@ -22,8 +25,8 @@ legacy/mirror и не являются источником истины.
 Источник истины — GitLab (`travel-platform2`). GitHub (`xotabeach/*`) —
 read-only витрина.
 
-После успешного pipeline (lean: notice/publish; full: `code-style` +
-`run-tests`) job `github-mirror` может пушить текущий commit:
+Когда mirror jobs будут снова включены, `github-mirror` может пушить текущий
+commit:
 
 - `HEAD → github/<branch>` (обычно `gamma`);
 - дополнительно `HEAD → github/main`, если ветка `gamma` или `main`.

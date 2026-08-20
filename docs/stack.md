@@ -66,9 +66,10 @@ volume backend. FCM требует исходящий HTTPS с backend (сеть
 
 ### 3. CI
 
-GitLab CI **lean** по умолчанию (publish / manual deploy / optional APK).
-Стиль, типы, тесты — локально `./scripts/validate.sh`. Полный DevSecOps —
-`.gitlab-ci.full.yml` при `CI_PIPELINE_MODE=full`.
+Backend push pipelines временно отключены полностью для экономии GitLab
+minutes. Стиль, типы, тесты — локально `./scripts/validate.sh`, production
+deploy — `tourism-backend/scripts/deploy-production-local.sh`. Mobile APK
+остаётся отдельным manual job.
 См. [ci-and-runners.md](ci-and-runners.md).
 
 ---
