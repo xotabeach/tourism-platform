@@ -268,7 +268,13 @@ PrivateKey = <SERVER_PRIVATE_KEY>
 [Peer]
 PublicKey = <WINDOWS_PUBLIC_KEY>
 AllowedIPs = 10.77.0.2/32
+PersistentKeepalive = 25
 ```
+
+Keepalive нужен **на обеих сторонах** (Windows client и server peer): иначе после
+NAT timeout latest handshake устаревает, и TCP к LM Studio (`10.77.0.2:1234`)
+начинает таймаутиться. На сервере с 2026-08-20 выставлено
+`PersistentKeepalive = 25` live + в `/etc/wireguard/wg0.conf`.
 
 Целевое состояние host firewall — открыть для WireGuard только `51820/udp`.
 Порт `1234/tcp` на публичном сервере открывать не нужно. На текущем
@@ -294,65 +300,51 @@ Ubuntu-хосте `ufw` пока не активирован, а INPUT policy �
 удалены с сервера. Приватные ключи и LM Studio token в переписку и Git не
 отправляются.
 
-### 6.4. Checkpoint 2026-08-20
+### 6.4. Checkpoint 2026-08-20 (обновлено)
 
 Подтверждено:
 
-- Windows tunnel импортирован, `PersistentKeepalive = 25` настроен;
-- WireGuard handshake проходит, Windows видна как `10.77.0.2`;
-- LM Studio Desktop слушает `0.0.0.0:1234`;
-- точечное Windows Firewall rule ограничивает TCP 1234 источником
-  `10.77.0.1` и WireGuard-интерфейсом;
-- API token сохранён только в `/opt/crimeatrip-test/.env` с mode `600`;
-- один запрос без токена дошёл до LM Studio и получил ожидаемый HTTP `401`.
+- WireGuard tunnel + `PersistentKeepalive = 25` настроены; handshake проходит.
+- LM Studio Desktop слушает локально; model id `gemma-4-26b-it`.
+- API token в `/opt/crimeatrip-test/.env` (mode `600`); в Git не попадает.
+- Стабильный путь API: Windows-initiated SSH reverse на loopback VPS +
+  forward на docker bridge (детали старта — только на сервере
+  `/opt/crimeatrip-test/HOME_LAB_START.md`, не в этом публичном doc).
+- Backend: `AI_PROVIDER=lmstudio`, `check_lm_studio.py` OK;
+  `reasoning_effort=none` для Gemma 4. Planning/RAG **выключены**.
 
-Не завершено:
+Не завершено (Phase 8B):
 
-- повторные TCP connections нестабильны: после успешного `401` следующие SYN
-  иногда остаются без SYN-ACK и завершаются connect timeout;
-- авторизованный `/v1/models` ещё не дал стабильный ответ;
-- точный runtime model ID и `/v1/chat/completions` не подтверждены;
-- backend-контейнер после добавления token не перезапускался, AI/RAG flags
-  остаются выключенными.
+- пользовательский AI-chat session API в мобильном «Подборе»;
+- включение `AI_PLANNING_ENABLED` после session/quota/BOLA;
+- устойчивый WireGuard server→Windows TCP (опционально вместо reverse SSH).
 
-Точка продолжения:
-
-1. Убедиться, что tunnel активен и latest handshake свежий.
-2. Снять короткий tcpdump `wg0` только для TCP 1234 и одновременно повторить
-   unauth/auth `/v1/models`.
-3. Проверить активные Windows Firewall application-block rules и влияние
-   второго VPN-адаптера с адресом `26.91.122.41`.
-4. После стабильного `/v1/models` сохранить точный model ID и выполнить
-   backend `scripts/check_lm_studio.py`.
-5. Только после успешного smoke-test применить env через controlled container
-   recreate; planning и RAG пока не включать.
-
-Сетевой режим LM Studio:
-<https://lmstudio.ai/docs/developer/core/server/serve-on-network>.
-
-Backend-конфигурация, без реального секрета в Git:
+Backend-конфигурация (без секретов; URL — docker-bridge forward на VPS):
 
 ```env
 AI_PLANNING_ENABLED=false
 AI_PROVIDER=lmstudio
-LM_STUDIO_BASE_URL=http://10.77.0.2:1234/v1
-LM_STUDIO_MODEL=<ТОЧНЫЙ_ID_ИЗ_V1_MODELS>
+LM_STUDIO_BASE_URL=http://172.19.0.1:1234/v1
+LM_STUDIO_MODEL=gemma-4-26b-it
 LM_STUDIO_API_KEY=<SECRET>
 AI_REQUEST_TIMEOUT_SECONDS=60
 AI_MAX_REPAIR_ATTEMPTS=1
 RAG_ENABLED=false
 ```
 
-Settings и OpenAI-compatible connectivity probe реализованы в backend
-`0aee04c`; пользовательские planning endpoints пока не включены. Флаги по
-умолчанию выключены.
+Сетевой режим LM Studio:
+<https://lmstudio.ai/docs/developer/core/server/serve-on-network>.
 
-Проверка с машины, которая должна обращаться к LM Studio:
+Settings и OpenAI-compatible connectivity probe реализованы в backend;
+пользовательские planning endpoints пока не включены. Флаги по умолчанию
+выключены.
+
+Проверка с хоста/контейнера, у которого есть путь к LM Studio:
 
 ```bash
 cd tourism-backend
-LM_STUDIO_BASE_URL=http://10.77.0.2:1234/v1 \
-LM_STUDIO_MODEL='<ТОЧНЫЙ_ID_ИЗ_V1_MODELS>' \
+LM_STUDIO_BASE_URL=http://172.19.0.1:1234/v1 \
+LM_STUDIO_MODEL='gemma-4-26b-it' \
 LM_STUDIO_API_KEY='<SECRET>' \
 uv run python scripts/check_lm_studio.py
 ```

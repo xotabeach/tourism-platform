@@ -4,12 +4,33 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 8A (Route Builder) — match + generate→draft + RoutingProvider
-stub as-built; next = self-host OSRM Crimea + home-lab LM Studio / RAG
+**Текущая фаза:** Phase 8A done (match + generate→draft + RoutingProvider stub).
+**Next:** Phase 8B (AI chat sessions + LM Studio planning) — завтра.
 
 **Последнее обновление:** 2026-08-20
 
 ## Changelog
+
+### 2026-08-20 — LM Studio home lab reachable (planning still off)
+
+- WireGuard handshake ок, но server→Windows TCP к LM Studio нестабилен; для
+  API выбран Windows-initiated SSH reverse + host→docker bridge forward
+  (операционные команды — **только** на VPS
+  `/opt/crimeatrip-test/HOME_LAB_START.md`, не в публичных docs).
+- Prod: `AI_PROVIDER=lmstudio`, `LM_STUDIO_MODEL=gemma-4-26b-it`,
+  planning/RAG **off**. `check_lm_studio.py` OK после `reasoning_effort=none`
+  (Gemma 4 иначе заполняет `reasoning_content`, пустой `content`).
+- Phase 8B (AI chat sessions в приложении) — следующий шаг.
+
+### 2026-08-20 — WireGuard server PersistentKeepalive
+
+- На VPS peer Windows добавлен `PersistentKeepalive = 25` (live `wg set` +
+  `/etc/wireguard/wg0.conf`): сервер сам шлёт keepalive каждые 25 с.
+- Если latest handshake всё равно стареет и `received` не растёт — на Windows
+  туннель выключен или не шлёт пакеты; нужен активный WireGuard client с
+  `PersistentKeepalive = 25` в его `[Peer]`.
+- Дальше по плану LM Studio: свежий handshake → `/v1/models` →
+  `check_lm_studio.py` → env в backend (planning/RAG пока off).
 
 ### 2026-08-20 — Match catalog seed (прод)
 
