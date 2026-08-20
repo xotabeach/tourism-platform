@@ -159,6 +159,7 @@ workspace/
 - [AI-чат и генерация маршрута](docs/ai-route-chat-mobile-implementation.md)
 - [Architecture decisions](docs/decisions)
 - [CI / runners](docs/ci-and-runners.md)
+- [Production backend deploy runbook](docs/production-backend-deploy-runbook.md)
 
 ## Дальнейшие шаги
 

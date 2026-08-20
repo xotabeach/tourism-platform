@@ -20,6 +20,10 @@ cd tourism-backend
 ./scripts/deploy-production-local.sh
 ```
 
+The complete operator flow, verification, rollback, and the direct pinned-SSH
+fallback for expired Registry credentials are documented in
+[`production-backend-deploy-runbook.md`](production-backend-deploy-runbook.md).
+
 This builds a `linux/amd64` image, pushes immutable `:<git-sha>` and
 `:production` tags, and reuses the pinned-host-key SSH deploy script. It
 consumes no GitLab minutes. Required values are injected only into the local

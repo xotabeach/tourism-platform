@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Remote test-contour deploy. Runs on the server under a restricted deploy user.
 # Usage: deploy-remote.sh <immutable-backend-image-ref>
+# Set DEPLOY_SKIP_PULL=true only when the exact image was loaded over the
+# pinned SSH connection immediately before this script is called.
 #
 # Example:
 #   ./deploy-remote.sh registry.gitlab.com/travel-platform2/tourism-backend:<sha>
@@ -37,6 +39,17 @@ esac
 
 cd "${DEPLOY_DIR}"
 
+if [[ "${DEPLOY_SKIP_PULL:-false}" == "true" ]]; then
+  if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
+    printf 'Error: local image is missing while DEPLOY_SKIP_PULL=true: %s\n' \
+      "${IMAGE}" >&2
+    exit 1
+  fi
+elif [[ "${DEPLOY_SKIP_PULL:-false}" != "false" ]]; then
+  printf 'Error: DEPLOY_SKIP_PULL must be true or false.\n' >&2
+  exit 1
+fi
+
 PREVIOUS="$(awk -F= '/^BACKEND_IMAGE=/{print $2; exit}' "${ENV_FILE}" || true)"
 printf 'Deploying backend image: %s\n' "${IMAGE}"
 if [[ -n "${PREVIOUS}" ]]; then
@@ -61,7 +74,9 @@ if docker volume inspect crimeatrip-test_media-data >/dev/null 2>&1; then
     chown -R 10001:10001 /data
 fi
 
-"${COMPOSE[@]}" pull backend
+if [[ "${DEPLOY_SKIP_PULL:-false}" != "true" ]]; then
+  "${COMPOSE[@]}" pull backend
+fi
 "${COMPOSE[@]}" up --detach postgres redis
 "${COMPOSE[@]}" --profile tools run --rm migrate
 "${COMPOSE[@]}" up --detach --force-recreate --no-deps backend
