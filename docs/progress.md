@@ -4,12 +4,56 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 5 polish + ops; next = managed notifications
-(T6.5.3), then Phase 8A (Route Builder)
+**Текущая фаза:** Phase 8A (Route Builder) — match + generate→draft + RoutingProvider
+stub as-built; next = self-host OSRM Crimea + home-lab LM Studio / RAG
 
 **Последнее обновление:** 2026-08-20
 
 ## Changelog
+
+### 2026-08-20 — RoutingProvider stub + план OSRM по Крыму
+
+- Application port `RoutingProvider` + `StubRoutingProvider` (haversine ×
+  road factor, `synthetic=true`, typed `routing_unreachable` /
+  `route_too_long`).
+- Generate/accept вызывают routing до persist: `distance_meters`, synthetic
+  LINESTRING, warnings в `accessibility.routing`.
+- План self-host: `docs/routing-provider-osrm-crimea.md` (extract, compose,
+  swap stub→OSRM). OSRM container ещё не поднят.
+- ADR-004 ссылается на as-built stub и OSRM-план.
+
+### 2026-08-20 — Place planning fields + OSM/content enrich CLI
+
+- Миграция `0029`: crowding, price range, access_transport, parking,
+  content enrichment provenance/`proposed_slug`, таблица `road_events`.
+- `scripts/enrich_places_facts.py` — backfill фактов из Overpass
+  `source_payload` (как продолжение `import_osm_crimea.py`).
+- `scripts/enrich_places_content.py` — эвристические draft slug/описания
+  (`generated_draft`); `--llm` зарезервирован под home-lab Gemma.
+- API place detail/list отдаёт новые поля; docs bulk-import §2.5 обновлён.
+
+### 2026-08-20 — Generate→черновик, расширенные поля, proposal в AI-чате
+
+- Backend: `POST /route-builder/generate` (form → private `routes(source=generated)`
+  draft; chat → proposal + blocks), accept/reject proposals, UsageCounter
+  (free weekly 5 / Travel+ daily 30), миграция `0028`.
+- Deterministic place picker по городу/интересам/сезону без LLM.
+- Mobile: расширенные поля формы (сезон, транспорт, день, бюджет+, дети/питомцы);
+  CTA генерации на результатах; AI-чат показывает proposal card с действиями.
+- Owned routes API включает `source=generated`.
+
+### 2026-08-20 — Три пути подбора + algorithmic match API
+
+- Канон: params free/Travel+ → алгоритмический catalog match; Travel+ + AI →
+  NN-ранжирование каталога; miss → генерация (квоты разные); AI-чат → proposal
+  в сообщении (создать / черновик / уточнить). Документ:
+  `docs/ai-route-match-three-paths.md`.
+- Backend `POST /api/v1/route-builder/match`: детерминированный scoring
+  публичных маршрутов (город, длительность, интересы, темп, сезон, транспорт,
+  дети/питомцы), bands ideal/close, `offer_generate`.
+- Mobile: форма «Подобрать» бьёт в match API; экран результатов показывает
+  ranked hits и CTA генерации; виджет `ChatRouteProposalCard` для будущего
+  chat-flow.
 
 ### 2026-08-20 — Travel+ AI-контракт, entitlements и топик-гард
 

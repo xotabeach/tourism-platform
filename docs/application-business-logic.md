@@ -295,11 +295,13 @@ config-реализация, бесплатный план по умолчани
 
 ## 15. Границы бесплатной версии
 
-Канон для подбора/генерации (согласован с paywall Figma и
-[ai-route-chat-product-contract.md](ai-route-chat-product-contract.md)):
+Канон для подбора/генерации (согласован с paywall Figma,
+[ai-route-chat-product-contract.md](ai-route-chat-product-contract.md) и
+[ai-route-match-three-paths.md](ai-route-match-three-paths.md)):
 
-- подбор **по параметрам** — да;
+- подбор **по параметрам** — да, **алгоритмический** catalog match на backend;
 - подбор **с ИИ** — нет (только Travel+);
+- при слабом match — CTA **сгенерировать** (квоты free);
 - до **5** генераций маршрута в неделю;
 - до **5** точек в сгенерированном маршруте;
 - один вариант результата;
@@ -311,11 +313,15 @@ config-реализация, бесплатный план по умолчани
 
 Канон при активной подписке:
 
-- **AI-чат подбора** и conversational refine;
+- **AI-чат подбора** и conversational refine; proposal сначала **в чате**,
+  затем создать / в черновик;
+- params-подбор: алгоритм + **NN-ранжирование каталога** (когда AI provider
+  включён); иначе тот же алгоритм, что у free;
 - soft daily cap генераций в конфиге (без жёсткого «5/неделю»);
 - до **12** точек в маршруте;
 - до **3** вариантов результата;
-- расширенные фильтры (бюджет, ETA, accessibility, дети/питомцы);
+- расширенные фильтры (бюджет, ETA, accessibility, дети/питомцы, сезон,
+  транспорт, выходные);
 - без рекламы в подборе;
 - эксклюзивные/экспертные подборки — когда контент размечен;
 - повышенный множитель тп (config) после award pipeline;
@@ -323,8 +329,8 @@ config-реализация, бесплатный план по умолчани
 
 Инвариант: free form-builder не деградирует намеренно.
 Сценарий «proposal в чате → согласие → `routes(source=generated)`» и
-топик-гард ассистента:
-[ai-route-chat-product-contract.md](ai-route-chat-product-contract.md).
+полный канон трёх путей: [ai-route-match-three-paths.md](ai-route-match-three-paths.md),
+топик-гард: [ai-route-chat-product-contract.md](ai-route-chat-product-contract.md).
 См. также [ai-route-planning-architecture.md](ai-route-planning-architecture.md)
 и [ai-route-system-end-to-end.md](ai-route-system-end-to-end.md).
 

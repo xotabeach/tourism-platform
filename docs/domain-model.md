@@ -322,7 +322,8 @@ Invariants:
 Концепты: `Plan`, `Subscription`, `Entitlement`, `UsageCounter`,
 `QuotaPolicy`. As-built: `users.travel_plus_*` + таблица
 `travel_plus_subscriptions`; проверки квот — через `EntitlementService`.
-Канон AI/подбора: [ai-route-chat-product-contract.md](ai-route-chat-product-contract.md).
+Канон AI/подбора: [ai-route-chat-product-contract.md](ai-route-chat-product-contract.md),
+[ai-route-match-three-paths.md](ai-route-match-three-paths.md).
 Store billing — позже.
 
 ## Identity и users

@@ -65,8 +65,20 @@ uv run python scripts/seed_crimea.py --file data/extra_places.json --places-only
 - `data_quality_status` — автоматическая проверка не равна публикации;
 - `recommended_visit_minutes`, `is_suitable_for_pets`.
 
+Добавлено (миграция `0029`, enrich CLI):
+
+- `typical_crowding` — `unknown|low|medium|high`;
+- `price_min_amount` / `price_max_amount` / `price_currency`;
+- `access_transport` (walk/car/bike/public), `parking_available`;
+- `content_enrichment_status` + `content_enrichment` provenance +
+  `proposed_slug` (черновик человекочитаемого slug);
+- таблица `road_events` для перекрытий/ограничений (SoT, не RAG).
+
 OSM-объекты импортируются как `draft`; реальный entrance не заменяется
-центроидом way/relation.
+центроидом way/relation. Backfill фактов:
+`scripts/enrich_places_facts.py`; черновики текстов:
+`scripts/enrich_places_content.py` (см.
+[crimea-places-bulk-import-plan.md](crimea-places-bulk-import-plan.md) §2.5).
 
 Route / RouteStop (Phase 4): `source` ∈ {editorial, generated, user_created};
 stable `place_id`; provider-neutral geometry и порядок stops.

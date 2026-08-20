@@ -11,12 +11,15 @@
 - [application-business-logic.md](application-business-logic.md) §13–16;
 - [ADR-006](decisions/ADR-006-ai-assisted-route-planning.md).
 
-## 1. Два режима подбора
+## 1. Режимы подбора (см. канон трёх путей)
+
+Полная схема: [ai-route-match-three-paths.md](ai-route-match-three-paths.md).
 
 | Режим | Кому | Что делает |
 | --- | --- | --- |
-| По параметрам | все авторизованные | form → deterministic Route Builder (Phase 8A) или срез каталога до 8A |
-| Подбор с ИИ | только **активный Travel+** | чат → typed constraints → generate → **карточка предложения** → согласие → `routes(source=generated)` |
+| По параметрам | все авторизованные | form → **algorithmic catalog match**; при Travel+ + AI flag — NN rerank; при слабом match — CTA генерации |
+| Генерация (после miss / явный запрос) | free и Travel+ (разные квоты и поля) | params → Route Builder → **черновик** (form) |
+| Подбор с ИИ | только **активный Travel+** | чат → уточнения → generate → **карточка proposal в чате** → создать / в черновик / уточнить |
 
 Без Travel+ UI не открывает AI-режим (переключатель и CTA ведут на paywall).
 Сервер обязан повторить ту же проверку на любом AI endpoint (BOLA/quota).
@@ -210,12 +213,12 @@ widgets/chat_message_blocks.dart
 ## 5. Порядок внедрения (обновлённый)
 
 1. ~~Travel+ в БД + gate AI UI~~ (as-built 2026-08-20).
-2. `EntitlementService` + QuotaPolicy free/Travel+ (этот срез).
-3. Topic/crisis guard на mobile + те же коды на backend `/messages`.
-4. Phase 8A deterministic generate (form).
-5. Sessions + generate + **proposal draft** + accept→route.
+2. ~~`EntitlementService` + QuotaPolicy + mobile topic guard~~.
+3. Algorithmic `POST /route-builder/match` + mobile results (см. three-paths).
+4. Phase 8A deterministic generate (form → draft).
+5. Sessions + generate + **proposal в чате** + accept / to-draft.
 6. Chat blocks: place chips + proposal card.
-7. LM Studio adapter за flag; system prompt = topic guard.
+7. LM Studio: catalog rerank + interpreter; system prompt = topic guard.
 8. Alternatives / расширенные фильтры / offline / тп-множитель.
 
 ## 6. Definition of done (продуктовый)

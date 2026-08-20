@@ -151,26 +151,48 @@ ORDER BY count(*) DESC;
 
 Приоритет: **ближайшая реализация**, до массовой публикации OSM places.
 
+- [x] CLI `scripts/enrich_places_facts.py` — backfill crowding / price /
+  transport / parking / seasonality / visit minutes из `source_payload` OSM.
+- [x] Миграция `0029`: `typical_crowding`, price range, `access_transport`,
+  `parking_available`, `content_enrichment*`, `proposed_slug`, таблица
+  `road_events`.
+- [x] CLI `scripts/enrich_places_content.py` — эвристический draft
+  `proposed_slug` + `short_description`/`description` со статусом
+  `generated_draft` (не публикует автоматически).
+- [ ] Подключить LM Studio (`--llm`) для генерации текстов из allowlisted facts.
 - [ ] Заменять технический `osm-{type}-{id}` на человекочитаемый slug из
   нормализованного `name`; при совпадении добавлять устойчивый короткий суффикс
-  из source identity, не порядковый номер запуска.
+  из source identity, не порядковый номер запуска. *(частично: для draft OSM
+  slug обновляется при `--apply` content enrich)*
 - [ ] Не менять уже опубликованный slug без таблицы redirect/alias.
-- [ ] Добавить статусы enrichment: `missing`, `generated_draft`,
+- [x] Добавить статусы enrichment: `missing`, `generated_draft`,
   `editorial_reviewed`, `rejected`.
 - [ ] Генерировать `short_description` и `description` через Gemma только из
   подтверждённых place facts и разрешённых RAG-фрагментов.
-- [ ] Хранить provenance текста: provider/model, prompt version, source IDs,
-  content hash и `generated_at`.
+- [x] Хранить provenance текста: provider/model, prompt version, source IDs,
+  content hash и `generated_at` (в `content_enrichment` JSONB).
 - [ ] Проверять длину, язык, дубли, запрещённые утверждения и упоминания
   координат/цен/расписаний, которых нет в SoT.
 - [ ] Добавить в SQLAdmin очередь предпросмотра, пакетного подтверждения и
   ручной правки; AI-текст не публикуется автоматически.
-- [ ] Сделать идемпотентную CLI/job-команду с batch size, resume и dry-run;
+- [x] Сделать идемпотентную CLI/job-команду с batch size, resume и dry-run;
   cron допускается только как расписание этой команды, а не как безусловная
   перезапись slug/описаний.
 
-До завершения этапа текущие технические slug остаются стабильными, а пустые
-описания считаются честным состоянием данных.
+Команды:
+
+```bash
+# Факты из уже сохранённого Overpass payload (dry-run → --apply)
+uv run python scripts/enrich_places_facts.py --limit 1000
+uv run python scripts/enrich_places_facts.py --limit 1000 --apply
+
+# Черновики slug/описаний (эвристика; --llm когда home lab готов)
+uv run python scripts/enrich_places_content.py --limit 200
+uv run python scripts/enrich_places_content.py --limit 200 --apply
+```
+
+До завершения этапа текущие технические slug остаются стабильными для
+published мест, а пустые описания считаются честным состоянием данных.
 
 ## Этап 3 — граница и дубли
 

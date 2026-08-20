@@ -6,6 +6,8 @@
 [ADR-004](decisions/ADR-004-routing-provider-abstraction.md),
 [implementation-plan.md](implementation-plan.md) (Phase 8A/8B),
 [application-business-logic.md](application-business-logic.md),
+продуктовый канон трёх путей:
+[ai-route-match-three-paths.md](ai-route-match-three-paths.md),
 сквозной поток запрос→маршрут→данные:
 [ai-route-system-end-to-end.md](ai-route-system-end-to-end.md),
 home lab: [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md),

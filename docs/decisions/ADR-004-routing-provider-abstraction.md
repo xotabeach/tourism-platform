@@ -17,10 +17,12 @@ Module `route_builder` определяет application port `RoutingProvider`.
 Нормализованный contract принимает waypoints, transport mode и ограничения, а
 возвращает legs, distance, duration, geometry, provider metadata и warnings.
 
-Первой реализацией будет deterministic stub. Он поддерживает разработку и
-тестирование без network или API key. Реальные adapters, включая возможный
-OpenRouteService adapter, добавляются позднее и не раскрывают provider-specific
-types за пределами `infrastructure`.
+Первой реализацией является deterministic stub (`StubRoutingProvider`). Он
+поддерживает разработку и тестирование без network или API key. План
+self-host OSRM по Крыму и swap stub→OSRM:
+[routing-provider-osrm-crimea.md](../routing-provider-osrm-crimea.md).
+Реальные adapters не раскрывают provider-specific types за пределами
+`infrastructure`.
 
 ## Последствия
 
