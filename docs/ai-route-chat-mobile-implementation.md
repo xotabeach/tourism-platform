@@ -1,6 +1,9 @@
 # AI-чат подбора и генерация маршрута — план реализации
 
-Статус: **точный контракт будущей реализации**, код ещё не начат.
+Статус: **точный контракт будущей реализации**; продуктовый UX (Travel+,
+топик-гард, proposal→accept) зафиксирован в
+[ai-route-chat-product-contract.md](ai-route-chat-product-contract.md).
+Код pipeline ещё не начат; Travel+ gate и mobile topic/crisis guard — as-built.
 
 Экран-референс: `design/screens-figma/krymtrip-2/22-route-match-ai-chat.png`.
 Результат: `23-route-match-results.png`. Реализация начинается после
@@ -33,9 +36,14 @@ Flutter не знает IP LM Studio, model ID, API token, Qdrant или SQL. Д
 7. Нажатие создаёт idempotent generation request.
 8. UI показывает этапы: подбор мест → проверка ограничений → построение пути →
    готово.
-9. Backend возвращает маршрут или детерминированный fallback.
-10. Экран результата позволяет сохранить, перестроить или вернуться в чат с
-    текущими constraints.
+9. Backend возвращает **proposal draft** (ещё не `routes` row).
+10. В чате показываются structured blocks: place chips + proposal card +
+    действия «Создать маршрут» / «Уточнить» / «Другой вариант».
+11. После явного accept создаётся `routes(source=generated)` и открывается
+    карточка маршрута. Reject/refine возвращает в чат с теми же constraints.
+
+Детали блоков и топик-гарда:
+[ai-route-chat-product-contract.md](ai-route-chat-product-contract.md).
 
 ## Кнопка генерации
 

@@ -11,6 +11,29 @@
 
 ## Changelog
 
+### 2026-08-20 — Travel+ AI-контракт, entitlements и топик-гард
+
+- Канон преимуществ Travel+ / free для подбора и AI, топик-гард с типовыми
+  ответами и сценарий proposal→accept→новый маршрут с place/proposal blocks в
+  чате: `docs/ai-route-chat-product-contract.md`.
+- Backend `EntitlementService`/`QuotaPolicy`: free vs Travel+ лимиты;
+  `/me` отдаёт `ai_chat_enabled`, `max_route_points`, `alternatives_count`,
+  `advanced_filters_enabled`.
+- Mobile AI-чат: классификатор intent + canned replies (greeting / off-topic /
+  injection / crisis) до вызова LLM.
+
+### 2026-08-20 — Travel+ в БД и гейт «Подбор с ИИ»
+
+- Добавлены `users.travel_plus_active` / `expires_at` / `plan` и таблица
+  `travel_plus_subscriptions` (миграция `0027`): история периодов +
+  денормализованный флаг для `/me`.
+- API: `POST /me/travel-plus/activate` (mock checkout) и
+  `POST /me/travel-plus/cancel`; SQLAdmin — выдача/снятие Travel+ и список
+  подписок.
+- Mobile читает статус из сессии/`/me`; раздел «Подбор с ИИ» и CTA открываются
+  только при активной подписке, иначе — экран Travel+.
+- Реальная оплата Store ещё не подключена; mock checkout пишет подписку в БД.
+
 ### 2026-08-20 — Топ путешественников, карточка локации и CI без push pipelines
 
 - Экран «Топ путешественников» перевёрстан по макету: отдельная позиция
@@ -300,7 +323,7 @@ Code audit vs living docs. Corrected stale claims:
 | 9 | Route execution | pending |
 | 10 | Stabilization and staging | pending |
 | 11 | User-created routes (publish + moderation) | in_progress |
-| 12 | Travel+ foundations | pending |
+| 12 | Travel+ foundations | in_progress |
 | 13 | Trip Planner | pending |
 | 14 | Traveler progress (catalog as-built; award rules remain) | in_progress |
 

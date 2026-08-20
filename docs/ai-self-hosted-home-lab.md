@@ -5,6 +5,7 @@
 Связанные практические документы:
 
 - [Windows + LM Studio + Gemma 4 26B](ai-lm-studio-windows-gemma4.md)
+- [AI-чат: продукт, Travel+, топик-гард, proposal→accept](ai-route-chat-product-contract.md)
 - [AI-чат подбора и кнопка генерации](ai-route-chat-mobile-implementation.md)
 
 **Статус кода:** adapter ещё не implemented. **Статус архитектуры:**

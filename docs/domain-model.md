@@ -319,9 +319,11 @@ Invariants:
 
 ## Subscriptions / Travel+ (foundation)
 
-Концепты (без billing в MVP): `Plan`, `Subscription`, `Entitlement`,
-`UsageCounter`, `QuotaPolicy`. Бизнес-код обращается к `EntitlementService`,
-а не к `user.is_premium`. Лимиты — только в конфигурации политики.
+Концепты: `Plan`, `Subscription`, `Entitlement`, `UsageCounter`,
+`QuotaPolicy`. As-built: `users.travel_plus_*` + таблица
+`travel_plus_subscriptions`; проверки квот — через `EntitlementService`.
+Канон AI/подбора: [ai-route-chat-product-contract.md](ai-route-chat-product-contract.md).
+Store billing — позже.
 
 ## Identity и users
 

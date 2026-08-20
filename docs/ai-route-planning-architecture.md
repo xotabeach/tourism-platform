@@ -361,8 +361,11 @@ cost; latency.
 
 ## 23. Travel+ integration
 
-Phase 12 добавляет policy для AI features без billing. Conversational planner —
-Future после 8B + entitlements. Free form builder не деградирует намеренно.
+Phase 12: durable Travel+ rows + `EntitlementService` / `QuotaPolicy`.
+AI-чат только при активной подписке. Канон лимитов и сценарий
+proposal→accept→route:
+[ai-route-chat-product-contract.md](ai-route-chat-product-contract.md).
+Conversational LLM — после 8B; free form builder не деградирует намеренно.
 
 ## 24. Rollout plan
 
