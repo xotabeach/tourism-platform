@@ -270,9 +270,12 @@ PublicKey = <WINDOWS_PUBLIC_KEY>
 AllowedIPs = 10.77.0.2/32
 ```
 
-В host firewall открыть только `51820/udp`. Порт `1234/tcp` на публичном
-сервере открывать не нужно. После запуска `wg0` проверить на сервере
-`wg show` и `ping 10.77.0.2`.
+Целевое состояние host firewall — открыть для WireGuard только `51820/udp`.
+Порт `1234/tcp` на публичном сервере открывать не нужно. На текущем
+Ubuntu-хосте `ufw` пока не активирован, а INPUT policy — ACCEPT; включать UFW
+без отдельного аудита SSH `6579`, Caddy и Docker chains нельзя, чтобы не
+оборвать deploy и публичный API. После запуска `wg0` проверить на сервере
+`wg show` и доступность `10.77.0.2`.
 
 ### 6.3. Ограничить LM Studio
 
@@ -290,6 +293,39 @@ AllowedIPs = 10.77.0.2/32
 отдельным локальным файлом, после чего его приватный ключ и копия конфига
 удалены с сервера. Приватные ключи и LM Studio token в переписку и Git не
 отправляются.
+
+### 6.4. Checkpoint 2026-08-20
+
+Подтверждено:
+
+- Windows tunnel импортирован, `PersistentKeepalive = 25` настроен;
+- WireGuard handshake проходит, Windows видна как `10.77.0.2`;
+- LM Studio Desktop слушает `0.0.0.0:1234`;
+- точечное Windows Firewall rule ограничивает TCP 1234 источником
+  `10.77.0.1` и WireGuard-интерфейсом;
+- API token сохранён только в `/opt/crimeatrip-test/.env` с mode `600`;
+- один запрос без токена дошёл до LM Studio и получил ожидаемый HTTP `401`.
+
+Не завершено:
+
+- повторные TCP connections нестабильны: после успешного `401` следующие SYN
+  иногда остаются без SYN-ACK и завершаются connect timeout;
+- авторизованный `/v1/models` ещё не дал стабильный ответ;
+- точный runtime model ID и `/v1/chat/completions` не подтверждены;
+- backend-контейнер после добавления token не перезапускался, AI/RAG flags
+  остаются выключенными.
+
+Точка продолжения:
+
+1. Убедиться, что tunnel активен и latest handshake свежий.
+2. Снять короткий tcpdump `wg0` только для TCP 1234 и одновременно повторить
+   unauth/auth `/v1/models`.
+3. Проверить активные Windows Firewall application-block rules и влияние
+   второго VPN-адаптера с адресом `26.91.122.41`.
+4. После стабильного `/v1/models` сохранить точный model ID и выполнить
+   backend `scripts/check_lm_studio.py`.
+5. Только после успешного smoke-test применить env через controlled container
+   recreate; planning и RAG пока не включать.
 
 Сетевой режим LM Studio:
 <https://lmstudio.ai/docs/developer/core/server/serve-on-network>.
@@ -370,10 +406,10 @@ LoRA рассматриваем после gold-set тестов. Датасет
 - [ ] Записаны tok/s, VRAM и RAM.
 - [ ] `/v1/models` отвечает на localhost.
 - [ ] `/v1/chat/completions` отвечает с API token.
-- [ ] Порт 1234 не открыт в WAN.
-- [ ] WireGuard `10.77.0.1 ↔ 10.77.0.2` настроен до LAN serve.
+- [x] Порт LM Studio 1234 не публиковался в WAN.
+- [x] WireGuard `10.77.0.1 ↔ 10.77.0.2` настроен до LAN serve.
 - [ ] Backend-host видит API по приватному адресу.
-- [ ] Секрет не хранится в Git.
+- [x] Секрет не хранится в Git.
 
 Следующий этап — retrieval опубликованных places, JSON-schema validator и
 deterministic fallback. RAG включается после стабильного каталога PostGIS.

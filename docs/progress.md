@@ -7,9 +7,36 @@
 **Текущая фаза:** Phase 5 polish + ops; next = managed notifications
 (T6.5.3), then Phase 8A (Route Builder)
 
-**Последнее обновление:** 2026-08-19
+**Последнее обновление:** 2026-08-20
 
 ## Changelog
+
+### 2026-08-20 — Checkpoint Windows AI VPN и LM Studio API
+
+- На сервере установлен WireGuard, поднят и включён в автозапуск интерфейс
+  `wg0`: server `10.77.0.1/24`, Windows peer `10.77.0.2/32`, публичный endpoint
+  использует только `51820/udp`.
+- Windows-конфиг импортирован как split-tunnel; настроен
+  `PersistentKeepalive = 25`. Handshake и двусторонний служебный трафик
+  подтверждены. Клиентский приватный ключ и копия конфига удалены с сервера.
+- LM Studio Desktop слушает `0.0.0.0:1234`; Windows Firewall ограничивает
+  входящий TCP 1234 адресом сервера `10.77.0.1` на WireGuard-интерфейсе.
+- `LM_STUDIO_API_KEY` вручную сохранён в `/opt/crimeatrip-test/.env` с mode
+  `600`; значение не выводилось, не логировалось и не попадало в Git. Текущий
+  backend-контейнер после этого не перезапускался.
+- Backend один раз получил ожидаемый `401` от
+  `http://10.77.0.2:1234/v1/models`, чем подтверждён полный сетевой путь до LM
+  Studio. Повторные TCP-соединения пока нестабильны и иногда истекают по
+  connect timeout; авторизованный `/v1/models`, model ID и chat completion ещё
+  не подтверждены.
+- Следующее продолжение начинать с tcpdump на `wg0:1234` и проверки активных
+  Windows Firewall/сторонних VPN rules. Затем получить точный model ID,
+  выполнить `scripts/check_lm_studio.py` и только после успешного smoke-теста
+  обновить/recreate backend-контейнер. `AI_PLANNING_ENABLED` и `RAG_ENABLED`
+  остаются выключенными.
+- Отдельный ops-gap: на текущем Ubuntu-хосте `ufw` не активирован, INPUT policy
+  — ACCEPT. Не включать UFW без аудита SSH `6579`, Caddy и Docker chains;
+  подготовить отдельный безопасный firewall hardening.
 
 ### 2026-08-19 — PostGIS bulk import и Windows LM Studio home lab
 
