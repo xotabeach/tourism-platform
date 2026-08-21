@@ -5,11 +5,28 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 8B (AI chat sessions + LM Studio planning) — in progress.
-**Next:** enable `AI_PLANNING_ENABLED` on prod after deploy; wire Travel+ smoke.
+**Next:** interactive chat smoke on device (chips + proposal); Travel+ smoke.
 
 **Последнее обновление:** 2026-08-21
 
 ## Changelog
+
+### 2026-08-21 — Phase 8B session management (new chat)
+
+- Sessions + messages already persisted (migration `0030`); owner BOLA.
+- API: `GET /sessions`, `POST /sessions/{id}/close`,
+  `GET /sessions/{id}/messages` (bounded pagination).
+- Mobile: кнопка «Новый чат» — close текущей + create новой + очистка UI.
+- Список прошлых чатов в UI — ещё не сделан (API list готов).
+
+### 2026-08-21 — Phase 8B interactive chat (no canned greeting)
+
+- Greeting → LLM с жёстким system prompt (без «Привет! У меня всё супер»).
+- Короткое «давай»/confirm → deterministic generate + proposal card
+  (place chips + кнопки), не free-form itinerary.
+- Clarification replies несут action chips («Подбери маршрут», настроение).
+- Mobile рендерит place chips + action chips; local canned только
+  crisis/off-topic/injection.
 
 ### 2026-08-21 — Phase 8B first slice: planning sessions API
 

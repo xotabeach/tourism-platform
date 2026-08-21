@@ -68,7 +68,10 @@ Flutter не знает IP LM Studio, model ID, API token, Qdrant или SQL. Д
 
 ```text
 POST   /api/v1/route-builder/sessions
+GET    /api/v1/route-builder/sessions
 GET    /api/v1/route-builder/sessions/{session_id}
+POST   /api/v1/route-builder/sessions/{session_id}/close
+GET    /api/v1/route-builder/sessions/{session_id}/messages
 POST   /api/v1/route-builder/sessions/{session_id}/messages
 PATCH  /api/v1/route-builder/sessions/{session_id}/constraints
 POST   /api/v1/route-builder/sessions/{session_id}/generate
@@ -76,6 +79,11 @@ GET    /api/v1/route-builder/generations/{request_id}
 GET    /api/v1/route-builder/generations/{request_id}/events
 POST   /api/v1/route-builder/generations/{request_id}/cancel
 ```
+
+Сессии и сообщения персистятся в БД (`route_planning_sessions` /
+`route_planning_messages`), owner-scoped (BOLA). Mobile: кнопка «Новый чат»
+закрывает текущую сессию и создаёт новую. Список сессий в UI — следующий
+срез.
 
 `events` — SSE либо обычный polling на первом срезе. WebSocket не нужен, пока
 нет доказанной двусторонней realtime-потребности.
