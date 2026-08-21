@@ -12,6 +12,23 @@ Travel+ smoke.
 
 ## Changelog
 
+### 2026-08-21 — AI chat match-first + design-spec screens + RAG pgvector
+
+- Chat: catalog match before generate; `catalog_match` carousel; assembled
+  proposal (start/finish/locations); stack starter actions; control_ack;
+  seasonal tips only on AI fallback; tone mirroring in LM Studio prompt.
+- Docs: product contract match-first; [ADR-008](decisions/ADR-008-rag-pgvector.md).
+- Mobile: design-spec greeting, carousel, assembled card, silent controls,
+  typing dots without bubble.
+
+### 2026-08-21 — RAG on pgvector (ADR-008)
+
+- Narrative chunks in Postgres: migration `0032_knowledge_chunks`, HNSW.
+- Image: `crimeatrip/postgis-pgvector:16-3.4` (`docker/postgres`).
+- Ingest: `scripts/ingest_knowledge.py --apply --embed`; retrieve hybrid
+  (cosine + FTS fallback); chat wires `knowledge` DATA when `RAG_ENABLED`.
+- Docs: [ADR-008](decisions/ADR-008-rag-pgvector.md).
+
 ### 2026-08-21 — Phase 8B stated-vs-draft constraints (no «Учли» strip)
 
 - `confirmed_fields` = только явный ввод в чате; форма больше не сидится

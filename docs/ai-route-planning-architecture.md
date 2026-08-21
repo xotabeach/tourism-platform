@@ -149,7 +149,9 @@ VRAM, ingest, TTL, чеклисты):
   `GemmaAIPlanningProvider` / `OllamaAIPlanningProvider` за тем же port.
 - Модели: **Gemma 4**; на ~12 GB VRAM default **`gemma4:12b`** (не откат на
   Gemma 2/3). `26b` — probe; `31b` — не default. См. home-lab §5.
-- RAG: Qdrant + embed model; long-form only. PostGIS остаётся SoT для фактов.
+- RAG: **pgvector in the same Postgres** (ADR-008) for Phase 8B narrative
+  chunks; Qdrant optional later for home-lab scale. PostGIS остаётся SoT
+  для фактов.
 - Оркестратор — FastAPI modular monolith (не отдельный Laravel/AI backend).
 - Сначала Docker Compose на одной машине; Kubernetes — только при SLA/ops need.
 - Optional LoRA для planning behaviour позже.
@@ -167,7 +169,7 @@ citation metadata без переобучения на каждый edit.
 | Класс знаний | Хранение |
 | --- | --- |
 | Mutable facts (coords, schedules, prices, closures, entrances, duration, safety) | PostgreSQL/PostGIS |
-| Long-form (history, culture, tips) | Documents + RAG |
+| Long-form (history, culture, tips) | `knowledge_chunks` + pgvector (ADR-008) |
 | Behaviour (intent, tool use, coherent plans, clarifications) | Prompts / eval / later LoRA |
 
 Fine-tune не заменяет операционные данные Крыма.

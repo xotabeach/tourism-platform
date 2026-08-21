@@ -27,8 +27,10 @@ editorial catalog.
 3. **Stage 1 (Phase 8B):** hosted experimental provider (Gemini adapter),
    structured output, mock provider, feature flag, без production SLA.  
    Model ID — только из configuration/env.
-4. **Stage 2 (Future):** self-hosted Gemma-family + RAG; PostGIS остаётся SoT
-   для mutable facts; weights не заменяют базу знаний Крыма.
+4. **Stage 2 (Future / Phase 8B slice):** self-hosted Gemma-family + RAG.
+   Narrative RAG — **pgvector in Postgres** ([ADR-008](ADR-008-rag-pgvector.md));
+   PostGIS остаётся SoT для mutable facts; Qdrant optional later. Weights не
+   заменяют базу знаний Крыма.
 5. **MCP не требуется на старте.** Сначала internal ToolRegistry; MCP —
    будущий transport тех же tools при появлении ≥2 независимых consumers.
 6. **Никогда не принимать unvalidated AI output.** Candidate allowlist,

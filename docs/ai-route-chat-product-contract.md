@@ -21,10 +21,20 @@
 | --- | --- | --- |
 | По параметрам | все авторизованные | form → **algorithmic catalog match**; при Travel+ + AI flag — NN rerank; при слабом match — CTA генерации |
 | Генерация (после miss / явный запрос) | free и Travel+ (разные квоты и поля) | params → Route Builder → **черновик** (form) |
-| Подбор с ИИ | только **активный Travel+** | чат → уточнения → generate → **карточка proposal в чате** → создать / в черновик / уточнить |
+| Подбор с ИИ | только **активный Travel+** | чат → stated params → **catalog match first** (карусель) → открыть маршрут / **собрать свой** → generate → assembled preview |
 
 Без Travel+ UI не открывает AI-режим (переключатель и CTA ведут на paywall).
 Сервер обязан повторить ту же проверку на любом AI endpoint (BOLA/quota).
+
+### AI-чат: match-first + UX (as-built)
+
+1. Стартовые stack-кнопки (спокойный / активный / горы / море / «пожрать»).
+2. `want_generate` → `match_routes`; hits → `catalog_match` + «Собрать собственный» / «Очистить».
+3. Нет hits или `build_custom_route` → generate → `route_proposal_card` (`assembled`).
+4. Slider/toggle → короткий `control_ack` без LLM (без перепечатки диалога).
+5. `recommendation_card` только при AI fallback (не в сети).
+6. Стиль: зеркалинг тона; грубость — вежливый отказ; извинения ок.
+7. RAG (`knowledge` / pgvector, [ADR-008](decisions/ADR-008-rag-pgvector.md)) — недоверенные DATA.
 
 ## 2. Преимущества Travel+ при подборе и AI (канон)
 

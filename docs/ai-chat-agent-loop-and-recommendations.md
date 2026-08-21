@@ -78,7 +78,8 @@ sequenceDiagram
 
 - Полный ToolRegistry: `get_place_details`, `find_places_near_point`,
   `validate_route_constraints`, routing estimates.
-- Qdrant RAG long-form (история/tips) как недоверенные chunks рядом с tools.
+- Real embedding model (swap `hash-v1` → LM Studio / sentence-transformers)
+  при том же dim=384; Qdrant — только если нужен scale-out вне Postgres.
 - NN catalog re-rank (Travel+ path) поверх algorithmic match.
 - Список прошлых чатов в UI; accept recommendation → auto-merge season/city.
 - Более богатый visual: горизонтальные place carousels, map preview в proposal.

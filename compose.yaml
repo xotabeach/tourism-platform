@@ -2,7 +2,10 @@ name: ${COMPOSE_PROJECT_NAME}
 
 services:
   postgres:
-    image: ${POSTGRES_IMAGE}
+    image: ${POSTGRES_IMAGE:-crimeatrip/postgis-pgvector:16-3.4}
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}

@@ -18,7 +18,9 @@ test-сервер. Полная картина контуров (включая 
 
 `compose.yaml` поднимает только local infrastructure:
 
-- `postgres` — PostgreSQL `tourism` с PostGIS;
+- `postgres` — PostgreSQL `tourism` с PostGIS **и pgvector**
+  (`crimeatrip/postgis-pgvector:16-3.4`, build из `docker/postgres`);
+  narrative RAG — [ADR-008](decisions/ADR-008-rag-pgvector.md).
 - `redis` — cache и краткоживущее состояние;
 - `minio` — S3-compatible storage;
 - `minio-init` — one-shot bucket `tourism-media`;
