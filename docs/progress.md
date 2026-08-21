@@ -12,6 +12,12 @@ Travel+ smoke.
 
 ## Changelog
 
+### 2026-08-21 — Phase 8B stated-vs-draft constraints (no «Учли» strip)
+
+- `confirmed_fields` = только явный ввод в чате; форма больше не сидится
+  в confirmed. Первые interests из чата заменяют draft списка формы.
+- LLM получает `form_draft_not_facts` отдельно. Полоску «Учли» убрали из UI.
+
 ### 2026-08-21 — Phase 8B agent loop, recommendations, sliders/toggles
 
 - Docs: [ai-chat-agent-loop-and-recommendations.md](ai-chat-agent-loop-and-recommendations.md)

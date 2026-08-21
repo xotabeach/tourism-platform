@@ -28,10 +28,21 @@
 | Компонент | Поведение |
 | --- | --- |
 | ToolRegistry | Allowlist tools: `search_places`, `seasonal_recommendations` |
-| Agent loop | Backend prefetch + до 2 tool rounds по запросу модели (JSON) |
+| Agent loop | Backend prefetch + до 1 follow-up tool round по запросу модели |
 | Recommendation cards | Блок `recommendation_card` в сообщении ассистента |
 | Slider / toggle | Блоки `slider` (бюджет) и `toggle` (дети / питомцы) в UI |
-| Less quiz | После 1–2 confirmed или при сезонной подсказке — `ask_field=ready` + generate CTA |
+| Less quiz | После 1–2 stated fields или сезонной подсказке — `ask_field=ready` |
+| Stated vs draft | `confirmed_fields` = только явный ввод в чате; форма = draft |
+
+### Как считается «известно» (без UI-полоски)
+
+1. Сессия стартует с `confirmed_fields = []`, даже если форма уже заполнена.
+2. Чип / control / accept tip / явный patch из реплики → ключи в
+   `confirmed_fields`, значения в `constraints`.
+3. LLM видит `known_constraints` = только ключи из `confirmed_fields`.
+4. Остальное из формы → `form_draft_not_facts` (не факты).
+5. Первое подтверждение `interests` из чата **заменяет** черновой список
+   интересов формы (не склеивает «природа» + «море»).
 
 ## 3. Целевой agent loop
 
