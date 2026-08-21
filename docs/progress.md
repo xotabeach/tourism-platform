@@ -5,11 +5,22 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 8B (AI chat sessions + LM Studio planning) — in progress.
-**Next:** device smoke (dynamic chips + confirmed strip); deploy backend `0031`; Travel+ smoke.
+**Next:** device smoke (recs + slider/toggle + tool loop); deploy backend;
+Travel+ smoke.
 
 **Последнее обновление:** 2026-08-21
 
 ## Changelog
+
+### 2026-08-21 — Phase 8B agent loop, recommendations, sliders/toggles
+
+- Docs: [ai-chat-agent-loop-and-recommendations.md](ai-chat-agent-loop-and-recommendations.md)
+  (идеи пользователя + backlog).
+- ToolRegistry: `search_places`, `seasonal_recommendations`; prefetch + до
+  1 follow-up tool round в ходе chat turn.
+- UI blocks: `recommendation_card`, live `slider` (бюджет), `toggle`
+  (дети/питомцы); меньше quiz через `prefer_ready_ask_field`.
+- Accept recommendation → merge city/interests/season в confirmed.
 
 ### 2026-08-21 — Phase 8B dynamic chips + confirmed constraints
 

@@ -7,6 +7,8 @@
 
 - [ai-route-chat-mobile-implementation.md](ai-route-chat-mobile-implementation.md)
   — API sessions/generate, кнопка, progress;
+- [ai-chat-agent-loop-and-recommendations.md](ai-chat-agent-loop-and-recommendations.md)
+  — tool loop backend↔LLM, рекомендации, slider/toggle, backlog идей;
 - [ai-route-planning-architecture.md](ai-route-planning-architecture.md);
 - [application-business-logic.md](application-business-logic.md) §13–16;
 - [ADR-006](decisions/ADR-006-ai-assisted-route-planning.md).
