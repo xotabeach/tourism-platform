@@ -4,12 +4,23 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 8A done (match + generate→draft + RoutingProvider stub).
-**Next:** Phase 8B (AI chat sessions + LM Studio planning) — завтра.
+**Текущая фаза:** Phase 8B (AI chat sessions + LM Studio planning) — in progress.
+**Next:** enable `AI_PLANNING_ENABLED` on prod after deploy; wire Travel+ smoke.
 
-**Последнее обновление:** 2026-08-20
+**Последнее обновление:** 2026-08-21
 
 ## Changelog
+
+### 2026-08-21 — Phase 8B first slice: planning sessions API
+
+- Migration `0030`: `route_planning_sessions` + `route_planning_messages`.
+- API: `POST/GET /route-builder/sessions`, `POST .../messages` (Travel+ +
+  owner BOLA, topic guard SoT, input bounds).
+- `AIPlanningProvider.chat_turn` + Mock + LM Studio (`reasoning_effort=none`);
+  generate intent → existing deterministic `generate` + proposal card.
+- Mobile AI chat: createSession + postMessage instead of generate-on-every
+  message; accept/reject proposals unchanged.
+- Flag still off by default; home-lab enable after deploy.
 
 ### 2026-08-20 — LM Studio home lab reachable (planning still off)
 
