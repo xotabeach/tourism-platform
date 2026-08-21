@@ -5,11 +5,22 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 8B (AI chat sessions + LM Studio planning) — in progress.
-**Next:** interactive chat smoke on device (chips + proposal); Travel+ smoke.
+**Next:** device smoke (dynamic chips + confirmed strip); deploy backend `0031`; Travel+ smoke.
 
 **Последнее обновление:** 2026-08-21
 
 ## Changelog
+
+### 2026-08-21 — Phase 8B dynamic chips + confirmed constraints
+
+- Session stores `confirmed_fields`; LLM видит только known/unknown, не
+  дефолты формы как факты (антигаллюцинации «Ялта / на троих»).
+- Structured JSON turn: `assistant_text` + `ask_field` + allowlisted
+  `action_ids` + `constraint_patch`; chips динамические под вопрос.
+- Chip `action_id` мержит patch в constraints; mobile — полоска «Учли…»,
+  createSession без ложного confirmed city.
+- Slider/toggle block types reserved (parse only); RAG/ToolRegistry — later.
+- Migration `0031_session_confirmed_fields`.
 
 ### 2026-08-21 — Phase 8B session management (new chat)
 
