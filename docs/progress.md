@@ -5,12 +5,30 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 8B (AI chat sessions + LM Studio planning) — in progress.
-**Next:** device smoke (recs + slider/toggle + tool loop); deploy backend;
-Travel+ smoke.
+**Next (завтра / ближайшее):**
+
+1. **Фото локаций** — у многих places нет cover/`place_images`. Продумать
+   pipeline: OSM tags (`wikimedia_commons` / `image`) → Wikimedia Commons /
+   Mapillary (лицензии!) → download + `place_images` / MinIO-or-local media;
+   CLI dry-run → `--apply`; не тащить произвольный URL без allowlist.
+2. **LLM slug + description + short_description** — скрипт
+   `enrich_places_content.py --llm` пока только флаг; реальный вызов
+   home-lab LM Studio (Gemma) с provenance, `proposed_slug`, review gate
+   ещё не сделан. Довести CLI + прогнать на draft OSM places.
+
+Также: device smoke match-first / RAG на проде (уже задеплоено).
 
 **Последнее обновление:** 2026-08-21
 
 ## Changelog
+
+### 2026-08-21 — Backlog: place photos + LLM content enrich
+
+- Зафиксировано к ближайшей реализации: импорт фото локаций из OSM/Wikimedia
+  (и смежных источников с лицензией); довести
+  `scripts/enrich_places_content.py --llm` для slug / description /
+  short_description через локальную нейросеть (сейчас только эвристики +
+  зарезервированный `--llm`).
 
 ### 2026-08-21 — AI chat match-first + design-spec screens + RAG pgvector
 
