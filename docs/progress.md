@@ -7,20 +7,145 @@
 **Текущая фаза:** Phase 8B (AI chat sessions + LM Studio planning) — in progress.
 **Next (завтра / ближайшее):**
 
-1. **Фото локаций** — у многих places нет cover/`place_images`. Продумать
-   pipeline: OSM tags (`wikimedia_commons` / `image`) → Wikimedia Commons /
-   Mapillary (лицензии!) → download + `place_images` / MinIO-or-local media;
-   CLI dry-run → `--apply`; не тащить произвольный URL без allowlist.
-2. **LLM slug + description + short_description** — скрипт
-   `enrich_places_content.py --llm` пока только флаг; реальный вызов
-   home-lab LM Studio (Gemma) с provenance, `proposed_slug`, review gate
-   ещё не сделан. Довести CLI + прогнать на draft OSM places.
+1. Прогнать `import_place_photos.py --apply` и `enrich_places_content.py
+   --apply --llm` на реальных draft OSM places (test/prod contour) — CLI
+   готовы, локально проверены только на 20 seed places (нет OSM данных).
+2. Mapillary как второй источник фото (нужен собственный API token — ops
+   шаг, не сделан).
+3. Review gate для `proposed_slug` / photo `is_cover` перед публикацией
+   (сейчас drafts остаются `publication_status` как было — импорт фото/текста
+   не публикует места автоматически).
+4. **Точка входа «Новый чат»** — решить, где она живёт. Логика (close +
+   create) рабочая с обеих сторон, но кнопку убрали из чата при сверке с
+   макетами: в дизайне её нет. Варианты и рекомендация —
+   [ai-route-chat-mobile-implementation.md](ai-route-chat-mobile-implementation.md)
+   §«Открытый вопрос: точка входа „Новый чат“». Код `_startNewChat` /
+   `onNewChat` не удалять.
+5. **Карточка-ответ «расскажи о месте»** (факты + фото + ссылка на
+   страницу места) — текстовый Q&A через `get_place_details` работает,
+   rich-блока нет. План —
+   [ai-route-chat-mobile-implementation.md](ai-route-chat-mobile-implementation.md)
+   §«Открытый вопрос: карточка-ответ „расскажи о месте“».
 
 Также: device smoke match-first / RAG на проде (уже задеплоено).
 
-**Последнее обновление:** 2026-08-21
+**Последнее обновление:** 2026-08-22
 
 ## Changelog
+
+### 2026-08-22 — AI-чат: баг-фиксы после ручного тестирования (фото, карусель, ползунки)
+
+- **«Leg 0->1 exceeds max distance»**: воспроизвести на текущем коде не
+  удалось (прямой прогон `pick_places_for_params` + `_route_places` на
+  реальной БД для `Крым`/`Ялта`/`Симферополь` × всех `duration` × всех
+  `transport_mode` — либо `OK`, либо чистый `insufficient_places`, ни разу
+  raw routing error). Гео-chain-select в `place_picker.py` (уже был
+  добавлен ранее, не в этом заходе) математически не даёт ни одному leg'у
+  превысить лимит режима. Вывод: если баг всё ещё виден в приложении —
+  скорее всего локальный backend-процесс не перезапущен после правки, не
+  логическая ошибка. Если после рестарта баг повторится — нужен свежий
+  repro (город/duration/transport_mode из реального запроса).
+- **Маршруты/места без фото**: реальная причина — фото есть только у 4/20
+  seed-мест, а `generate_service.py` при сборке AI-предложения хардкодил
+  `cover_url=None` независимо от того, есть ли фото у выбранных мест.
+  Добавлен `places/application/place_covers.py` (`covers_for_places`,
+  `generic_fallback_cover`): подбирает фото выбранных мест, а если совсем
+  ни у одной нет — использует любое существующее фото места как заглушку
+  (как и просили — не оставлять карточку пустой). Подключено в
+  `place_picker.pick_places_for_params` (заполняет `PickedPlace.cover_hint`,
+  это поле раньше объявлено, но нигде не заполнялось) и `generate_service`
+  (`cover_url` предложения + галерея карточки «собранного» маршрута теперь
+  берёт фото всех точек, не только одно). `routes/application/service.py
+  ._cover_urls_for_routes` (каталожные маршруты) тоже получил этот
+  generic-fallback последним шагом.
+- **Между карточками маршрутов в горизонтальном списке не было зазора**:
+  `ChatCatalogMatchCarousel` использовал `PageView` с `viewportFraction: 1`
+  (карточка = вся ширина, без просвета соседней). Теперь
+  `viewportFraction: 0.94` + горизонтальный паддинг 5px на страницу — виден
+  зазор и лёгкий пик соседней карточки; заодно гарантирует одинаковую
+  ширину всех карточек (раньше тоже была одинаковой по высоте — фиксированный
+  `SizedBox`, но без зазора это было незаметно).
+- **Мало параметров в превью маршрута**: `RouteParamsBlock` показывал
+  только бюджет/сложность/маршрут/расстояние. `stopsCount` и
+  `durationMinutes` уже были в модели, но никогда не рендерились — добавлены
+  строки «Время в пути» и «Точек маршрута» (и в каталожной карусели, и в
+  карточке AI-предложения).
+- **Ползунки/переключатели пересылали сообщение на каждое движение** (баг
+  из [[ai-chat-fix-backlog]] п.1, ранее только зафиксирован, не
+  исправлялся): теперь `ChatControlsGroup` копит изменения локально и
+  отправляет одним чат-turn'ом по кнопке «Подтвердить» — на бэкенд всё
+  ещё уходит по одному constraint-patch на контрол (контракт API не менялся),
+  но в чат добавляется только последний ответ агента, не по одному на
+  каждое движение слайдера/тумблера.
+- Проверено: `flutter analyze`/`flutter test` (207/207), backend
+  `pytest tests/security tests/unit -k "route_builder or route_match or
+  routing or scoring or place"` — зелёные; живой repro-скрипт против
+  реальной БД для фото/routing (см. выше).
+- **Не реализовано в этом заходе, задокументировано как открытый вопрос**:
+  карточка-ответ на «расскажи о месте» (факты + фото + ссылка на страницу
+  места) — текстовый Q&A через `get_place_details` уже работает, rich-блока
+  с фото/диплинком нет. План —
+  [ai-route-chat-mobile-implementation.md](ai-route-chat-mobile-implementation.md)
+  §«Открытый вопрос: карточка-ответ „расскажи о месте“».
+
+### 2026-08-22 — Pixel-сверка чата и профиля с макетами
+
+- Профиль (`Frame 146/147`): блок подписчиков — hairline-рамка вместо
+  чёрной 2 px, высота пилюли 54 → 42, значение bold; «Звание:» серым,
+  значение w700; прогресс — сплошная тёмная капсула (в макете заливка не
+  визуализирует процент), 30 → 26 px, зазор до «Топ» 16; «Топ N» на
+  `pageSurface`; высота карточки 155 (обычная) / 116 (эксперт); имя в
+  шапке в две строки.
+- Чат: чип «Подбор с ИИ» — сплошной `primaryBlue` вместо градиента
+  (обновлён golden `mode_switch_morph_mid`); кнопки в пузыре 42 → 28 px с
+  шагом 34; типографика пузыря 16 → 15 / заголовок 14 → 13; иконка
+  отправки перерисована по макету; «Сегодня» над разделителем.
+- Экран 2: параметры одной строкой «label value» (не выравнивание по
+  краям), теги компактнее (3+1 как в макете), у превью рамка + разделитель.
+- Экран 3: поля старт/финиш — белые с рамкой; «Локации собранного
+  маршрута:» синим; галерея — лента превью вместо full-bleed фото;
+  разделители по макету; «Посмотреть на карте» подключена (раньше колбэк
+  никуда не был проброшен — кнопка не могла появиться).
+- Кнопка «Новый чат» убрана из чата (её нет в макетах) → см. Next п.4.
+
+### 2026-08-22 — Place photos (Wikimedia Commons) + LLM content enrich wired
+
+- `scripts/import_place_photos.py` (новый, CLI dry-run → `--apply`): OSM
+  `wikimedia_commons` / `image` теги → Wikimedia Commons `imageinfo` API →
+  allowlist лицензий (CC0/PD/CC BY/CC BY-SA, всё остальное отклоняется) →
+  скачивание → пересжатие в WebP (Pillow, capped edge/pixels, mirrors
+  `routes/application/media.py`) → `media_attachments` (role=cover) +
+  `place_images` (is_cover, author, license, source_url на Commons page).
+  Ни один URL не запрашивается без предварительной проверки хоста
+  (`commons.wikimedia.org` / `upload.wikimedia.org`) — ни на стадии
+  `image=`-тега, ни на стадии самого запроса на скачивание.
+- Новые модули: `places/application/photo_import.py` (чистый парсинг тегов +
+  тонкий sync-клиент Commons API, license allowlist, HTML-strip для
+  Artist/Credit), `places/application/photo_storage.py` (обработка + запись
+  на диск), `places/application/place_images.py` (upsert `place_images`,
+  переиспользует паттерн из `seed_crimea.py`). `media/application/service.py`
+  `upsert_place_file_attachment` расширен опциональными content_type/
+  byte_size/width/height/checksum.
+  Публикацию мест это не меняет: `publication_status` не трогается.
+- `scripts/enrich_places_content.py --llm`: `llm_callable=None` заменён на
+  реальный вызов `LMStudioProvider.draft_place_content` (новый метод,
+  JSON-only промпт под slug/short_description/description); если
+  `AI_PLANNING_ENABLED` выключен или `AI_PROVIDER != lmstudio` — печатает
+  причину и тихо откатывается на эвристику, батч не падает. Любая ошибка
+  LM Studio на одном месте (timeout, битый JSON) → эвристика для этого
+  места, без прерывания остальных.
+- `structured_turn._extract_json_object` переименован в публичный
+  `extract_json_object` и переиспользован в `draft_place_content` (тот же
+  парсер JSON/```json-fence, что и в чат-турнах).
+- Проверено: 23 новых unit-теста (`test_photo_import.py`) + 2 новых
+  (`test_lm_studio.py`) — все зелёные; полный `pytest` 257 passed, Ruff/MyPy
+  чистые. Живой smoke (не в CI): реальный вызов Wikimedia Commons API на
+  «Ласточкино гнездо» (`File:Swallow's Nest (Crimea) 2007.JPG`, CC BY-SA 4.0)
+  — скачано/пересжато/записано в `media_attachments`+`place_images`,
+  `cover_image_url`-джойн из `places/application/service.py` отдал верный
+  путь; тестовые строки и файл затем удалены. Локальная БД содержит только
+  20 seed-мест (`source_name=seed`), поэтому массовый прогон не делался —
+  это следующий шаг на контуре с OSM-импортом (1000 мест).
 
 ### 2026-08-21 — Backlog: place photos + LLM content enrich
 
