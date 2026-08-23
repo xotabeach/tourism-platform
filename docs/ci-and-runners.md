@@ -20,8 +20,8 @@ on a normal push, which is easy to miss:
 | `tourism-platform` | `CI_COMMIT_BRANCH == "main" \|\| "gamma"` | **да** |
 | `workspace` (корень) | **нет `workflow:` вообще** | **да, на любой пуш** |
 
-While the quota is low, push to those three with the GitLab push option that
-skips pipeline creation:
+While the quota is low, always push with the GitLab push option that skips
+pipeline creation — in **every** repository, backend included:
 
 ```bash
 git push -o ci.skip origin main
@@ -30,6 +30,13 @@ git push -o ci.skip origin main
 `-o ci.skip` prevents the pipeline from being created at all (it is not a
 cancelled or skipped job that still bills). The GitHub mirror remote is
 unaffected either way.
+
+On the backend the flag is a no-op today, because its `workflow.rules`
+already refuses everything except a manual web run — but use it anyway.
+Remembering which repository has which rules is one more thing to get
+wrong, and the flag costs nothing when it is redundant. Production
+delivery never depends on a pipeline in any case: it runs from a trusted
+machine via `deploy-production-direct.sh` over pinned SSH.
 
 Longer-term the honest fix is to give `tourism-mobile`, `tourism-platform`
 and `workspace` the same `web`-only `workflow.rules` the backend has, so
