@@ -8,6 +8,33 @@ low, and how to bring back automated checks with a self-hosted runner later.
 Backend push pipelines are disabled completely. A regular push therefore uses
 zero GitLab runner minutes and does not publish or deploy anything.
 
+### Which repositories still spend minutes on push (2026-08-24)
+
+Only the backend is fully disabled. The other three **do** create a pipeline
+on a normal push, which is easy to miss:
+
+| Репозиторий | `workflow.rules` | Пуш в `main` тратит минуты? |
+| --- | --- | --- |
+| `tourism-backend` | только `CI_PIPELINE_SOURCE == "web"` | нет |
+| `tourism-mobile` | `CI_COMMIT_BRANCH == "main" \|\| "gamma"` | **да** |
+| `tourism-platform` | `CI_COMMIT_BRANCH == "main" \|\| "gamma"` | **да** |
+| `workspace` (корень) | **нет `workflow:` вообще** | **да, на любой пуш** |
+
+While the quota is low, push to those three with the GitLab push option that
+skips pipeline creation:
+
+```bash
+git push -o ci.skip origin main
+```
+
+`-o ci.skip` prevents the pipeline from being created at all (it is not a
+cancelled or skipped job that still bills). The GitHub mirror remote is
+unaffected either way.
+
+Longer-term the honest fix is to give `tourism-mobile`, `tourism-platform`
+and `workspace` the same `web`-only `workflow.rules` the backend has, so
+skipping is not something an operator has to remember on every push.
+
 The backend `.gitlab-ci.yml` keeps one escape hatch: a pipeline created
 manually through **Build → Pipelines → Run pipeline** exposes a manual
 `backend-publish-manual` job. It builds and pushes the registry image only;
