@@ -5,33 +5,69 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 8B (AI chat sessions + LM Studio planning) — in progress.
-**Next (завтра / ближайшее):**
 
-1. Прогнать `import_place_photos.py --apply` и `enrich_places_content.py
-   --apply --llm` на реальных draft OSM places (test/prod contour) — CLI
-   готовы, локально проверены только на 20 seed places (нет OSM данных).
-2. Mapillary как второй источник фото (нужен собственный API token — ops
-   шаг, не сделан).
-3. Review gate для `proposed_slug` / photo `is_cover` перед публикацией
-   (сейчас drafts остаются `publication_status` как было — импорт фото/текста
-   не публикует места автоматически).
-4. **Точка входа «Новый чат»** — решить, где она живёт. Логика (close +
-   create) рабочая с обеих сторон, но кнопку убрали из чата при сверке с
-   макетами: в дизайне её нет. Варианты и рекомендация —
-   [ai-route-chat-mobile-implementation.md](ai-route-chat-mobile-implementation.md)
-   §«Открытый вопрос: точка входа „Новый чат“». Код `_startNewChat` /
-   `onNewChat` не удалять.
-5. **Карточка-ответ «расскажи о месте»** (факты + фото + ссылка на
-   страницу места) — текстовый Q&A через `get_place_details` работает,
-   rich-блока нет. План —
-   [ai-route-chat-mobile-implementation.md](ai-route-chat-mobile-implementation.md)
-   §«Открытый вопрос: карточка-ответ „расскажи о месте“».
+**Стратегия подбора пересмотрена 2026-08-23:** замер данных показал, что
+узкое место не в AI-слое, а в заполненности `places`. Решение —
+[ADR-009](decisions/ADR-009-data-first-route-intelligence.md), план по
+фазам — [route-intelligence-roadmap.md](route-intelligence-roadmap.md).
 
-Также: device smoke match-first / RAG на проде (уже задеплоено).
+**Next (ближайшее) — P0 «Данные» из роадмапа:**
 
-**Последнее обновление:** 2026-08-22
+1. Бэкфилл `locality_id` через PostGIS (сейчас 1.7% → корень бага
+   «Leg exceeds max distance»), досеять `localities` до набора UI
+   (нет «Саки», «Керчь»).
+2. Промоут тегов OSM из `source_payload` в колонки: `description` (785
+   мест), `ele` (773), `opening_hours` (114), `website`, `phone`, `fee`,
+   `surface` — данные уже скачаны и сейчас выбрасываются.
+3. **Категории в скоринг** — `place_categories` заполнены у 100% мест, но
+   `scoring.py` / `place_picker.py` их не читают (матчат подстроку по
+   тексту с заполненностью 0.1%).
+4. `recommended_visit_minutes` по эвристике категории + golden-тесты
+   подбора «до/после».
+
+**Дальше (P1–P4, детали в роадмапе):** семантический эмбеддер вместо
+`hash-v1`, OSRM, погодное переранжирование, золотой час, многодневная
+структура.
+
+**Отложено (решение принято, реализация позже):**
+
+- **Точка входа «Новый чат»** → отдельный экран истории чатов, вход из
+  настроек (вариант 3). Код `_startNewChat` / `onNewChat` не удалять.
+- **Карточка-ответ «расскажи о месте»** — план в
+  [ai-route-chat-mobile-implementation.md](ai-route-chat-mobile-implementation.md).
+- Mapillary как второй источник фото (нужен свой API token).
+- Review gate для `proposed_slug` / photo `is_cover` перед публикацией.
+
+**Последнее обновление:** 2026-08-23
 
 ## Changelog
+
+### 2026-08-23 — Замер данных, ADR-009 data-first, реальный импорт на прод
+
+- **Замер заполненности `places` на test-контуре** вскрыл, что потолок
+  подбора — данные, а не AI: `locality_id` 1.7%, `recommended_visit_minutes`
+  / `access_transport` / `price_*` 0%, `typical_crowding` 100% `unknown`,
+  `description` 3 места из 5020. Пять из восьми компонентов `scoring.py`
+  читают эти колонки и всегда отдают нейтральный дефолт 0.4–0.5.
+- **Главная находка:** `place_categories` заполнены у **100%** мест
+  (15 категорий), но `scoring.py` и `place_picker.py` их не используют —
+  ищут подстроку «гор» по свободному тексту с заполненностью 0.1%.
+- Зафиксировано [ADR-009](decisions/ADR-009-data-first-route-intelligence.md)
+  + [route-intelligence-roadmap.md](route-intelligence-roadmap.md) (P0–P4,
+  плюс порядок будущего выделения сервисов: routing → AI → ingest).
+- **Прод (crimeatrip-test):** импортировано 5000 реальных мест OSM
+  (было 1000) и **210 фото** с лицензией CC0/CC BY/CC BY-SA (было 4).
+- `import_place_photos.py --apply` падал с `NoReferencedTableError`
+  (`media_attachments.uploaded_by_user_id` → `users`): скрипт импортировал
+  только те модули, что использует напрямую, и SQLAlchemy не
+  регистрировал таблицы, достижимые лишь через строковый ForeignKey.
+  Исправлено импортом полного набора моделей, как в `alembic/env.py`.
+- Добавлен фолбэк фото через тег `wikidata` → Wikidata P18 → Commons:
+  прямые `wikimedia_commons`/`image` теги есть у ~0.1% элементов, а
+  `wikidata` — у 6%. Кандидатов на батче в 5000 мест: 5 → 229.
+- Чат: city-picker как bottom-sheet со всеми локальностями, чипы
+  интересов «История»/«Природа», «Тревел Агент» обычным начертанием,
+  типографика сообщений −1 размер.
 
 ### 2026-08-22 — AI-чат: баг-фиксы после ручного тестирования (фото, карусель, ползунки)
 
