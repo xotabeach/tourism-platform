@@ -257,15 +257,24 @@ Priority: high but a design decision, not a quick patch — needs a call on
 which screen is canonical before touching code. Source: mobile code review
 `UX-1`, `UX-2`, building on mobile UX review finding 5.
 
-Shared today: only `CollapsingHeroSliver`/`CollapsingHeroAction`/
-`AppFavoriteIcon`/`RouteMapPreview`. Diverged into parallel copies: reviews
-(`PlaceReviewsSection` ~927 LOC vs. a private `_RouteReviewsSection` inside
-the 2666-line `route_details_screen.dart`), the audio/info card (tokens on
-place, hardcoded hex/radius on route), the collapse behavior itself
-(`scale:false` + different fade range on place vs. default `scale:true` on
-route), and loading state (place: raw `Container`s with no back button;
-route: `AppShimmer` skeleton). `place_hero_card.dart` (~202 LOC) vs.
-`route_hero_card.dart` (~801 LOC) also diverge in favorite-tap animation.
+Branch: `tourism-mobile` `fix/place-route-twins` (HEAD `57d7be6`).
+Canonical = **route**. `./scripts/validate.sh` 2026-08-25: dart format +
+`flutter analyze --fatal-infos` clean; flutter test **215 passed**; macOS
+goldens **25 passed**. `place_hero_card.dart` is out of slice (not on main).
+
+- ~~Shared today: only `CollapsingHeroSliver`/`CollapsingHeroAction`/
+  `AppFavoriteIcon`/`RouteMapPreview`. Diverged into parallel copies: reviews
+  (`PlaceReviewsSection` ~927 LOC vs. a private `_RouteReviewsSection` inside
+  the 2666-line `route_details_screen.dart`), the audio/info card (tokens on
+  place, hardcoded hex/radius on route), the collapse behavior itself
+  (`scale:false` + different fade range on place vs. default `scale:true` on
+  route), and loading state (place: raw `Container`s with no back button;
+  route: `AppShimmer` skeleton). `place_hero_card.dart` (~202 LOC) vs.
+  `route_hero_card.dart` (~801 LOC) also diverge in favorite-tap animation.~~
+  ✅ done 2026-08-25, `2da6efc` — `EntityReviewsSection` (`entityId`,
+  `kind`, `allowComposer`); `AudioGuideCard`; `HeroCollapseSpec.place` /
+  `.route`; `DetailsHeroLoadingView(showBack: true)`. `57d7be6` is dart
+  format only so `validate.sh` matches main.
 
 This is why "make place match route" work (done earlier today) has to be
 redone by hand every time — there's no shared implementation to inherit from,
