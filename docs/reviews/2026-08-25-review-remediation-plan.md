@@ -114,19 +114,35 @@ Priority: high. Source: mobile UX review (findings 1–2) + mobile code review
 `homeRoutesProvider` and `topTravelersProvider` only; `homePlacesProvider` is
 never invalidated by any scope, including `all`.
 
-- **`homePlacesProvider` missing from refresh entirely** (`CODE-1`) — pull to
+Branch: `tourism-mobile` `fix/stale-cache-and-loading-flash` (HEAD `ae7891b`).
+`./scripts/validate.sh` 2026-08-25: dart format + `flutter analyze --fatal-infos`
+clean; flutter test **213 passed**; macOS goldens **25 passed**.
+`homePlacesProvider` is an alias of `placesListProvider` on this revision (no
+separate limited fetch yet); refresh scopes target the alias the same way they
+target `homeRoutesProvider`.
+
+- ~~**`homePlacesProvider` missing from refresh entirely** (`CODE-1`) — pull to
   refresh on Home → Локации, and even `AppDataRefreshScope.all`, leave places
-  stale. Add it to the `home` (and `all`) case in `_invalidateScope`.
-- **`myRoutes` refresh doesn't invalidate `placesListProvider`** (`CODE-2`)
+  stale. Add it to the `home` (and `all`) case in `_invalidateScope`.~~
+  ✅ done 2026-08-25, `9fa0078` — `home`/`all` invalidate and await
+  `homePlacesProvider`; regression in `app_data_refresh_test.dart`.
+- ~~**`myRoutes` refresh doesn't invalidate `placesListProvider`** (`CODE-2`)
   even though that screen watches favorited places through it
-  (`app_data_refresh.dart:121-123`).
-- **`my_routes_screen.dart`** full-screen loading flash + raw exception text
-  at 3 sites (118/271/342) — same fix pattern already applied to Home today.
-- **`home_screen.dart:316-319`** error branch (`UX-7`) doesn't preserve the
+  (`app_data_refresh.dart:121-123`).~~
+  ✅ done 2026-08-25, `9fa0078`.
+- ~~**`my_routes_screen.dart`** full-screen loading flash + raw exception text
+  at 3 sites (118/271/342) — same fix pattern already applied to Home today.~~
+  ✅ done 2026-08-25, `9fa0078` — title/search/tabs stay outside
+  `routesAsync.when`; list uses skeleton / `AppAsyncErrorView`.
+- ~~**`home_screen.dart:316-319`** error branch (`UX-7`) doesn't preserve the
   header the way the loading branch now does — same class of bug, error path
-  instead of loading path.
-- **`achievements_screen.dart`** (`UX-9`) — filter/search UI lives only
-  inside the `data:` branch, same antipattern.
+  instead of loading path.~~
+  ✅ done 2026-08-25, `9fa0078` — error keeps greeting header; no raw
+  exception text.
+- ~~**`achievements_screen.dart`** (`UX-9`) — filter/search UI lives only
+  inside the `data:` branch, same antipattern.~~
+  ✅ done 2026-08-25, `9fa0078`. `ae7891b` is a test-harness lint fix;
+  `7d66163` is dart format only so `validate.sh` matches main.
 
 Worth doing together: the underlying antipattern (`AsyncValue.when` as the
 Scaffold body root, with chrome built inside `data:`/absent from `loading:`)
