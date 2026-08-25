@@ -222,20 +222,30 @@ Priority: high, larger lift than the phases above — plan as its own slice
 rather than folding into a quick pass. Source: mobile code review `CODE-9`,
 `CODE-13`, `CODE-15`.
 
-- Extract a `RouteMatchNotifier` (session lifecycle, turn pipeline,
+Branch: `tourism-mobile` `fix/route-match-notifier` (HEAD `48f7deb`).
+`./scripts/validate.sh` 2026-08-25: dart format + `flutter analyze --fatal-infos`
+clean; flutter test **214 passed**; macOS goldens **25 passed**.
+
+- ~~Extract a `RouteMatchNotifier` (session lifecycle, turn pipeline,
   `_ensureChatSession`/`_sendAiMessage`/`_acceptProposal`/reject,
   `_buildMatchParams`, constraint-patch apply) out of
   `_RouteMatchScreenState` (currently 1406 lines, ~30 mutable fields mixing
   domain logic with UI-only state like scroll sync and keyboard inset).
-  UI-only state can stay in the State object.
-- Add behavioral tests against a fake `RouteMatchRepository` for
+  UI-only state can stay in the State object.~~
+  ✅ done 2026-08-25, `a9c0149` — chat pipeline lives in
+  `RouteMatchNotifier`; form/scroll/keyboard stay in the State object.
+  `48f7deb` is dart format only so `validate.sh` matches main.
+- ~~Add behavioral tests against a fake `RouteMatchRepository` for
   `createSession` → `postMessage` → `acceptProposal`/`reject` — today only
   layout/golden tests and safety-keyword tests exist for this path; the
-  actual chat pipeline has zero behavioral coverage.
-- Add a behavioral test for the Travel+ activation flow: `_submit` →
+  actual chat pipeline has zero behavioral coverage.~~
+  ✅ done 2026-08-25, `a9c0149`.
+- ~~Add a behavioral test for the Travel+ activation flow: `_submit` →
   `activateTravelPlus` → `session.travelPlusActive` flips → AI mode unlocks.
   Same gap — goldens and nav-to-checkout exist, the actual state transition
-  doesn't have a test.
+  doesn't have a test.~~
+  ✅ done 2026-08-25, `a9c0149` — checkout submit flips
+  `travelPlusActive` and the AI mode CTA no longer gates to Travel+.
 
 The Notifier extraction isn't just cleanup — it's what makes the two test
 gaps above practical to close without standing up the whole screen widget
