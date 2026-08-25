@@ -132,19 +132,33 @@ Priority: high. Source: backend review §5 + `AI-1`/`AI-2`/`AI-6`..`AI-9`.
 Both the backend review and this session's independent architecture pass
 converged on the same fix — formalize the boundary, don't extract a service.
 
-- In-process concurrency guard around the LM Studio call (`asyncio.Semaphore`
+Branch: `tourism-backend` `fix/lm-studio-hardening` (HEAD `ecb1993`, stacked
+on Phase 0). `./scripts/validate.sh` 2026-08-25: ruff/mypy/pip-audit clean;
+pytest **394 passed**, 1 skipped; coverage 74.65%.
+
+- ~~In-process concurrency guard around the LM Studio call (`asyncio.Semaphore`
   or small queue) + a fast "занято, подождите" instead of a 60s hang into
   fallback. One local GPU serves every concurrent chat today with zero
-  protection against queueing.
-- Per-turn metrics: `provider`, `latency_ms`, `structured_parse=ok|fallback`,
+  protection against queueing.~~
+  ✅ done 2026-08-25, `c5da3b6` — in-process slot (`acquire_inference_slot`);
+  second caller gets `AIProviderBusyError` / «занят… Подождите», not the
+  outage fallback.
+- ~~Per-turn metrics: `provider`, `latency_ms`, `structured_parse=ok|fallback`,
   `tools_round`, `rag_hit`, `outage_fallback` — JSON-contract reliability and
-  outage rate are currently unmeasured.
-- `constraint_patch` from the model must not silently overwrite fields
-  already in `confirmed_fields` without explicit user action.
-- `find_places_near_point` (`tool_registry.py` ~444–458): add `ST_DWithin` +
-  `LIMIT` — currently full bbox load + Python haversine.
-- History load is `SELECT` all then `[-12:]` in Python (`session_service.py`
-  ~537–549) — trim in the query while this file is open anyway.
+  outage rate are currently unmeasured.~~
+  ✅ done 2026-08-25, `48c0193` — `JsonFormatter` now keeps `extra=`;
+  `_log_ai_chat_turn` emits those keys (`ecb1993` format-only follow-up).
+- ~~`constraint_patch` from the model must not silently overwrite fields
+  already in `confirmed_fields` without explicit user action.~~
+  ✅ done 2026-08-25, `ea3dacf` — `protect_confirmed=True` on the LLM merge
+  path; chips/sliders still overwrite.
+- ~~`find_places_near_point` (`tool_registry.py` ~444–458): add `ST_DWithin` +
+  `LIMIT` — currently full bbox load + Python haversine.~~
+  ✅ done 2026-08-25, `9a0f4e7`.
+- ~~History load is `SELECT` all then `[-12:]` in Python (`session_service.py`
+  ~537–549) — trim in the query while this file is open anyway.~~
+  ✅ done 2026-08-25, `4a5b5d8` — `ORDER BY created_at DESC LIMIT 12` plus
+  Phase 0 omit-filter so redacted turns do not fill the window.
 
 ## Phase 4 — Mobile: rebuild scope, cold start, swipe-deck jank
 
