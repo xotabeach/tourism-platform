@@ -188,18 +188,33 @@ pytest **394 passed**, 1 skipped; coverage 74.65%.
 
 Priority: high. Source: mobile code review `PERF-11/12/15/17/20`.
 
-- `RouteHeroCard` (`:150-151`) and Home (`:413`, `:500`) watch the *entire*
+Branch: `tourism-mobile` `fix/rebuild-scope-and-startup` (HEAD `b6ca5bd`).
+`./scripts/validate.sh` 2026-08-25: dart format + `flutter analyze --fatal-infos`
+clean; flutter test **213 passed**; macOS goldens **25 passed**.
+
+- ~~`RouteHeroCard` (`:150-151`) and Home (`:413`, `:500`) watch the *entire*
   `sessionProvider` — any session field change (e.g. a token refresh)
   rebuilds every visible route card. Switch to `.select` on the specific
   field each site actually needs (mirror the narrower `PERF-15` shell watch
-  once a pattern is established).
-- `main.dart:12-15` — `await AppPush.bootstrap()` (Firebase) runs *before*
+  once a pattern is established).~~
+  ✅ done 2026-08-25, `b6ca5bd` — hero selects `(userId, displayName,
+  avatarUrl)`; Home selects `(displayName, avatarUrl)` and passes the avatar
+  into the header; shell uses `sessionProvider.select((s) => s.userId)`.
+  Widget tests fail if a token rotate still rebuilds hero/Home.
+- ~~`main.dart:12-15` — `await AppPush.bootstrap()` (Firebase) runs *before*
   `runApp`, delaying first frame on every cold start. Defer to after first
-  frame or run non-blocking.
-- `RouteSwipeDeck`'s `AnimatedBuilder` (`:437+`) rebuilds up to 3×
+  frame or run non-blocking.~~
+  ✅ done 2026-08-25, `b6ca5bd` — background handler still registers before
+  `runApp`; `AppPush.bootstrap()` is scheduled on the first frame.
+  `c8491db` is dart format only so `validate.sh` matches main.
+- ~~`RouteSwipeDeck`'s `AnimatedBuilder` (`:437+`) rebuilds up to 3×
   `RouteHeroCard` (each re-running its `coverImage` `LayoutBuilder` +
   `MediaQuery` DPR lookup) on every drag/settle animation frame — the
-  concrete mechanism behind "swipe deck jank on mid-range Android."
+  concrete mechanism behind "swipe deck jank on mid-range Android."~~
+  ✅ done 2026-08-25, `b6ca5bd` — back cards reuse the same `RouteHeroCard`
+  instance; covers are cached in `_RouteCardContent` (`route-cover-<id>`)
+  so drag progress does not recreate `coverImage`. Visual tree/transforms
+  unchanged; goldens still pass.
 
 ## Phase 5 — Mobile: AI-chat screen architecture + missing behavioral tests
 
