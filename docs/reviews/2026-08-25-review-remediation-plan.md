@@ -86,7 +86,11 @@ Priority: immediate. Source: mobile code/security/perf review, `SEC-1` /
 `Image.network(...)` call sites in `lib/` — every other image in the app goes
 through `AppImages.coverImage`/`resolveMediaUrl`.
 
-- Route all three AI-chat image call sites through `AppImages.coverImage` (or
+Branch: `tourism-mobile` `fix/chat-image-allowlist` (HEAD `52a9507`).
+`./scripts/validate.sh` 2026-08-25: dart format + `flutter analyze --fatal-infos`
+clean; flutter test **210 passed**; macOS goldens **25 passed**.
+
+- ~~Route all three AI-chat image call sites through `AppImages.coverImage` (or
   `resolveMediaUrl` + a bounded provider) instead of raw `Image.network` on
   an unvalidated URL straight from the AI/API response. This is the one place
   in the whole app where an image URL bypasses the scheme/host allowlist
@@ -96,7 +100,11 @@ through `AppImages.coverImage`/`resolveMediaUrl`.
   `test/security/image_cache_security_test.dart` is green today only because
   it unit-tests the allowlist function, not these call sites — add a widget
   regression on the chat chip/proposal card so this can't silently regress
-  back.
+  back.~~
+  ✅ done 2026-08-25, `881107f` — `ChatPlaceChip`, gallery thumbs, and
+  `CatalogRoutePreviewHeader` use `AppImages.coverImage`; widget test would
+  fail on `Image.network` (`javascript:` / off-origin). `52a9507` is dart
+  format only so `validate.sh` matches main's previously unformatted files.
 
 ## Phase 2 — Mobile: stale data + full-screen loading, now confirmed systemic
 
