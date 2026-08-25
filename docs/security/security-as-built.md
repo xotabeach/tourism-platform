@@ -1,10 +1,28 @@
-# Security as-built — КрымТрип (2026-07-30)
+# Security as-built — КрымТрип (2026-07-30, обновлено 2026-08-26)
 
 Практическое описание **как защита устроена сейчас** в коде.
 Политика и целевой baseline: [security-baseline.md](security-baseline.md).
 Решение по токенам: [ADR-007](../decisions/ADR-007-authentication-and-session-strategy.md).
 
 Это не сертификат соответствия OWASP. Статус контролей ниже — as-built.
+
+**Обновление 2026-08-26 (фаза 0 ремедиации после ревью 2026-08-25).**
+Закрыто в `main`:
+
+- **Mock Travel+ self-activate** больше не доступен вне `local`/`test` —
+  гейт в entitlements + отказ на уровне HTTP и сервиса. До этого любой
+  аутентифицированный пользователь мог выдать себе премиум в любом окружении.
+- **Ротация refresh-токена** берёт row lock (`with_for_update`) —
+  закрыта гонка при параллельном refresh.
+- **Квоты генерации** берут row lock перед проверкой — закрыта гонка
+  check-then-insert (мобильные ретраи делали её реальной, не теоретической).
+- **Publication-фильтр** на переиспользуемых обложках и на избранных
+  маршрутах — неопубликованные места/маршруты больше не утекают.
+- **Crisis/injection-реплики** сохраняются как `[redacted]` и не
+  возвращаются в контекст LLM на следующем ходу.
+
+Источник и детали:
+[reviews/2026-08-25-review-remediation-plan.md](../reviews/2026-08-25-review-remediation-plan.md).
 
 ## 1. Trust boundaries
 
@@ -183,7 +201,7 @@ params, небезопасный YAML.
 - Redis rate-limit на OTP
 - Upload: max bytes, max pixels, format allowlist via decode
 - Pagination caps, Dio/API timeouts
-- AI/generation quotas — Phase 8B+ (ещё не as-built)
+- AI/generation quotas — as-built (`quota.py`), с row lock с 2026-08-26
 
 ## 6. Медиа и uploads
 
@@ -221,10 +239,14 @@ Backend: `tourism-backend/tests/security/`
 - media path helpers
 - profile/support surfaces
 
-Mobile: `tourism-mobile/test/security/`
+Mobile: `tourism-mobile/test/security/` — 15 файлов, в том числе:
 
 - secure storage port
 - image URL scheme allowlist / cache wiring
+- `chat_image_allowlist_test.dart` — регрессия на обход allowlist в
+  ИИ-чате (закрыт фазой 1, 2026-08-26)
+- untrusted content на карточке маршрута, inbox, публичном профиле,
+  истории поиска, AI safety
 
 При изменении auth, API input или UI рендера текста/медиа — обязательны
 security regression tests + `pytest tests/security` /
@@ -244,7 +266,7 @@ tests, media_attachments.
 - password / Argon2id для **mobile** users (ops admin уже Argon2id)
 - prod Redis/Postgres ACL + TLS между сервисами
 - certificate pinning (по threat model)
-- роли editor/moderator на mobile API + AI/RAG quotas
+- роли editor/moderator на mobile API (AI-квоты — уже as-built)
 - MFA / step-up для admin principals
 - часть topic-docs ниже могла отставать — **этот файл** + код + ADR-007
   приоритетнее устаревших «not implemented» абзацев

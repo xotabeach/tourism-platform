@@ -89,13 +89,18 @@ flowchart TD
 
   subgraph soon [Приоритет_2_следующее]
     fav[FavoritesScreen]
-    builder[RouteBuilderForm]
-    builderRes[BuilderResult]
     active[ActiveRoute]
   end
 
-  subgraph future [Приоритет_3_позже]
+  subgraph shipped [Реализовано_2026_08_26]
+    builder[RouteBuilderForm]
+    builderRes[BuilderResult]
     chat[TravelPlus_Chat]
+    chatHist[ChatHistory]
+    allList[AllList_Paginated]
+  end
+
+  subgraph future [Приоритет_3_позже]
     myRoutes[MyUserRoutes]
     trip[TripPlanner]
   end

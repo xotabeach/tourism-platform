@@ -27,17 +27,20 @@ lib/
 │   └── shell/
 │       └── app_shell_screen.dart     # bottom navigation scaffold
 └── features/
-    ├── home/
+    ├── home/                         # feed + Маршруты/Локации + all-list
     ├── places/
     ├── routes/                       # catalog, reviews, publication
     ├── route_publish/                # user draft → submit
-    ├── route_match/                  # form UI; builder API = Phase 8A
+    ├── route_match/                  # form + AI chat + chat history
     ├── my_routes/                    # favorites / follows / history stub
     ├── favorites/                    # API favorites (also via my_routes)
     ├── profile/                      # durable; achievements from API
+    ├── reviews/                      # shared EntityReviewsSection
+    ├── onboarding/                   # welcome + session state
     ├── auth/
     ├── settings/                     # support, notifications, Travel+ mock
-    └── search/
+    ├── search/
+    └── shared/                       # placeholder tab scaffold
 ```
 
 Per feature (unchanged rule):
@@ -65,6 +68,18 @@ features/<name>/
 | Error facade | typed `AppFailure`; no secrets in messages |
 | Agent docs / BLoC | **Not adopted** — stay on Riverpod |
 
+### Где состояние живёт в notifier, а не в экране
+
+Экранный `State` держит только UI-состояние (скролл, фокус, инсеты
+клавиатуры, выбранный режим). Доменный пайплайн выносится в
+`StateNotifier` рядом, в `application/`:
+
+- `RouteMatchNotifier` (`route_match/application/route_match_notifier.dart`)
+  — весь пайплайн ИИ-чата: сессия, ходы, предложения маршрута,
+  `startNewChat`, `resumeSession`. Вынесен 2026-08-26; до этого жил в
+  `State` экрана на ~1400 строк, из-за чего чат нельзя было покрыть
+  behavioral-тестами без подъёма всего дерева виджетов.
+
 ## What we explicitly do not adopt
 
 - `flutter_bloc` / Cubit as primary state
@@ -82,14 +97,16 @@ Onboarding (вне shell): `/welcome` → `/auth/identity` → `/auth/otp`.
 
 | Index | Branch | Path | Content (as-built 2026-08) |
 | --- | --- | --- | --- |
-| 0 | Home | `/` | Home feed |
+| 0 | Home | `/` | Feed с тумблером Маршруты/Локации; «Смотреть все» → `/all` (пагинация по 10) |
 | 1 | Routes | `/routes` | Editorial swipe + details |
 | 2 | Compose (+) | overlay | Опубликовать / Подобрать (не tab) |
 | 3 | My routes | `/my-routes` | Favorites + follows; history placeholder |
 | 4 | Profile | `/profile` | Durable profile; ranks/тп/achievements API |
 
 Places catalog — вне tab bar (push / deep link). Publish: `/publish`.
-Match form: `/match` (результат — facade до Phase 8A).
+`/match` — двухрежимный экран: форма параметров и AI-чат; результаты
+реальные. История чатов — `/profile/settings/chat-history`, возобновление
+сессии — `/match/resume`.
 
 Nav follows the Figma segmented model: leading inactive glass segment, active
 dark droplet, trailing inactive glass segment. Route details stay in the Routes

@@ -2,8 +2,10 @@
 
 Crimea Travel Platform: Flutter-клиент, FastAPI modular monolith, PostGIS,
 Redis. Внешний routing — за `RoutingProvider` (Phase 8A). LLM-planner —
-за `AIPlanningProvider` (Phase 8B+): сначала mock/Gemini, затем home-lab
-**Gemma 4** через Ollama. Mobile никогда не ходит в модель напрямую.
+за `AIPlanningProvider`: как-built это mock и **LM Studio** (Gemma 4 на
+домашней GPU-машине, OpenAI-совместимый HTTP). Стадия hosted Gemini была
+запланирована, но пропущена; Ollama-адаптер не писался. Mobile никогда не
+ходит в модель напрямую.
 
 Стек по контурам: [stack.md](stack.md).
 
@@ -13,16 +15,14 @@ flowchart LR
     Ops["Ops / редактор SQLAdmin"]
     Platform["Crimea Travel Platform"]
     Routing["Routing Provider"]
-    Gemini["Gemini experimental"]
-    Ollama["Ollama Gemma 4 home lab"]
+    LMStudio["LM Studio Gemma 4 home lab"]
     FCM["FCM / APNs"]
     Sources["Внешние источники данных"]
 
     Traveler -->|Ищет места и планирует поездки| Platform
     Ops -->|Модерация маршрутов, support| Platform
     Platform -->|Distance duration geometry| Routing
-    Platform -.->|Phase 8B planner| Gemini
-    Platform -.->|Future self-host| Ollama
+    Platform -->|AI planner chat turns| LMStudio
     Platform -.->|tray push| FCM
     Platform -->|Импорт или ручная сверка| Sources
 ```

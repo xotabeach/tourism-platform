@@ -23,6 +23,41 @@ phase is independently shippable; do not block phase N+1 on phase N being
 fully done unless noted. Phases are ordered by severity × cost, not by which
 review they came from.
 
+## Merge status — 2026-08-26
+
+**Phases 0–6 are merged to `main` in both repositories.** Phases 7–8 are not
+started.
+
+| Repo | `main` | Validation |
+| --- | --- | --- |
+| `tourism-backend` | `ecb1993` | `validate.sh` green — 394 passed, 1 skipped, coverage 74.65% |
+| `tourism-mobile` | `0e69467` | `validate.sh` green — 245 tests + 25 goldens, format/analyze clean |
+
+Each phase was merged one at a time with validation in between. Backend was a
+fast-forward. Mobile needed real conflict resolution because every branch was
+cut from `main` independently, and because an unmerged working session from
+2026-08-25 (recovered from a stash into
+`feat/home-modes-and-chat-history`, commit `62885c0`) touched the same files:
+
+- **Phase 2** had made `homePlacesProvider` an alias of `placesListProvider`
+  because the real limited provider only existed in the unmerged session.
+  Resolved to the real provider; refresh scopes target it unchanged.
+- **Phase 4**'s narrowed `sessionProvider.select` won over the wider watch;
+  the home header now takes `name`/`avatarUrl` as parameters, threaded
+  through both mode builders and the loading/error shells.
+- **Phase 5**'s `RouteMatchNotifier` is where session resume now lives
+  (`resumeSession`), moved out of the screen's `State` where the recovered
+  session had put it. Covered by two new notifier tests.
+- **Phase 6** branched before the 2026-08-25 hero fixes, so its shared
+  extraction had carried the *pre-fix* lip (fading + scaling, detaching
+  mid-scroll). Kept `CollapsingSheetLip`; adopted phase 6's shared
+  `EntityReviewsSection` and `AudioGuideCard` wholesale.
+
+**Debt this merge surfaced:** `EntityReviewsSection` was extracted from the
+pre-token-pass reviews file, so it carries 8 hardcoded colours and 13
+hardcoded radii — the 2026-08-25 token pass on `place_reviews_section.dart`
+did not survive the unification. Folded into phase 8's token work below.
+
 ## Goals
 
 1. Close exploitable P1 bugs first — backend security races/self-activation,
@@ -327,6 +362,12 @@ finding 5/8/9; backend review `M-5`/`AI-11`; mobile code review `CODE-6..8`,
 - `route_details_screen.dart` design-token migration — see Phase 6, this is
   the narrower "just the tokens" slice if the full twin-unification is
   deferred.
+- `EntityReviewsSection` design-token migration (8 hardcoded colours, 13
+  hardcoded radii). Phase 6 extracted it from the pre-token-pass reviews
+  file, so the 2026-08-25 token pass on `place_reviews_section.dart` was lost
+  in the unification — see the merge-status note at the top. Doing it here
+  now fixes both place and route reviews at once, which is the payoff of the
+  unification.
 - Cross-module ORM-import cleanup (backend review `M-5`, ADR-001) — gradual,
   module by module; add the dependency test ADR-001 calls for once a first
   module is cleaned up.

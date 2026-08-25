@@ -1,19 +1,23 @@
 # AI-чат подбора и генерация маршрута — план реализации
 
-Статус: **точный контракт будущей реализации**; продуктовый UX (Travel+,
-топик-гард, proposal→accept) зафиксирован в
+Статус (2026-08-26): **реализовано и в `main`**. Pipeline поставлен с обеих
+сторон — сессии планирования, ходы чата, предложения маршрута,
+accept/reject, история чатов и возобновление сессии. Продуктовый UX
+(Travel+, топик-гард, proposal→accept) зафиксирован в
 [ai-route-chat-product-contract.md](ai-route-chat-product-contract.md).
-Код pipeline ещё не начат; Travel+ gate и mobile topic/crisis guard — as-built.
+
+На мобиле состояние чата живёт в `RouteMatchNotifier`
+(`route_match/application/route_match_notifier.dart`), а не в `State`
+экрана: там же `startNewChat` и `resumeSession` для истории чатов.
 
 Экран-референс: `design/screens-figma/krymtrip-2/22-route-match-ai-chat.png`.
-Результат: `23-route-match-results.png`. Реализация начинается после
-детерминированного Route Builder Phase 8A и стабильного AI provider adapter.
+Результат: `23-route-match-results.png`.
 
 ## Главный принцип
 
 ```text
 Flutter chat -> HTTPS FastAPI -> Route Builder / tools -> PostGIS + routing
-                                      |-> Qdrant context
+                                      |-> pgvector context
                                       `-> LM Studio Gemma 4
 ```
 

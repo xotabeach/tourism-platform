@@ -94,7 +94,7 @@ flowchart LR
 As-built / MVP:
 
 - editorial могут быть `public`;
-- generated — `private` (после Phase 8A; пока builder не реализован);
+- generated — `private` (builder реализован, генерация и квоты живые);
 - user_created: создаётся как draft → submit → `pending_review` → ops
   approve (`public` + `active` в каталоге) или reject; seed-driven публичные
   user_created по-прежнему допустимы в ленте.

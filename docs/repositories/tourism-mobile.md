@@ -15,7 +15,7 @@ workspace. Стек: [stack.md](../stack.md).
 ## Вне целей
 
 - Доменная логика как источник истины.
-- Прямой доступ к PostgreSQL / Redis / Ollama.
+- Прямой доступ к PostgreSQL / Redis / LM Studio.
 - Импорт ORM backend.
 - Облачная infra.
 - Официальное госприложение.
@@ -58,7 +58,8 @@ Drift/Isar — после offline spike.
   активного/неактивного сердца.
 - [x] Единое отображение экспертного статуса в общих карточках пользователя
   и маршрута (`author_is_expert`, градиентная рамка и бейдж).
-- [ ] Route builder / execution (Phase 8A/9).
+- [x] Route builder: форма + AI-чат + proposal→accept (2026-08-26)
+- [ ] Route execution (Phase 9).
 - [ ] Offline download.
 
 ### Этап 3. Надёжность

@@ -74,20 +74,26 @@ deploy — `tourism-backend/scripts/deploy-production-local.sh`. Mobile APK
 
 ---
 
-## Целевой AI-стек (Gemma 4, ещё не в Compose)
+## AI-стек (Gemma 4 на LM Studio; GPU-хост вне Compose)
 
-Планирование маршрутов с LLM — **Phase 8B+**. Сначала deterministic builder
-(Phase 8A). Код адаптеров Gemini/Ollama **ещё не вшит** в backend; env в
-`.env.example` — заготовки.
+Планирование маршрутов с LLM реализовано (Phase 8B, в `main` с 2026-08-26).
+Адаптер `LMStudioProvider` вшит в backend и включается через
+`AI_PROVIDER=lmstudio`. Вне Compose остаётся только сам GPU-хост — это
+осознанно, см. ниже.
 
-Порядок провайдеров (`AIPlanningProvider`):
+Фактический путь провайдеров (`AIPlanningProvider`):
 
 ```text
-mock  →  Gemini (experimental, hosted)  →  Ollama + Gemma 4 (home lab)
+mock  →  LM Studio + Gemma 4 (home lab)
 ```
 
-RAG (Qdrant) — отдельно, после стабильного adapter. PostGIS остаётся SoT для
-координат, часов, closures, цен. Веса модели ≠ база знаний Крыма.
+Промежуточная стадия с hosted Gemini была запланирована (ADR-006 stage 1),
+но пропущена — адаптеры Gemini/Ollama не писались.
+
+RAG — **pgvector в том же Postgres** (ADR-008), не Qdrant; выключен по
+умолчанию (`RAG_ENABLED=false`) и пока на `hash-v1`, не на семантическом
+эмбеддере. PostGIS остаётся SoT для координат, часов, closures, цен. Веса
+модели ≠ база знаний Крыма.
 
 ### Home lab (GPU-машина, не test-сервер)
 
@@ -115,19 +121,18 @@ Mobile **не** ходит в LM Studio/Ollama. Только HTTPS backend.
 | Quality probe | `gemma4:26b` Q4 | если влезает VRAM и latency |
 | Embeddings | `nomic-embed-text` или `bge-m3` | RAG; можно CPU |
 
-Env (когда появится код):
+Env (как-built). Рабочих значений `AI_PROVIDER` два — `mock` и
+`lmstudio`; `gemini` / `ollama` есть в enum, но адаптеров под них нет,
+`ai_factory` на них падает. При `AI_PROVIDER=lmstudio` три `LM_STUDIO_*`
+обязательны — `validate_settings` не даст стартовать без них.
 
 ```text
 AI_PLANNING_ENABLED=false
-AI_PROVIDER=mock|gemini|ollama
-OLLAMA_BASE_URL=http://127.0.0.1:11434
-OLLAMA_CHAT_MODEL=gemma4:12b
-OLLAMA_EMBED_MODEL=nomic-embed-text
-QDRANT_URL=http://127.0.0.1:6333
+AI_PROVIDER=mock|lmstudio
 RAG_ENABLED=false
 ```
 
-LM Studio-вариант:
+LM Studio (единственный рабочий не-mock провайдер):
 
 ```text
 AI_PROVIDER=lmstudio

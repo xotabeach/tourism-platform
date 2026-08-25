@@ -1,7 +1,9 @@
 # ADR-006: AI-assisted route planning
 
-- Статус: принято (архитектурное направление; реализация — Phase 8B+)
-- Дата: 2026-07-23
+- Статус: принято; реализовано (Phase 8B, в `main` с 2026-08-26)
+- Дата: 2026-07-23 (статус обновлён 2026-08-26)
+- Отклонения от решения при реализации отмечены в тексте курсивом
+  «*как-built*»: stage 1 (Gemini) пропущен, провайдер — LM Studio.
 
 ## Контекст
 
@@ -26,7 +28,9 @@ editorial catalog.
    infrastructure adapters.
 3. **Stage 1 (Phase 8B):** hosted experimental provider (Gemini adapter),
    structured output, mock provider, feature flag, без production SLA.  
-   Model ID — только из configuration/env.
+   Model ID — только из configuration/env.  
+   *Как-built: стадия пропущена — Gemini-адаптер не писался, сразу собран
+   self-hosted LM Studio (stage 2).*
 4. **Stage 2 (Future / Phase 8B slice):** self-hosted Gemma-family + RAG.
    Narrative RAG — **pgvector in Postgres** ([ADR-008](ADR-008-rag-pgvector.md));
    PostGIS остаётся SoT для mutable facts; Qdrant optional later. Weights не
@@ -41,7 +45,7 @@ editorial catalog.
 Детали: [ai-route-planning-architecture.md](../ai-route-planning-architecture.md).  
 Сквозной поток (промпт → параметры → дороги → persist):
 [ai-route-system-end-to-end.md](../ai-route-system-end-to-end.md).  
-Home lab (Ollama, Qdrant, RAG):
+Home lab (как-built: LM Studio + pgvector):
 [ai-self-hosted-home-lab.md](../ai-self-hosted-home-lab.md).
 
 ## Альтернативы
@@ -113,5 +117,7 @@ on-prem; gold eval проходит на Gemma candidate; ops ready for inferenc
 
 - Phase 4: editorial routes — без AI.
 - Phase 8A / 8B / 12 / Future — см. [implementation-plan.md](../implementation-plan.md).
-- Progress: AI architecture documented, not implemented —
-  [progress.md](../progress.md).
+- Progress: реализовано и в `main` с 2026-08-26 (Phase 8B) —
+  [progress.md](../progress.md). Отклонение от решения: stage 1 (hosted
+  Gemini) пропущен, сразу собран self-hosted **LM Studio**; RAG — pgvector
+  (ADR-008), не Qdrant.

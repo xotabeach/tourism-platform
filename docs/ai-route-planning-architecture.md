@@ -1,7 +1,13 @@
 # AI-assisted route planning architecture
 
-Архитектурный документ будущего AI-assisted Route Builder.  
-**Статус:** documented, not implemented.  
+Архитектурный документ AI-assisted Route Builder.  
+**Статус (2026-08-26):** реализовано и в `main`. Phase 8B поставлена:
+сессии планирования, chat turns, `ToolRegistry`, structured parse,
+RAG-каркас. Провайдер как-built — **LM Studio** (OpenAI-совместимый HTTP),
+а не Gemini/Ollama: соответствующие адаптеры так и не были написаны, стадия
+Gemini пропущена. Разделы ниже, где ещё упоминаются Gemini/Ollama/Qdrant,
+описывают рассматривавшийся, но не реализованный путь — сверяйся с
+пометками «как-built».  
 Связанные решения: [ADR-006](decisions/ADR-006-ai-assisted-route-planning.md),
 [ADR-004](decisions/ADR-004-routing-provider-abstraction.md),
 [implementation-plan.md](implementation-plan.md) (Phase 8A/8B),
@@ -24,10 +30,14 @@ home lab: [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md),
 
 ## 2. Non-goals
 
-Сейчас и до Phase 8B **не** делаем:
+*Как-built: список написан до Phase 8B. Первые два пункта уже сделаны —
+LLM вызывается из чат-эндпоинта, conversational Travel+ chat есть.
+Остальные пункты в силе.*
 
-- вызовы Gemini/Gemma из production endpoints;
-- conversational Travel+ chat API;
+Сейчас **не** делаем:
+
+- ~~вызовы LLM из production endpoints~~ (сделано: `session_service`);
+- ~~conversational Travel+ chat API~~ (сделано);
 - MCP server;
 - vector DB / GPU infra;
 - billing;
@@ -127,36 +137,55 @@ Application ports (имена адаптируются к conventions модул
 
 Domain/application **не импортируют** Google GenAI SDK, vLLM, Ollama, MCP SDK.
 
-Реализации (будущее): `MockAIPlanningProvider`, `GeminiAIPlanningProvider`,
-`GemmaAIPlanningProvider`.
+Реализации **как-built**: `MockAIPlanningProvider` и `LMStudioProvider`.
+`GeminiAIPlanningProvider` / `GemmaAIPlanningProvider` из ранних черновиков
+не писались.
 
-## 8. Gemini experimental stage (Phase 8B)
+## 8. Gemini experimental stage — пропущен
 
-- Hosted provider через adapter.
-- Model ID только из config/env (не hardcoded в business logic).
-- Structured outputs; опционально function calling → ToolRegistry.
-- Mock provider для тестов.
-- Feature flag, без production SLA.
-- Candidate model ids в env — placeholders, не утверждение доступности.
+*Как-built: стадия не выполнялась. Сразу собран self-hosted LM Studio
+(§9). Раздел оставлен как след решения ADR-006 stage 1.*
 
-## 9. Gemma self-hosted stage (Future)
+## 9. Gemma self-hosted stage — реализовано
 
-Кратко здесь; **практический план home lab** (Compose, Ollama, Qdrant,
-VRAM, ingest, TTL, чеклисты):
+Кратко здесь; **практический план home lab** (VRAM, ingest, TTL, чеклисты):
 [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
 
-- Inference: Ollama (lab) или OpenAI-compatible HTTP; adapter
-  `GemmaAIPlanningProvider` / `OllamaAIPlanningProvider` за тем же port.
+- Inference **как-built**: OpenAI-compatible HTTP к LM Studio, adapter
+  `LMStudioProvider` за тем же port. Ollama не использован.
 - Модели: **Gemma 4**; на ~12 GB VRAM default **`gemma4:12b`** (не откат на
   Gemma 2/3). `26b` — probe; `31b` — не default. См. home-lab §5.
-- RAG: **pgvector in the same Postgres** (ADR-008) for Phase 8B narrative
-  chunks; Qdrant optional later for home-lab scale. PostGIS остаётся SoT
+- RAG: **pgvector in the same Postgres** (ADR-008); Qdrant не используется.
+  Выключен по умолчанию, эмбеддер пока `hash-v1`. PostGIS остаётся SoT
   для фактов.
 - Оркестратор — FastAPI modular monolith (не отдельный Laravel/AI backend).
 - Сначала Docker Compose на одной машине; Kubernetes — только при SLA/ops need.
 - Optional LoRA для planning behaviour позже.
 - Canary Gemini↔Gemma: valid JSON rate, hard-constraint compliance, latency,
   cost, fallback rate.
+
+## 9a. Runtime-защита LM Studio (как-built, 2026-08-26)
+
+Добавлено фазой 3 ремедиации после ревью 2026-08-25. В более ранних
+разделах этого документа не отражено.
+
+- **Один слот инференса.** GPU домашней машины один, поэтому вызовы к
+  LM Studio проходят через in-process gate (`lm_studio.py`). При занятом
+  слоте — **fail-fast** `AIProviderBusyError("lm_studio_busy")`, а не
+  очередь: пользователь получает быстрый понятный ответ вместо 60-секундного
+  ожидания с последующим таймаутом.
+- **Метрики на каждый turn** (`session_service`): `latency_ms`,
+  `structured_parse` (`ok|fallback`), `outage_fallback`. До этого
+  надёжность JSON-контракта на реальной Gemma была неизмерима.
+- **История режется в SQL** (`llm_history_stmt`), а не срезом `[-12:]` в
+  Python после выборки всех сообщений сессии.
+- **Флагнутые реплики редактируются.** Сообщения, помеченные
+  `topic_guard` как crisis/injection, сохраняются как
+  `REDACTED_USER_TEXT = "[redacted]"` и исключаются из окна, уходящего в
+  LLM. До этого canned-ответ закрывал только текущий ход, а сам текст
+  возвращался в контекст на следующем.
+- **`constraint_patch` не перезаписывает подтверждённые поля** — merge идёт
+  с `protect_confirmed=True`.
 
 ## 10. Why RAG is required
 
@@ -375,11 +404,13 @@ Conversational LLM — после 8B; free form builder не деградиру�
 
 1. Phase 4 — editorial routes (без AI).
 2. Phase 8A — deterministic pipeline + failure codes + mock RoutingProvider.
-3. Phase 8B — interfaces, mock AI, Gemini adapter behind flag, validation/repair.
-4. Phase 12 — quotas / Travel+ flag для AI limits.
-5. Future — conversational interpreter; Gemma + RAG (см.
-   [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md)); optional MCP;
-   canary migration.
+3. Phase 8B — **сделано**: interfaces, mock AI, LM Studio adapter behind
+   flag, validation/repair, conversational interpreter, chat sessions.
+   Gemini-адаптер пропущен.
+4. Phase 12 — quotas / Travel+ flag для AI limits (квоты генерации уже
+   есть, с row lock).
+5. Future — RAG на настоящем эмбеддере вместо `hash-v1` (см.
+   [ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md)); optional MCP.
 
 ## 25. Mermaid diagrams (summary)
 
@@ -398,21 +429,22 @@ flowchart LR
   norm --> pipe
 ```
 
-### Gemini to Gemma migration
+### Provider adapters (как-built)
 
 ```mermaid
 flowchart LR
   app[RouteBuilderApplication]
   port[AIPlanningProvider]
-  gemini[GeminiAdapter_experimental]
-  gemma[GemmaAdapter_self_hosted]
+  lmstudio[LMStudioProvider_self_hosted]
   mock[MockAIPlanningProvider]
 
   app --> port
   port --> mock
-  port --> gemini
-  port --> gemma
+  port --> lmstudio
 ```
+
+Планировавшаяся миграция Gemini→Gemma не понадобилась: hosted-стадия
+пропущена, сразу собран self-hosted адаптер.
 
 ### Validation and repair loop
 
@@ -420,14 +452,15 @@ flowchart LR
 
 ---
 
-## Configuration foundation (documented)
+## Configuration foundation (как-built)
 
-Будущие переменные (без реальных секретов; wiring Settings — Phase 8B):
+Переменные (без реальных секретов). Wiring в `Settings` сделан;
+`validate_settings` требует `LM_STUDIO_*` при `AI_PROVIDER=lmstudio`.
 
 ```bash
-# AI planning (Phase 8B+). Disabled by default.
+# AI planning. Disabled by default.
 # AI_PLANNING_ENABLED=false
-# AI_PROVIDER=mock          # mock | gemini | ollama
+# AI_PROVIDER=mock          # рабочие значения: mock | lmstudio
 # AI_MODEL=
 # AI_REQUEST_TIMEOUT_SECONDS=30
 # AI_MAX_REPAIR_ATTEMPTS=1

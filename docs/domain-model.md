@@ -9,7 +9,9 @@
 - Значения `freshnessStatus`: `fresh`, `review_due`, `stale`, `unknown`.
 - Удаление опубликованных данных предпочтительно заменяется архивацией.
 - Связи между modules передаются через IDs и application contracts. Прямые
-  cross-domain ORM imports запрещены.
+  cross-domain ORM imports запрещены — **на 2026-08-26 правило нарушено 62
+  раза**, см. отклонение в
+  [ADR-001](decisions/ADR-001-modular-monolith-first.md).
 
 ## Geography
 

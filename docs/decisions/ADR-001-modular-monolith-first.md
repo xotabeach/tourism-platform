@@ -12,7 +12,8 @@ services увеличит стоимость разработки, локаль�
 
 ## Решение
 
-Backend реализуется как modular monolith с boundaries:
+Backend реализуется как modular monolith с boundaries. На 2026-08-26
+модулей 14 (список ниже — исходный набор решения плюс появившиеся позже):
 
 - `identity`;
 - `users`;
@@ -20,12 +21,23 @@ Backend реализуется как modular monolith с boundaries:
 - `places`;
 - `routes`;
 - `route_builder`;
-- `media`.
+- `media`;
+- `admin`, `favorites`, `knowledge`, `notifications`, `route_execution`,
+  `subscriptions`, `support` — добавлены после принятия ADR.
 
 Внутри каждого module применяется pragmatic clean architecture со слоями
 `domain`, `application`, `infrastructure`, `presentation`. Module владеет своей
 persistence model. Cross-domain ORM imports и navigation properties запрещены;
 интеграция выполняется через IDs, application contracts и domain events.
+
+> **Фактическое отклонение (2026-08-26).** Правило не соблюдается: 62 прямых
+> импорта чужих `infrastructure.models` из `*/application/*.py`, плотнее
+> всего в `route_builder` (~22), `places` (~11), `routes` (~9), `identity`
+> (~8). Автоматических dependency tests, которых требует раздел
+> «Последствия», нет — правило держится только на review и на практике не
+> удержалось. Решение (монолит как единица деплоя) при этом в силе; см.
+> [reviews/2026-08-25-review-remediation-plan.md](../reviews/2026-08-25-review-remediation-plan.md)
+> фаза 8 — постепенная чистка + dependency test, чтобы не регрессировало.
 
 ## Последствия
 

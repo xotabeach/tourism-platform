@@ -265,21 +265,21 @@ foundation для fallback (без LLM).
 
 ## Phase 8B — AI-assisted Route Planning (experimental)
 
-**Цель:** provider-neutral AI ports, mock + Gemini adapter, structured output,
+**Цель:** provider-neutral AI ports, mock + LM Studio adapter (Gemini-стадия пропущена), structured output,
 tool calling через internal ToolRegistry, validation, bounded repair,
 deterministic fallback, metrics, feature flag. **Без production SLA.**
 
 | Область | Задачи |
 | --- | --- |
 | Backend | `AIPlanningProvider`, schemas, validator/repair, usage metadata |
-| Mobile | Нет отдельного AI UI (тот же builder result + warnings) |
+| Mobile | AI-чат как отдельный режим `/match` + история чатов и возобновление сессии |
 | Infrastructure | Env placeholders only; no GPU |
 | API | Тот же route-builder; AI за flag, не отдельные mobile AI endpoints |
 | Tests | Mock provider contract + invalid output → fallback |
 | Security | AI/RAG security; prompt/tool validation; no PII in prompts; tool allowlists |
 | Acceptance | Flag on: AI proposal проходит validation или fallback; flag off: 8A |
 | Dependencies | Phase 8A |
-| Не входит | Gemma deploy, RAG prod, MCP, billing, chat dialogue |
+| Не входит | RAG prod (эмбеддер всё ещё `hash-v1`), MCP, billing |
 
 ## Phase 8 — Route builder (umbrella)
 

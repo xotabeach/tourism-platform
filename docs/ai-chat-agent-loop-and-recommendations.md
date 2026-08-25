@@ -27,7 +27,7 @@
 
 | Компонент | Поведение |
 | --- | --- |
-| ToolRegistry | Allowlist tools: `search_places`, `seasonal_recommendations` |
+| ToolRegistry | Allowlist tools (4): `search_places`, `seasonal_recommendations`, `get_place_details`, `find_places_near_point` |
 | Agent loop | Backend prefetch + до 1 follow-up tool round по запросу модели |
 | Recommendation cards | Блок `recommendation_card` в сообщении ассистента |
 | Slider / toggle | Блоки `slider` (бюджет) и `toggle` (дети / питомцы) в UI |

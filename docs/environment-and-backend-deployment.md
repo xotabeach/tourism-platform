@@ -41,17 +41,18 @@ DATA_SOURCE=mock|api
 API_BASE_URL=https://...
 
 AI_PLANNING_ENABLED=false
-AI_PROVIDER=mock|gemini|ollama
-AI_MODEL=...
-AI_BASE_URL=...
-# Home lab (not on the constrained test VPS):
-# OLLAMA_BASE_URL=http://127.0.0.1:11434
-# OLLAMA_CHAT_MODEL=gemma4:12b
-# QDRANT_URL=http://127.0.0.1:6333
+AI_PROVIDER=mock|lmstudio
+RAG_ENABLED=false
+# Home lab (not on the constrained test VPS), required when
+# AI_PROVIDER=lmstudio:
+# LM_STUDIO_BASE_URL=http://<PRIVATE_WINDOWS_IP>:1234/v1
+# LM_STUDIO_MODEL=<id из /v1/models>
+# LM_STUDIO_API_KEY=<secret>
 ```
 
-`AI_PROVIDER=self_hosted` в старых черновиках = `ollama` (Gemma 4). Код
-адаптера ещё не вшит; см. [stack.md](stack.md).
+`gemini` / `ollama` встречаются в старых черновиках и остались в enum, но
+адаптеров под них нет — рабочих значения два: `mock` и `lmstudio`. RAG —
+pgvector в том же Postgres (ADR-008), не Qdrant. См. [stack.md](stack.md).
 
 Secrets such as database passwords, signing keys, and `GEMINI_API_KEY` are
 environment-scoped CI/server secrets and never mobile compile-time values.

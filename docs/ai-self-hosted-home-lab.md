@@ -8,11 +8,13 @@
 - [AI-чат: продукт, Travel+, топик-гард, proposal→accept](ai-route-chat-product-contract.md)
 - [AI-чат подбора и кнопка генерации](ai-route-chat-mobile-implementation.md)
 
-**Статус кода:** adapter ещё не implemented. **Статус архитектуры:**
-self-host transport может быть Ollama или OpenAI-compatible LM Studio;
-выбранный Windows quality probe — **Unsloth Gemma 4 26B A4B it UD-IQ4_XS**,
-Qdrant остаётся
-отдельным RAG-компонентом; не test-VPS.
+**Статус кода (2026-08-26):** adapter реализован и в `main` —
+`LMStudioProvider` (`route_builder/infrastructure/lm_studio.py`), включён
+через `ai_factory` при `AI_PROVIDER=lmstudio`. **Статус архитектуры:**
+transport выбран — **OpenAI-compatible LM Studio** (Ollama рассматривался,
+но адаптер не писался); Windows quality probe — **Unsloth Gemma 4 26B A4B
+it UD-IQ4_XS**. RAG живёт в **pgvector** в том же Postgres (ADR-008), а не
+в отдельном Qdrant; не test-VPS.
 Сводка контуров: [stack.md](stack.md).
 
 Связанные документы:

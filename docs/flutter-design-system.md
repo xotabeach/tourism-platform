@@ -17,10 +17,22 @@ lib/core/design/
   app_spacing.dart
   app_typography.dart
   components/
+    app_async_error.dart
+    app_brand_bar.dart
     app_controls.dart
+    app_edge_back_gesture.dart
+    app_favorite_icon.dart
     app_glass.dart
+    app_skeleton.dart
+    audio_guide_card.dart
+    collapsing_hero_header.dart
+    details_hero_loading_view.dart
     native_liquid_glass.dart
 ```
+
+`audio_guide_card`, `details_hero_loading_view` и общие collapse-параметры
+в `collapsing_hero_header` появились 2026-08-26 при унификации экранов
+места и маршрута — раньше это были параллельные копии на каждом экране.
 
 `core/theme` wires these tokens into Material 3 and keeps compatibility
 exports for older feature imports.
@@ -28,9 +40,11 @@ exports for older feature imports.
 ## Tokens
 
 - Spacing scale: `4, 8, 12, 16, 20, 24, 32`; page inset is `16`.
-- Radii: chip `22`, field `26`, card `26`, modal `28`, capsule/circle `999`.
+- Radii: chip `22`, field `22`, card `22`, tile `12`, settingsTile `14`,
+  modal `28`, capsule/circle `999`.
 - Motion: fast `120 ms`, normal `180 ms`, emphasized `260 ms`, nav droplet
-  `360 ms`, reduced motion `150 ms`.
+  `360 ms`, reduced motion `150 ms`; морфы — mode `420 ms`,
+  compose `620 ms`, compose close `360 ms`, detail `720 ms`.
 - Typography: bundled full Rubik variable font. UI styles explicitly set
   family, size, weight, height and zero/non-negative letter spacing.
 - Semantic swipe colors: muted green for favorite, muted burgundy for
