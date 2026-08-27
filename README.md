@@ -13,9 +13,9 @@ Crimea Travel Platform — рабочее название мобильной т
 здесь. Backend и mobile — отдельные submodules, не skeleton.
 
 As-built: каталог, auth, избранное, публикация маршрутов + SQLAdmin,
-профиль (тп/звания), отзывы, inbox/FCM. Дальше — Phase 8A (Route Builder).
-Выбранный home lab — Windows LM Studio + Unsloth Gemma 4 26B A4B it
-UD-IQ4_XS; connectivity adapter/probe есть, planning API ещё нет. В локальном
+профиль (тп/звания), отзывы, inbox/FCM, Route Builder и экспериментальный
+Phase 8B AI-чат с planning sessions. Выбранный home lab — Windows LM Studio +
+Unsloth Gemma 4 26B A4B it UD-IQ4_XS; transport/probe подключены. В локальном
 и серверном PostGIS импортировано по 1000 OSM drafts для quality gate.
 
 - Стек: [docs/stack.md](docs/stack.md)
@@ -28,9 +28,10 @@ UD-IQ4_XS; connectivity adapter/probe есть, planning API ещё нет. В �
 - PostgreSQL/PostGIS, Redis; MinIO + Mailpit локально.
 - Test host: Caddy + backend + PostGIS + Redis.
 - Границы модулей: `identity`, `geography`, `places`, `routes`, `favorites`,
-  `support`, `notifications`, `admin`, `media`; stub — `route_builder`,
-  `route_execution`, `subscriptions`.
-- `RoutingProvider` — абстракция (ADR-004); реализация — Phase 8A.
+  `support`, `notifications`, `admin`, `media`; `route_execution` остаётся
+  незапущенным stub.
+- `RoutingProvider` — абстракция (ADR-004); текущая реализация — deterministic
+  stub с коэффициентом расстояния, OSRM отложен до наполнения каталога.
 - AI: port `AIPlanningProvider` → mock / Gemini / **LM Studio Gemma 4**
   ([ai-self-hosted-home-lab.md](docs/ai-self-hosted-home-lab.md)).
 - Kafka — только после ADR-005. Helm — позже в этом repo.
