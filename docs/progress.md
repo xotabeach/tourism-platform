@@ -33,7 +33,13 @@
 - **Фаза 6 — mobile:** общие `EntityReviewsSection` / `AudioGuideCard` /
   collapse-параметры вместо параллельных копий на экранах места и маршрута.
 
-**Next — фазы 7 и 8** (частично начаты): мёртвый экран `/search`, «назад» на
+**Review remediation 2026-08-27:** R0 (основная docs-карта), R2 Expert rank и
+R4 mobile correctness закрыты. R1 media/admin и R3 AI request lifecycle ещё
+открыты; R4 остаются только задачи, не вошедшие в первый инкремент.
+
+**Next — R1/R3, затем R5–R9:** приватные media и admin surface, AI request
+lifecycle, серверные фильтры каталога, районы, публикация и execution.
+Остаток mobile Phase 7–8: мёртвый экран `/search`, «назад» на
 экранах входа, a11y-контракт на иконочные кнопки, долг по дизайн-токенам
 (включая всплывший при мердже: `EntityReviewsSection` собран из
 до-токенной версии), остаточный perf-разбор. Детали — в плане.
@@ -119,6 +125,20 @@
   стиль кнопки карты, заголовок «Избранное» очищен от завершающего двоеточия.
 - Отдельные backend-рекомендации для маршрутов ещё не начаты: сохраняются
   ранее описанные миграции feedback/deck, алгоритм v1 и планировщик.
+
+### 2026-08-27 — Первый remediation-инкремент после полного ревью
+
+- **R2 закрыта:** Expert rank разрешается единообразно в профиле, карточках
+  маршрутов и отзывах; позиция leaderboard не учитывает экспертов.
+- **R4 закрыта для первого среза:** устранена stale-response race в
+  `AllListScreen`, mobile format/analyze/test/goldens проходят.
+- **R0 закрыта для текущего среза:** platform README и review-документы
+  добавлены в канонический репозиторий; README больше не описывает Route
+  Builder как отсутствующий API.
+- Backend-коммит `16dcea6` задеплоен на test contour immutable image; health
+  и OpenAPI smoke-check прошли. GitLab и GitHub mirror синхронизированы.
+- **Открыты:** R1 (private support media/admin), R3 (AI DB lifecycle и
+  timeout contract), R5+ (каталог/данные/recommendations/execution).
 
 ### 2026-08-26 — Слияние фаз 0–6 в main + актуализация документации
 

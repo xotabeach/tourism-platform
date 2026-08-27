@@ -35,8 +35,8 @@ Reviewed SHAs (do not treat older reviews as current):
 
 Priority: immediate, parallel with R1. Complexity: **S**. Repo: `tourism-platform` + README workspace/backend.
 
-- [ ] **DOC-2026-01 / DOC-2026-04** — stub только `route_execution`. `route_builder` и `subscriptions` — live API. Поправить workspace `README.md`, `tourism-backend/README.md`, `tourism-platform/README.md`, `stack.md`.
-- [ ] **DOC-2026-02** — в `progress.md` одна таблица Product phases: 8A done (stub routing), 8B done-experimental (`ai_planning_enabled` default false). Review-фазы 7–8 2026-08-25 → отсылка к этому файлу (R6). Не писать «Next фазы 7 и 8» без префикса R.
+- [x] **DOC-2026-01 / DOC-2026-04** — README workspace/backend/platform синхронизированы с live Route Builder и planning sessions.
+- [x] **DOC-2026-02** — progress обновлён с явным разделением review remediation R0–R9 и продуктовых фаз; закрытые R2/R4 отмечены.
 - [ ] **DOC-2026-03** — pgvector остаётся **ADR-008**; ops-admin → **ADR-010** + redirect-stub. Прогнать grep `ADR-008`.
 - [ ] Optional: одна страница «As-built in 15 minutes» (published-only catalog, stub routing, OTP local vs test vs prod, как выдать Travel+, какой `validate.sh`).
 - [ ] Optional: корневой `AGENTS.md` со ссылкой на `tourism-platform/docs/` (DOC-2026-21).
@@ -67,9 +67,9 @@ Priority: immediate. Complexity: **M**. Repo: `tourism-backend`, чуть `touri
 
 Priority: immediate. Complexity: **S**. Repo: `tourism-backend`. Independent of R1.
 
-- [ ] **BE-2026-01** — один resolver: `is_expert` / `EXPERT_RANK_ID` → title «Эксперт»; иначе points среди non-expert ranks. Подключить в `routes/application/service.py` `_rank_titles` и оба `review_service.py`.
-- [ ] **BE-2026-07** — `_leaderboard_place` с тем же `non_expert` predicate; экспертам `leaderboard_place=null`.
-- [ ] Tests: unit с expert row `min_points=1e9` и низкими тп; API public route владельца-эксперта; профиль A не сдвигается экспертом выше.
+- [x] **BE-2026-01** — Expert-aware rank resolution подключён в routes и обоих review services.
+- [x] **BE-2026-07** — `_leaderboard_place` использует non-expert predicate; экспертам возвращается `null`.
+- [x] Tests: unit Expert rank и public leaderboard regression; target suite зелёный.
 
 **Acceptance:** карточка маршрута, match, review byline и профиль показывают одно звание.  
 **ADR:** ADR-012 (можно после кода).
@@ -98,8 +98,8 @@ Priority: high. Complexity: **M**. Repo: `tourism-backend` + `tourism-mobile`.
 
 Priority: high. Complexity: **S**. Repo: `tourism-mobile`. **Не трогать** `stash@{0}`.
 
-- [ ] **MO-2026-QA** — `dart format` 9 test files; переименовать `_welcomeCta` (11 infos). Цель: `./scripts/validate.sh` зелёный.
-- [ ] **MO-2026-19** — generation token на `AllListScreen`; игнорировать stale; `_loading` до конца *текущего* запроса.
+- [x] **MO-2026-QA** — format/analyze/test/goldens проходят; `_welcomeCta` переименован.
+- [x] **MO-2026-19** — generation token на `AllListScreen`; stale responses игнорируются.
 - [ ] **MO-2026-21** — `ref.invalidate(chatSessionsProvider)` после `startNewChat` / create session.
 - [ ] **MO-2026-22** — `_busy` на Travel+ checkout; in-flight guard на `acceptProposal`.
 - [ ] **MO-2026-25** — не глотать upload ошибок фото support.
