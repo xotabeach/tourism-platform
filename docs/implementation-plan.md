@@ -302,6 +302,28 @@ experimental.
 | Dependencies | Phase 4, Phase 6 |
 | Не входит | Live GPS tracking productization |
 
+## Phase 9.5 — 2GIS maps and navigation integration
+
+**Цель:** заменить синтетическую геометрию маршрутов на дорожные маршруты
+2ГИС и показать их на экране прохождения, сохранив единый контракт для
+мобильного клиента и возможность смены провайдера.
+
+| Область | Задачи |
+| --- | --- |
+| Trial / access | Создать demo/test key 2ГИС; проверить Maps API, Navigation API и Mobile SDK, квоты, ограничения и лицензионные условия |
+| Backend | Ввести `RoutingProvider` adapter для 2ГИС; таймауты, retries/circuit breaker, кэш и feature flag `routing_provider=2gis`; ключ только в secret manager/env |
+| API contract | Сохранить `provider`, `synthetic`, geometry, distance/duration и warnings; ключ мобильному клиенту не выдавать; fallback на synthetic явно помечать |
+| Mobile | Интегрировать карту 2ГИС в Route detail и Active Route; показать polyline, stops, distance и ETA; выбрать native SDK или согласованный API bridge |
+| Observability | Метрики latency/error/quota, redaction ключей, budget alert и health-check без утечки credentials |
+| Tests | Mock HTTP contract tests, timeout/fallback, key-redaction и iOS/Android map smoke tests |
+| Acceptance | Для маршрута с 2+ точками возвращается дорожная geometry с `provider=2gis`, без `synthetic`; экран показывает карту и stops; контролируемый fallback при недоступности |
+| Dependencies | Phase 8A, Phase 9; опубликованный каталог (R7) желателен для rollout |
+| Не входит | Полноценный live GPS/turn-by-turn, offline-карты, billing и обязательная миграция старых маршрутов |
+
+**Rollout:** server-side geometry в test contour → mobile map → smoke/quota checks →
+ограниченный production rollout. Тестовый ключ нельзя коммитить, помещать в
+Flutter bundle или присылать в чат.
+
 ## Phase 10 — Production readiness and stabilization
 
 **Цель:** усилить уже работающий staging-контур и подготовить контролируемый

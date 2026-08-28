@@ -16,7 +16,7 @@ Reviewed SHAs (do not treat older reviews as current):
 
 Фазы **0–6 ревью 2026-08-25 смержены** и здесь не повторяются, кроме долга 7–8, который вошёл в R6.
 
-Нумерация: **R0–R9** (review-remediation 2026-08-27), чтобы не путать с Product Phase 8A/8B и Route-intelligence P0–P4.
+Нумерация: **R0–R10** (review-remediation 2026-08-27), чтобы не путать с Product Phase 8A/8B и Route-intelligence P0–P4.
 
 ---
 
@@ -193,12 +193,32 @@ Priority: closes the core loop. Complexity: **L**. Repos: both.
 
 ---
 
+## Phase R10 — 2GIS maps and navigation provider
+
+Priority: P1/P2, после критичных security/reliability задач. Complexity: **L**. Repos: backend + mobile + platform.
+
+- [ ] **GIS-01** — завести demo/test key 2ГИС и зафиксировать в секрет-хранилище разрешённые продукты, квоты, ограничения по IP/заголовкам и лицензионные условия.
+- [ ] **GIS-02** — backend adapter `TwoGisRoutingProvider` через общий `RoutingProvider`; feature flag, таймауты/retry/circuit breaker, кэш и redaction.
+- [ ] **GIS-03** — контрактные тесты Navigation API и контролируемый fallback; ключ не попадает в API-ответы, логи, мобильный bundle и git.
+- [ ] **GIS-04** — mobile map surface: polyline/stops/ETA на Route detail и Active Route; native 2GIS Mobile SDK либо согласованный API bridge.
+- [ ] **GIS-05** — ограниченный rollout с метриками latency/error/quota и budget alert; сначала test contour, затем выбранные маршруты production.
+
+**Progress (2026-08-28):** план добавлен; реализация и выдача ключа не начаты.
+
+**Depends:** Phase 8A/9, published catalog (R7) для широкого rollout. Route execution v0
+может работать до 2ГИС на координатных snapshots и не блокируется этим провайдером.
+
+**Не делать в этой фазе:** live GPS tracking, turn-by-turn/offline navigation,
+billing и раскрытие секретного ключа клиенту.
+
+---
+
 ## Explicitly not now
 
 - Микросервисы / split `route_builder`.
 - Kafka, Kubernetes, Helm.
 - Gemini adapter, Qdrant, MCP, RAG в prod на `hash-v1`.
-- OSRM до реального published каталога (потом P2 roadmap).
+- OSRM до реального published каталога (потом P2 roadmap); 2ГИС — отдельный провайдер в R10.
 - Store billing / exclusive catalogs / ads.
 - Trip Planner (Product Phase 13).
 - Notification campaign CMS (T6.5.3).
