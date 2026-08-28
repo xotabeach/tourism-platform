@@ -164,6 +164,8 @@ Priority: medium, после R7 или параллельно с маленьк�
 - [ ] **ADR-013** host crontab + idempotent CLI (не Kafka, не K8s CronJob).
 - [ ] Таблицы `route_recommendation_feedback` / `route_recommendation_deck_items` как в `route-swipe-recommendations.md`.
 - [ ] `GET .../recommendations/today`, `POST .../skip`.
+- [ ] Учитывать `users.travel_preferences` как явный профиль (интересы, формат отдыха, сложность, длительность, сезонность), а поведение использовать как ограниченный затухающий сигнал, а не жёсткий фильтр.
+- [ ] Diversity/exploration guard: caps на категорию/регион, cooldown для skip, новые направления в каждом deck; один просмотр не должен запирать пользователя в одной теме.
 - [ ] Честный copy вместо «каждый день», пока cron не жив (DOC-2026-12 можно закрыть в R0 текстом, здесь — правдой в проде).
 - [ ] **BE-2026-06** — вынести grant +5 тп с публичного GET на тот же cron (`FOR UPDATE SKIP LOCKED`).
 
