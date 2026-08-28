@@ -179,6 +179,16 @@ Priority: closes the core loop. Complexity: **L**. Repos: both.
 - [ ] History tab в Избранном — реальные прохождения, не `routes.take(6)`.
 - [ ] Тп/achievements с прогулок — только после этой фазы (не выдумывать unlock-from-km раньше).
 
+### Progress (2026-08-28)
+
+- [x] **BE-FNC-01** — backend slice: `route_executions` и snapshots остановок, ownership/BOLA,
+  active/completed/cancelled state machine, idempotent start/complete/cancel, pagination и
+  security/integration tests. Миграция `0038_route_executions` применена локально.
+- [ ] **MO-FNC-01** — подключить mobile CTA «Пройти маршрут» к API и сделать экран прохождения в
+  текущем стиле приложения.
+- [ ] **BE-FNC-02** — начисление Travel Points и достижения за подтверждённое прохождение.
+- [ ] **MO-FNC-02** — заменить вкладку «История» на данные `GET /route-executions`.
+
 **Depends:** есть published маршруты, которые имеет смысл проходить (R7). OSRM не обязателен для v0.
 
 ---
