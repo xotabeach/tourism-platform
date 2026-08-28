@@ -204,6 +204,7 @@ Priority: P1/P2, после критичных security/reliability задач. 
 - [ ] **GIS-03** — контрактные тесты Navigation API и контролируемый fallback; ключ не попадает в API-ответы, логи, мобильный bundle и git.
 - [ ] **GIS-04** — mobile map surface: polyline/stops/ETA на Route detail и Active Route; native 2GIS Mobile SDK либо согласованный API bridge.
 - [ ] **GIS-05** — ограниченный rollout с метриками latency/error/quota и budget alert; сначала test contour, затем выбранные маршруты production.
+- [ ] **GIS-06** — route quality gate: режим транспорта, road/trail filters, закрытия и доступ, водные преграды, высотный профиль/уклон, realistic duration и availability объектов; неподтверждённую прямую линию не публиковать.
 
 **Progress (2026-08-28):** план добавлен; реализация и выдача ключа не начаты.
 

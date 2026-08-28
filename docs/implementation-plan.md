@@ -311,12 +311,13 @@ experimental.
 | Область | Задачи |
 | --- | --- |
 | Trial / access | Создать demo/test key 2ГИС; проверить Maps API, Navigation API и Mobile SDK, квоты, ограничения и лицензионные условия |
-| Backend | Ввести `RoutingProvider` adapter для 2ГИС; таймауты, retries/circuit breaker, кэш и feature flag `routing_provider=2gis`; ключ только в secret manager/env |
+| Backend | Ввести `RoutingProvider` adapter для 2ГИС; `driving`/`walking`, detailed geometry, `filters`/`hard_filters`, альтернативы и altitude profile; таймауты, retries/circuit breaker, кэш и feature flag `routing_provider=2gis`; ключ только в secret manager/env |
 | API contract | Сохранить `provider`, `synthetic`, geometry, distance/duration и warnings; ключ мобильному клиенту не выдавать; fallback на synthetic явно помечать |
 | Mobile | Интегрировать карту 2ГИС в Route detail и Active Route; показать polyline, stops, distance и ETA; выбрать native SDK или согласованный API bridge |
 | Observability | Метрики latency/error/quota, redaction ключей, budget alert и health-check без утечки credentials |
 | Tests | Mock HTTP contract tests, timeout/fallback, key-redaction и iOS/Android map smoke tests |
-| Acceptance | Для маршрута с 2+ точками возвращается дорожная geometry с `provider=2gis`, без `synthetic`; экран показывает карту и stops; контролируемый fallback при недоступности |
+| Quality gate | Не принимать прямые линии: проверять статус route graph, соответствие режима транспорту, закрытые/непроезжаемые дороги, водные преграды, высоту/уклон, доступность объектов и реалистичное время |
+| Acceptance | Для маршрута с 2+ точками возвращается дорожная geometry с `provider=2gis`, без `synthetic`; экран показывает карту и stops; контролируемый fallback при недоступности; неподтверждённый маршрут не маркируется готовым к прохождению |
 | Dependencies | Phase 8A, Phase 9; опубликованный каталог (R7) желателен для rollout |
 | Не входит | Полноценный live GPS/turn-by-turn, offline-карты, billing и обязательная миграция старых маршрутов |
 
