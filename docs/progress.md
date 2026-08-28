@@ -53,8 +53,11 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   `ddfff19` и root `31de9ec` отправлены в GitLab и зеркалированы в GitHub с
   `[ci skip]`. Backend образ `8433721` развёрнут direct deploy, миграции
   `0039`–`0041` применены, production `/health/ready` вернул `{"status":"ready"}`.
-  Real-key 2ГИС smoke пока не выполнен: локальный backend `.env` не содержит
-  canonical `TWO_GIS_HTTP_API_KEY`; значение на сервере не читаем и не выводим.
+  Sanitized real-key smoke внутри production-контейнера проверил конфигурацию и
+  получил `configured: false`: canonical `TWO_GIS_HTTP_API_KEY` отсутствует и
+  локально, и в deploy environment. Реальные walking/driving запросы не
+  отправлялись; после secret injection на host нужно повторить smoke без
+  вывода ключа.
 - **Следующий порядок:** B0/B1 smoke → B2 полный independent quality и
   retention scheduling → M1/M2 real map + execution → R1/R2 recommendations → safe 2ГИС catalog
   enrichment → hand-off/SDK decision → widgets и production hardening.
