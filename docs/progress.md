@@ -5,8 +5,8 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 9/9.5 (route execution + 2ГИС quality) — local
-HTTP smoke и OSM independent gate v2 сделаны; production flag, retention
-cron, карта и recommendations ещё впереди.
+HTTP smoke, OSM independent gate v2 и GIS-06 catalog dry-run сделаны;
+production flag, retention cron, карта и recommendations ещё впереди.
 
 Единый детальный план текущего инкремента:
 [implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
@@ -52,7 +52,17 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   quiz, L1 read-only offline snapshots (сохранить/открыть/удалить), список
   скачанных маршрутов и logout с очисткой локальных данных реализованы;
   Active Route/resume/outbox и реальная карта ещё в работе.
-- **Release/deploy:** коммиты backend `8433721`, mobile `3a58872`, platform
+- **2ГИС catalog (GIS-06):** `scripts/enrich_places_2gis.py` dry-run по
+  умолчанию. Сверяет bounded batch с Places API (`q` + точка + радиус),
+  считает confidence, пишет sanitized JSON (`matched` / `ambiguous` /
+  `not_found` / `quota_stop`), не меняет `publication_status` и не
+  публикует. Apply только с `--output` и только в allowlist полей
+  (пустой address / missing `source_external_id`, freshness, `needs_review`
+  для ambiguous); название, координаты и часы работы не авто-пишутся.
+  Локальный прогон 20 точек 2026-08-29: 1 matched, 4 ambiguous, 15
+  not_found (в т.ч. catalog meta 404 = пустой результат), 0 ошибок,
+  `--apply` не запускали. Ключ в отчёт не попадал. Backend `e5471eb`.
+- **Release/deploy:** коммиты backend `e5471eb`, mobile `3a58872`, platform
   `ddfff19` и root `31de9ec` отправлены в GitLab и зеркалированы в GitHub с
   `[ci skip]`. Backend образ `8433721` развёрнут direct deploy, миграции
   `0039`–`0041` применены, production `/health/ready` вернул `{"status":"ready"}`.
@@ -63,7 +73,7 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   вывода значения.
 - **Следующий порядок:** production secret + optional `ROUTING_PROVIDER=2gis`
   → retention scheduling/alerts → M1/M2 real map + execution → R1/R2
-  recommendations → safe 2ГИС catalog enrichment → hand-off/SDK.
+  recommendations → GIS-07 scheduled catalog refresh → hand-off/SDK.
 
 ### 2026-08-28 — 2ГИС, personalization prompt и L1 offline (первый срез)
 
@@ -91,9 +101,9 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   — green; mobile
   `flutter analyze --fatal-infos` — green, новые offline/prompt tests и
   существующие route/preferences/widget tests — green.
-- **Пока не сделано (после среза 28.08 и smoke 29.08):** production-contour
-  smoke, retention scheduling/alerts, coastline/SRTM, catalog enrichment
-  dry-run, Active Route/resume/outbox, native 2ГИС SDK/handoff и
+- **Пока не сделано (после среза 28.08, smoke и GIS-06 29.08):** production-contour
+  smoke, retention scheduling/alerts, coastline/SRTM, GIS-07 scheduled
+  catalog refresh, Active Route/resume/outbox, native 2ГИС SDK/handoff и
   WidgetKit/Dynamic Island. Детальная очередь — в
   [расширенном плане](2gis-personalization-offline-plan-2026-08-28.md).
 
@@ -1212,7 +1222,7 @@ envelope, JSON logs.
    history на backend API.
 4. **R1/R2** — рекомендации v1: preferences как prior, bounded behavior,
    diversity/exploration, feedback и cron.
-5. Safe 2ГИС catalog dry-run (`enrich_places_2gis.py`), затем hand-off/SDK.
+5. GIS-07 — scheduled stale catalog refresh и quota alerts; затем hand-off/SDK.
 
 ### Phase 5 — Flutter foundation (продолжение)
 

@@ -446,8 +446,8 @@ Acceptance: widget никогда не показывает live GPS или се
 **Sprint A — локальный срез выполнен:** GIS-01/02 без real-key smoke,
 PREF-01/02, OFF-01, provider-result часть GIS-03, GIS-04 и mobile geometry
 projection/quality notice.  
-**Sprint B — следующий:** full independent terrain/water/access gate, GIS-06,
-retention scheduling/alerts и quality/admin review.  
+**Sprint B — частично:** OSM independent gate v2 и GIS-06 dry-run сделаны;
+остаются coastline/SRTM, retention scheduling/alerts и quality/admin review.  
 **Sprint C:** GIS-05, mobile Active Route, L2 outbox, RECO-01.  
 **Sprint D:** RECO-02, AI-01, scheduled enrichment and quota dashboards.  
 **Sprint E:** vendor hand-off, SDK spike, WidgetKit/Live Activity decision.
@@ -469,7 +469,7 @@ retention scheduling/alerts и quality/admin review.
   active (quality policy v2); coastline/SRTM field survey still pending;
 - [x] RouteDetail exposes provider geometry, source/freshness, time breakdown,
   elevations, quality status and warnings;
-- [ ] catalog enrichment starts dry-run, stores provenance and never auto-publishes;
+- [x] catalog enrichment starts dry-run, stores provenance and never auto-publishes;
 - [x] explicit preferences affect ranking softly and explainably;
 - [ ] deck feedback, decay, caps and exploration pass property fixtures;
 - [ ] AI sees only approved candidate DTOs.
@@ -521,7 +521,8 @@ retention scheduling/alerts и quality/admin review.
 3. Подключить расписание retention job и мониторинг попыток mutation.
 4. ~~Расширить gate OSM/editorial water, access, surface, closure и season.~~
    Stop-level v2 сделан; береговая геометрия/SRTM остаются.
-5. Реализовать dry-run `enrich_places_2gis.py`, затем проверить 20 точек вручную.
+5. ~~Реализовать dry-run `enrich_places_2gis.py`, затем проверить 20 точек вручную.~~
+   Скрипт и локальный dry-run 20 точек 2026-08-29; `--apply` не запускали.
 6. Реализовать Active Route/resume и L2 outbox.
 7. Добавить recommendation deck/feedback с diversity property tests.
 8. После vendor confirmation — hand-off; отдельно Full SDK/offline.
