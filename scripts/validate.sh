@@ -33,6 +33,7 @@ REQUIRED_FILES=(
   docs/implementation-plan.md
   docs/implementation-blueprint-2026-08.md
   docs/implementation-readiness-review-2026-08-28.md
+  docs/2gis-personalization-offline-plan-2026-08-28.md
   docs/development-conventions.md
   docs/progress.md
   docs/stack.md

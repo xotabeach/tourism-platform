@@ -9,31 +9,81 @@
 
 Единый детальный план текущего инкремента:
 [implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
+Расширение требований (2ГИС-квоты, enrichment, prompt, offline, hand-off и
+Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-offline-plan-2026-08-28.md).
 
 ## Current snapshot — 2026-08-28
 
 Этот блок имеет приоритет над более старыми changelog-записями ниже.
 
 - **Backend route execution v0:** shipped in `f4f9774`; API, ownership/BOLA,
-  stop snapshots и state machine работают. Mobile journey и history ещё не
-  подключены.
+  stop snapshots и state machine работают. Миграции `0039`/`0040` добавляют
+  append-only routing revisions: execution фиксирует fingerprint, geometry,
+  время, высоты, provider и quality status на момент старта. Mobile journey и
+  history ещё не подключены.
 - **Deterministic Route Builder:** match/generate API и persistence существуют;
-  routing пока `stub`/synthetic, поэтому это не production-grade navigation.
-  2ГИС adapter и route quality gate — следующий backend slice.
+  добавлен provider-neutral `TwoGisRoutingProvider` (walking/driving,
+  detailed geometry, filters, typed errors, altitude normalization) и сохранение
+  provider geometry. По умолчанию `stub`/synthetic всё ещё остаётся только для
+  local/test; production-grade navigation блокируют real-key smoke,
+  независимые terrain/access проверки и retention scheduling/alerts.
 - **2ГИС:** ключ должен использоваться как server-side HTTP API key. Наличие
   и имя переменной в окружении запуска нужно подтвердить перед реализацией
   adapter только по имени/наличию, не выводя значение. Demo key не
   предназначен для Mobile SDK; SDK key — отдельная subscription/licence задача.
-- **Route quality:** требования описаны в blueprint/ADR-010, кодовый gate,
-  routing snapshots, terrain/access/availability schema и 2ГИС adapter ещё
+- **Route quality:** provider-result gate v1 уже блокирует отсутствующую
+  geometry, некорректные legs, pedestrian/highway contradiction и экстремальный
+  уклон; pace/gain/dirt/ferry переводятся в review. Stop-data gate v1 также
+  отбрасывает закрытые точки и явные конфликты «с детьми/питомцами», а воду,
+  поверхность, сезонность и safety warnings помечает на review. RouteDetail
+  отдаёт GeoJSON, provenance, breakdown времени, высоты и warnings. Полный
+  terrain/water/access контур и retention scheduling/alerts ещё впереди;
+  region road-event gate и DB-level mutation trigger уже включены миграциями
+  `0040_snapshot_immutable`/`0041_snapshot_retention`; execution повторно
+  проверяет актуальные region-level closure events до старта.
+- **Recommendations:** preferences quiz работает; первый мягкий preference
+  signal подключён к backend match/generate и не меняет профиль. Backend deck,
+  feedback, diversity caps, decay, lazy/cron generation и explainability ещё
   не реализованы.
-- **Recommendations:** swipe UI и preferences quiz работают, но backend deck,
-  feedback, ranker, diversity caps, lazy/cron generation и explainability ещё
-  не реализованы. Preferences пока сохраняются, но не используются в
-  рекомендациях.
-- **Следующий порядок:** B0 contract/ADR → B1 2ГИС HTTP adapter → B2 quality
-  gate/snapshots → M1/M2 map + execution → R1/R2 recommendations → rewards и
-  production hardening.
+- **Mobile first slice:** prompt для незаполненных API-preferences, улучшенный
+  quiz, L1 read-only offline snapshots (сохранить/открыть/удалить), список
+  скачанных маршрутов и logout с очисткой локальных данных реализованы;
+  Active Route/resume/outbox и реальная карта ещё в работе.
+- **Следующий порядок:** B0/B1 smoke → B2 полный independent quality и
+  retention scheduling → M1/M2 real map + execution → R1/R2 recommendations → safe 2ГИС catalog
+  enrichment → hand-off/SDK decision → widgets и production hardening.
+
+### 2026-08-28 — 2ГИС, personalization prompt и L1 offline (первый срез)
+
+- **Backend:** добавлены настройки `ROUTING_PROVIDER=2gis` и server-only
+  `TWO_GIS_HTTP_API_KEY`; `TwoGisRoutingProvider` нормализует detailed WKT,
+  indexed JSON arrays, road filters, provider statuses и высоты (см → м), не
+  раскрывая ключ. Generated routes предпочитают provider geometry и сохраняют
+  routing metadata; provider-result quality gate v1 не пропускает заведомо
+  непригодную geometry и разделяет movement/visit/total time; explicit profile
+  preferences участвуют в bounded scoring.
+- **Mobile:** добавлены versioned route snapshots в SharedPreferences, offline
+  fallback для detail, список/удаление/очистка скачанных маршрутов, очистка
+  snapshots при logout, одноразовый prompt для незаполненных API-preferences и
+  лёгкий quiz с иконками/счётчиком/reset. Route detail читает GeoJSON provider
+  geometry, отдельно показывает время в дороге/на остановках/всего, высоту и
+  понятное предупреждение о качестве.
+- **Execution/quality:** миграция `0039_route_routing_snapshots` связала
+  revision snapshot с `RouteExecution`, PostgreSQL trigger запрещает менять
+  routing facts после вставки, а миграция `0041_snapshot_retention` добавила
+  индекс для bounded cleanup; stop-data и region road-event gate проверяют
+  closure, accessibility, season, surface и water signals до публикации
+  generated draft.
+- **Tests:** backend adapter/scoring/quality/snapshot targeted tests — green;
+  migration и route-execution security lifecycle на локальных PostgreSQL/Redis
+  — green; mobile
+  `flutter analyze --fatal-infos` — green, новые offline/prompt tests и
+  существующие route/preferences/widget tests — green.
+- **Пока не сделано:** real-key smoke, retention scheduling/alerts и полный
+  terrain/water/access gate, catalog enrichment dry-run, Active
+  Route/resume/outbox, native
+  2ГИС SDK/handoff и WidgetKit/Dynamic Island. Детальная очередь — в
+  [расширенном плане](2gis-personalization-offline-plan-2026-08-28.md).
 
 **Ревью 2026-08-25 — фазы 0–6 закрыты и смержены в `main` 2026-08-26.**
 Полный план и статус —
@@ -1055,10 +1105,10 @@ Code audit vs living docs. Corrected stale claims:
 | 6 | Authentication | in_progress |
 | 6.5 | Internal ops admin (SQLAdmin) | done |
 | 7 | Favorites and profile | done |
-| 8A | Deterministic Route Builder | pending |
-| 8B | AI-assisted Route Planning (experimental) | pending |
+| 8A | Deterministic Route Builder | in_progress (match/generate + provider/stop-data/road-event quality v1 shipped; full independent gate pending) |
+| 8B | AI-assisted Route Planning (experimental) | in_progress (chat/provider contracts shipped; eval hardening pending) |
 | 9 | Route execution | in_progress (backend v0 shipped; mobile/history pending) |
-| 9.5 | 2GIS maps and navigation provider | pending (HTTP demo key заявлен; adapter/quality gate не начаты) |
+| 9.5 | 2GIS maps and navigation provider | in_progress (HTTP adapter, contract tests, GeoJSON API/mobile projection, execution snapshots; smoke/real map/attribution pending) |
 | 10 | Stabilization and staging | pending |
 | 11 | User-created routes (publish + moderation) | in_progress |
 | 12 | Travel+ foundations | in_progress |
@@ -1129,9 +1179,9 @@ envelope, JSON logs.
 
 ### Ближайшие продуктовые приоритеты (2026-08-28)
 
-1. **B0/B1** — 2ГИС HTTP contract, adapter и test-contour smoke (ADR-010).
-2. **B2** — routing snapshots и quality gate: дороги/тропы, вода, доступ,
-   высота, сложность, availability.
+1. **B0/B1** — 2ГИС HTTP contract и sanitized test-contour smoke (ADR-010).
+2. **B2** — полный quality gate: дороги/тропы, вода, доступ,
+   высота, сложность, availability; append-only execution snapshot уже есть.
 3. **M1/M2** — карта в Route detail, полноценное прохождение, resume и
    history на backend API.
 4. **R1/R2** — рекомендации v1: preferences как prior, bounded behavior,
@@ -1392,8 +1442,10 @@ Home lab (Ollama + Qdrant, PostGIS vs RAG, Lab-0…5, RTX ~12 GB):
   Remaining Phase 6: real SMS provider (test contour uses OTP/debug paths).
   Cookies later for web (admin already cookie-session).
 - Routing provider — 2ГИС выбран первым test-contour provider (ADR-010);
-  `RoutingProvider` и deterministic builder as-built, внешний adapter и
-  quality gate ещё не реализованы.
+  `RoutingProvider`, HTTP adapter, deterministic builder и provider-result
+  quality gate v1 as-built, stop-data gate и immutable execution snapshot
+  as-built; real-key smoke и независимые terrain/access проверки ещё не
+  реализованы; region road-event gate v1 уже подключён.
 - Не коммитить `.tmp-ref-frames/` и локальные `.env`.
 - AI architecture + home-lab guide documented; adapters not in backend yet.
   Сводка: [stack.md](stack.md). Test-VPS без Ollama.

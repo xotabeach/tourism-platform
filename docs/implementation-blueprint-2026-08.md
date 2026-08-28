@@ -9,6 +9,10 @@
 честное прохождение маршрута, персональные рекомендации и использование
 пользовательских предпочтений.
 
+Новые product-facing требования (prompt, расширенные preferences, L0–L3
+offline, безопасное обновление каталога, hand-off в 2ГИС и Apple surfaces)
+собраны в [расширенном плане 2ГИС/персонализации/offline](2gis-personalization-offline-plan-2026-08-28.md).
+
 Он не заменяет исторические ревью и специализированные документы. Он
 связывает их и задаёт порядок, в котором работу можно безопасно отдавать
 агенту или разработчику.
@@ -101,8 +105,11 @@ security/privacy impact, тесты, метрики, rollback и Definition of D
   Alembic и typed Pydantic schemas.
 - `RoutingProvider` находится в
   `tourism-backend/src/tourism_backend/modules/route_builder/application/routing.py`.
-- Сейчас `routing_provider` типизирован только как `stub`; stub выдаёт
-  synthetic `haversine × 1.35` и straight-line WKT.
+- В коде есть `stub` для local/test и первый `2gis` HTTP adapter с typed
+  settings, detailed WKT, road filters и altitude normalization. Provider-result
+  gate v1 проверяет geometry/legs, mode/road contradictions, уклон и набор
+  высоты. По умолчанию feature flag остаётся `stub`; synthetic результат не
+  считается готовой навигацией.
 - `Route` уже содержит базовые поля `distance_meters`,
   `estimated_duration_minutes`, `difficulty`, `transport_mode`,
   `seasonality`, `accessibility`, `geometry`.
@@ -112,7 +119,9 @@ security/privacy impact, тесты, метрики, rollback и Definition of D
 - `/me/preferences` уже сохраняет четыре поля:
   `preferred_categories`, `preferred_difficulty`, `travels_with_kids`,
   `travels_with_pets`.
-- Recommendation tables, ranker, feedback endpoint и cron ещё не реализованы.
+- Первый bounded preference signal уже подключён к match/generate scoring и не
+  меняет профиль пользователя. Recommendation tables, deck, feedback endpoint,
+  diversity reranker и cron ещё не реализованы.
 
 ### Mobile as-built
 
@@ -122,7 +131,11 @@ security/privacy impact, тесты, метрики, rollback и Definition of D
   API.
 - Route catalog и detail существуют; swipe deck уже конечный и исключает
   избранные маршруты на клиенте.
-- Кнопка «Пройти маршрут» ещё требует полного API-backed journey.
+- Добавлены L1 read-only route snapshots, список/удаление offline-копий и
+  очистка их при logout; кнопка «Пройти маршрут» всё ещё требует полного
+  API-backed journey.
+- Для API-пользователя добавлен одноразовый personalization prompt и лёгкий
+  quiz с reset/clear; mock contour намеренно не показывает prompt.
 - Нативный 2ГИС Mobile SDK не подключён; текущий server key нельзя считать SDK
   key.
 
@@ -229,12 +242,13 @@ security/privacy impact, тесты, метрики, rollback и Definition of D
 
 ```env
 APP_ENV=test|staging|production
-ROUTING_PROVIDER=stub|2gis|osrm
+ROUTING_PROVIDER=stub|2gis
 TWO_GIS_ROUTING_BASE_URL=https://routing.api.2gis.com
-TWO_GIS_ROUTING_API_KEY=<secret>
+TWO_GIS_HTTP_API_KEY=<secret>
 ROUTING_TIMEOUT_SECONDS=8
-ROUTING_MAX_RETRIES=1
-ROUTING_CACHE_TTL_SECONDS=86400
+TWO_GIS_ROUTING_ALTERNATIVE=0
+TWO_GIS_ROUTING_FILTERS=dirt_road,ferry
+TWO_GIS_MAX_ROUTE_METERS=50000
 ROUTE_QUALITY_POLICY_VERSION=v1
 RECOMMENDER_ENABLED=false
 RECOMMENDER_RANKER_VERSION=v1
@@ -351,7 +365,7 @@ JSONB `accessibility` должен постепенно перейти к вер
 
 ### 6.1 Preflight перед кодом
 
-- [ ] Проверить, что добавленный ключ — HTTP API key, а не SDK/App ID key.
+- [ ] Проверить в Platform Manager, что добавленный ключ — HTTP API key, а не SDK/App ID key.
 - [ ] Зафиксировать дату создания demo key и дату истечения.
 - [ ] Уточнить включённые сервисы, quota, rate limit и production terms.
 - [ ] Настроить IP/header restrictions, если доступны для типа key.
@@ -360,6 +374,11 @@ JSONB `accessibility` должен постепенно перейти к вер
 - [ ] Проверить, что server egress может обратиться к
   `routing.api.2gis.com`.
 - [ ] Зафиксировать legal/attribution/cache requirements.
+
+Первый adapter и нормализация уже находятся в backend. До включения provider
+нужно закрыть оставшиеся preflight-пункты и выполнить sanitized smoke; наличие
+кода adapter само по себе не означает, что demo key разрешает production или
+Mobile SDK.
 
 ### 6.2 Запрос
 
@@ -427,6 +446,11 @@ warnings[]
 provider_status
 computed_at, expires_at
 ```
+
+Первый нормализованный API-срез уже отдаёт GeoJSON LineString, provider,
+synthetic, quality status/warnings, movement/visit/total time и altitude
+metadata. Поля provider route id, maneuvers, immutable revision и expiry
+остаются частью snapshot-среза B2.
 
 WKT/geometry parser обязан проверять:
 
@@ -565,36 +589,46 @@ Public catalog policy:
 
 ### 8.1 Routing snapshots
 
-Предпочтительно добавить отдельную таблицу `route_routing_snapshots`, а не
-перезаписывать `Route.geometry` при каждом внешнем запросе:
+Миграции `0039_route_routing_snapshots` и `0040_snapshot_immutable` добавляют
+отдельную append-only таблицу `route_routing_snapshots`, а не перезаписывают
+`Route.geometry` при каждом внешнем запросе. `RouteExecution.routing_snapshot_id`
+ссылается на запись, созданную при старте:
 
 ```text
 id UUID PK
-route_id UUID FK
-route_revision INTEGER
+route_id UUID FK NULL (SET NULL при удалении родителя)
+revision INTEGER
+fingerprint VARCHAR(64)
 provider VARCHAR
 provider_version VARCHAR
-request_hash VARCHAR
 transport_mode VARCHAR
 geometry GEOGRAPHY(LINESTRING, 4326)
-encoded_geometry TEXT NULL
-distance_meters INTEGER
-movement_duration_seconds INTEGER
+distance_meters INTEGER NULL
+movement_duration_seconds INTEGER NULL
+visit_duration_minutes INTEGER NULL
+transfer_duration_seconds INTEGER NULL
+buffer_duration_seconds INTEGER NULL
+total_duration_seconds INTEGER NULL
 elevation_gain_meters INTEGER NULL
 elevation_loss_meters INTEGER NULL
 min_altitude_meters INTEGER NULL
 max_altitude_meters INTEGER NULL
-max_grade_percent REAL NULL
-requested_filters JSONB
-applied_filters JSONB
-warnings JSONB
+max_road_angle_degrees REAL NULL
+road_types TEXT[] NULL
+requested_filters JSONB NULL
+warnings TEXT[] NULL
 quality_status VARCHAR
-computed_at TIMESTAMPTZ
-expires_at TIMESTAMPTZ NULL
+quality_policy_version VARCHAR NULL
+route_updated_at TIMESTAMPTZ NULL
+captured_at TIMESTAMPTZ
+created_at TIMESTAMPTZ
 ```
 
-Indexes: `(route_id, transport_mode, computed_at DESC)`, `(quality_status,
-expires_at)`, unique idempotency hash where appropriate.
+`revision` увеличивается только при изменении fingerprint (геометрия,
+остановки или routing-факты). PostgreSQL trigger запрещает изменение всех
+фактов после вставки; допускается только обнуление необязательного `route_id`,
+если родитель удаляется. Retention/архивирование — отдельная операционная
+политика.
 
 ### 8.2 Execution linkage
 
@@ -1371,9 +1405,15 @@ Unresolved decisions must not be hidden inside implementation code.
 - [ ] 2ГИС HTTP key type/expiry/terms recorded, secret protected;
 - [ ] adapter works with mock and test smoke;
 - [ ] route response is normalized and versioned;
-- [ ] quality gate rejects impossible/unverified public routes;
-- [ ] distance/time/difficulty/availability are distinct and explainable;
-- [ ] route detail shows source/freshness/warnings;
+- [x] provider result is normalized into GeoJSON/routing metadata without key;
+- [x] quality gate v1 rejects missing geometry, invalid legs, pedestrian
+  highway contradiction and extreme slope for generated routes;
+- [x] movement/visit/total time and altitude metadata are distinct;
+- [x] route detail shows source/freshness/quality/warnings;
+- [x] provider + stop-data + region road-event gate v1 protects generated
+  drafts (full independent terrain/water/access gate remains);
+- [x] append-only routing snapshot with DB mutation guard and bounded cleanup
+  protects each execution; retention scheduling/alerts remain;
 - [ ] active execution starts, resumes, updates stops and appears in history;
 - [ ] retries and duplicate taps are idempotent;
 - [ ] recommendation deck reads preferences without mutating them;

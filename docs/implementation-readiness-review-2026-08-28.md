@@ -36,6 +36,30 @@ monolith, ADR, typed API schemas, миграции Alembic, security baseline,
 документация считается пригодной как executable-план: у каждой крупной части
 есть владелец, входы, выходы, зависимости, ошибки, тесты и Definition of Done.
 
+### Delta после первого implementation slice (28.08.2026)
+
+После первоначальной оценки реализован безопасный первый срез, который нужно
+учитывать при чтении таблиц ниже:
+
+- backend: `TwoGisRoutingProvider` (HTTP, walking/driving, detailed geometry,
+  typed errors, indexed-response normalization, cm→m altitude conversion) и
+  bounded profile-preference scoring;
+- mobile: API-only personalization prompt, расширенный quiz, L1 read-only
+  offline route snapshots/list/clear и logout cleanup;
+- provider-result quality gate v1 и RouteDetail GeoJSON/time/altitude/quality
+  DTO уже добавлены; mobile использует geometry и объясняет quality status;
+- остаются release-blocking: реальный key smoke, retention scheduling/alerts,
+  независимая проверка полного terrain/water/access контура, Active
+  Route/resume/outbox, recommendation deck/
+  feedback, catalog dry-run и native SDK/handoff/widgets. Application-level
+  append-only snapshots, DB trigger mutation guard и stop-data gate v1 уже
+  добавлены.
+
+Актуальный breakdown и статусы находятся в [progress.md](progress.md) и
+[расширенном плане](2gis-personalization-offline-plan-2026-08-28.md). Ниже
+сохранён исторический baseline первичного среза; он не должен использоваться
+как текущий статус без сверки с `progress.md`.
+
 ## Оценка зрелости
 
 Шкала: 1 — идея, 3 — описанный прототип, 5 — можно реализовывать без
@@ -47,11 +71,11 @@ monolith, ADR, typed API schemas, миграции Alembic, security baseline,
 | Архитектура и границы модулей | 7/10 | 8/10 | Modular monolith и ports/adapters уже есть; нужно закрепить routing/recommendation contracts |
 | Backend foundation | 7/10 | 8/10 | Auth, миграции, typed schemas и route-execution v0 работают |
 | Route execution | 4/10 | 8/10 | API есть, mobile journey, resume/offline и rewards ещё впереди |
-| Дорожная реалистичность | 3/10 | 8/10 | Сейчас stub/synthetic; quality gate описан, но не реализован |
-| 2ГИС integration readiness | 4/10 | 8/10 | HTTP demo key есть; adapter, quotas, contract tests и key separation ещё нет |
+| Дорожная реалистичность | 6/10 | 8/10 | HTTP adapter, provider-result/stop-data/region-road-event gate v1 и immutable execution snapshots есть; полноценные terrain/access checks и real smoke ещё впереди |
+| 2ГИС integration readiness | 6/10 | 8/10 | HTTP adapter, quota guards, contract tests и key separation есть; real-key smoke, vendor confirmation и mobile SDK остаются |
 | Данные каталога | 5/10 | 8/10 | Есть publish gate и импорт, но районность, freshness и trail metadata неполны |
 | Recommendations | 3/10 | 8/10 | Хорошая концептуальная записка, backend deck/feedback пока не реализованы |
-| Использование preferences | 3/10 | 8/10 | `PATCH /me/preferences` работает, но подбор ещё не читает профиль |
+| Использование preferences | 5/10 | 8/10 | Профильные сигналы уже участвуют в match/generate как мягкий prior; feedback/decay/diversity ещё впереди |
 | Mobile UX | 6/10 | 8/10 | Сильный shell и visual system; route map/execution states отсутствуют |
 | Security/privacy | 6/10 | 8/10 | Baseline и security tests есть; точная геолокация, vendor keys и admin gaps требуют закрытия |
 | Наблюдаемость и operations | 5/10 | 8/10 | Deploy/health/runbook есть, продуктовые SLO, quota alerts и trace correlation нужно добавить |
@@ -101,7 +125,8 @@ quality gate и mobile execution.
 subscription key; ключ с App ID предназначен только для SDK и не может
 использоваться для прямых HTTP-запросов. Поэтому план обязан разделять:
 
-- `TWO_GIS_ROUTING_API_KEY` — backend HTTP Routing API;
+- `TWO_GIS_HTTP_API_KEY` — backend HTTP Routing API (legacy deployment
+  aliases принимаются только на период миграции);
 - отдельные iOS/Android/Flutter SDK keys — только после решения по лицензии и
   подписке.
 

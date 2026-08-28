@@ -59,7 +59,7 @@ key и SDK key не взаимозаменяемы.
 ```env
 ROUTING_PROVIDER=2gis
 TWO_GIS_ROUTING_BASE_URL=https://routing.api.2gis.com
-TWO_GIS_ROUTING_API_KEY=<secret>
+TWO_GIS_HTTP_API_KEY=<secret>
 ```
 
 Поддерживаемые значения конфигурации должны быть typed и fail-closed:
@@ -126,25 +126,27 @@ unverified → checking → verified
 
 ## Data contract
 
-Рекомендуется хранить отдельный routing snapshot, а не перезаписывать
-историю в `routes`:
+Миграции `0039_route_routing_snapshots` и `0040_snapshot_immutable` хранят
+отдельный routing snapshot, а не перезаписывают историю в `routes`:
 
 ```text
 route_routing_snapshots
-  id, route_id, route_revision
-  provider, provider_version, request_hash
-  transport_mode, geometry, encoded_geometry
-  distance_meters, movement_duration_seconds
+  id, route_id, revision, fingerprint
+  provider, provider_version, transport_mode, geometry
+  distance_meters, movement_duration_seconds, visit_duration_minutes
+  transfer_duration_seconds, buffer_duration_seconds, total_duration_seconds
   elevation_gain_meters, elevation_loss_meters
-  min_altitude_meters, max_altitude_meters, max_grade_percent
-  requested_filters, applied_filters, excluded_areas
-  quality_status, warnings, computed_at, expires_at
+  min_altitude_meters, max_altitude_meters, max_road_angle_degrees
+  road_types, requested_filters, quality_status, quality_policy_version
+  warnings, route_updated_at, captured_at, created_at
 ```
 
 Сырые ответы 2ГИС не сохраняются без проверки лицензии и необходимости;
-достаточно нормализованных полей и hash для диагностики. `RouteExecution`
+достаточно нормализованных полей и fingerprint для диагностики. `RouteExecution`
 ссылается на snapshot, чтобы изменение внешнего графа не меняло уже начатое
-прохождение задним числом.
+прохождение задним числом. После вставки snapshot защищён PostgreSQL trigger;
+bounded cleanup удаляет только старые, неиспользуемые и не последние revision,
+а расписание/алерты остаются операционной задачей.
 
 ## Failure and fallback
 

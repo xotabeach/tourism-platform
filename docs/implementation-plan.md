@@ -9,6 +9,10 @@
 рекомендации, mobile UX, тесты и release/rollback gates. Этот файл сохраняет
 высокоуровневую карту фаз; статусы сверяются с [progress.md](progress.md).
 
+Новые требования к prompt, offline-уровням, безопасному обновлению каталога,
+2ГИС hand-off и Apple surfaces детализированы в
+[плане 2ГИС/персонализации/offline](2gis-personalization-offline-plan-2026-08-28.md).
+
 Текущие архитектурные решения: [ADR-010 — 2ГИС](decisions/ADR-010-2gis-routing-and-map-provider.md)
 и [ADR-011 — персональные рекомендации](decisions/ADR-011-personalized-route-recommendations.md).
 
@@ -304,8 +308,8 @@ experimental.
 
 **Цель:** старт прохождения, visited/skipped stops, история.
 
-**Статус:** backend v0 реализован; mobile journey, routing snapshot linkage,
-history UI и reward policy остаются в работе. См. [blueprint](implementation-blueprint-2026-08.md).
+**Статус:** backend v0 реализован; routing snapshot linkage добавлен; mobile
+journey, history UI и reward policy остаются в работе. См. [blueprint](implementation-blueprint-2026-08.md).
 
 | Область | Задачи |
 | --- | --- |
@@ -328,12 +332,12 @@ history UI и reward policy остаются в работе. См. [blueprint](
 | Область | Задачи |
 | --- | --- |
 | Trial / access | Зафиксировать HTTP demo key 2ГИС, срок и квоты; Mobile SDK проверять отдельно — demo key для SDK не подходит, нужна отдельная subscription key и лицензия |
-| Backend | Ввести `RoutingProvider` adapter для 2ГИС; `driving`/`walking`, detailed geometry, `filters`/`hard_filters`, альтернативы и altitude profile; таймауты, retries/circuit breaker, кэш и feature flag `routing_provider=2gis`; ключ только в secret manager/env |
-| API contract | Сохранить `provider`, `synthetic`, geometry, distance/duration и warnings; ключ мобильному клиенту не выдавать; fallback на synthetic явно помечать |
-| Mobile | Интегрировать карту 2ГИС в Route detail и Active Route; показать polyline, stops, distance и ETA; выбрать native SDK или согласованный API bridge |
+| Backend | **Первый срез сделан:** `TwoGisRoutingProvider` с `driving`/`walking`, detailed geometry, filters, typed errors, timeouts, altitude normalization, provider-result/stop-data/region-road-event gate v1, append-only routing snapshots и DB mutation trigger. Остались полный independent terrain/access gate, bounded retry/circuit breaker, cache/freshness и smoke с реальным key; ключ только в secret manager/env |
+| API contract | **Сделано:** `provider`, `synthetic`, GeoJSON geometry, movement/visit/total time, altitude, quality status и warnings; fallback на synthetic явно помечен; execution API получает revision-linked snapshot. Bounded retention cleanup и индекс добавлены; остаются расписание/алерты |
+| Mobile | **Первый срез сделан:** provider geometry projection, quality notice и L1 read-only offline snapshot. Real 2ГИС map/attribution и Active Route остаются в работе; Native SDK/handoff выбираются только после отдельной subscription/licence проверки |
 | Observability | Метрики latency/error/quota, redaction ключей, budget alert и health-check без утечки credentials |
 | Tests | Mock HTTP contract tests, timeout/fallback, key-redaction и iOS/Android map smoke tests |
-| Quality gate | Не принимать прямые линии: проверять статус route graph, соответствие режима транспорту, закрытые/непроезжаемые дороги, водные преграды, высоту/уклон, доступность объектов и реалистичное время |
+| Quality gate | Не принимать прямые линии: provider-result, stop-data и region-road-event gate блокируют отсутствующую geometry, противоречия режима, жёсткие закрытия/неподходящие точки; execution повторно блокирует актуальное closure; water crossing и полный terrain/access контур остаются отдельным release gate |
 | Acceptance | Для маршрута с 2+ точками возвращается дорожная geometry с `provider=2gis`, без `synthetic`; экран показывает карту и stops; контролируемый fallback при недоступности; неподтверждённый маршрут не маркируется готовым к прохождению |
 | Dependencies | Phase 8A, Phase 9; опубликованный каталог (R7) желателен для rollout |
 | Не входит | Полноценный live GPS/turn-by-turn, offline-карты, billing и обязательная миграция старых маршрутов |
@@ -342,6 +346,27 @@ history UI и reward policy остаются в работе. См. [blueprint](
 smoke/quota checks → ограниченный production rollout. Тестовый HTTP-ключ нельзя
 коммитить, помещать в Flutter bundle или присылать в чат. Нативный 2ГИС SDK —
 отдельное решение после получения subscription key и проверки лицензии.
+
+## Phase 9.6 — Personalization, offline and data freshness
+
+**Цель:** замкнуть холодный старт пользователя и дать честный read-only
+offline-контур, не превращая рекомендации в filter bubble и не затирая
+редакторские данные внешним API.
+
+| Область | Задачи |
+| --- | --- |
+| Mobile UX | Одноразовый prompt после API-входа; лёгкий quiz с reset/clear; выход из аккаунта; список и очистка скачанных snapshots |
+| Backend | Мягкий preference signal (первый срез сделан); затем recommendation deck/feedback, caps, decay, diversity и explainability |
+| Data | Dry-run 2ГИС Places/Geocoder reconciliation, provenance, confidence, stale status, manual review; никаких auto-publish и blind overwrite |
+| Offline | L0 bounded offline session, L1 snapshots, L2 execution outbox; L3 map territories только после SDK/licence decision |
+| Apple | App Group snapshot → WidgetKit → Live Activity/Dynamic Island после Active Route и privacy review |
+| Handoff | Vendor-confirmed 2ГИС universal/app link с web fallback; не передавать tokens/PII |
+| Acceptance | Пользователь понимает, почему показан маршрут; просмотр не меняет профиль; offline snapshot открывается/удаляется; logout очищает локальные данные; stale/unknown явно маркируются |
+| Dependencies | Phase 9.5 B0/B1; route execution API; platform/vendor terms |
+| Не входит | Полный background GPS, turn-by-turn и offline map packs до отдельного решения |
+
+Подробный порядок, policy values, квоты и Definition of Done — в
+[2gis-personalization-offline-plan-2026-08-28.md](2gis-personalization-offline-plan-2026-08-28.md).
 
 ## Phase 10 — Production readiness and stabilization
 
