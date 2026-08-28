@@ -371,8 +371,8 @@ JSONB `accessibility` должен постепенно перейти к вер
 - [ ] Настроить IP/header restrictions, если доступны для типа key.
 - [ ] Сохранить key только в secret storage; не копировать в issue, чат,
   fixture или docs.
-- [ ] Проверить, что server egress может обратиться к
-  `routing.api.2gis.com`.
+- [x] Проверить, что local egress может обратиться к
+  `routing.api.2gis.com` (подтверждено sanitized smoke 2026-08-29).
 - [ ] Зафиксировать legal/attribution/cache requirements.
 
 Первый adapter и нормализация уже находятся в backend. До включения provider

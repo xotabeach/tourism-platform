@@ -20,8 +20,8 @@ WidgetKit и Dynamic Island. Он дополняет [единый blueprint](im
 
 | Область | Что есть | Ограничение, которое явно показываем |
 | --- | --- | --- |
-| 2ГИС backend | `TwoGisRoutingProvider`, server-side HTTP, `walking`/`driving`, detailed WKT, фильтры, altitude normalization, typed errors | feature flag по умолчанию остаётся `stub`; нужен test smoke с реальным ключом |
-| Данные generated route | provider geometry сохраняется вместо прямой линии; v1 quality gate проверяет geometry, leg metrics, mode/road contradictions, уклон, набор высоты, stop-data и region road events; execution повторно блокирует актуальное closure; время движения/остановок/итог разделено | полный independent terrain/water/access gate ещё впереди |
+| 2ГИС backend | `TwoGisRoutingProvider`, server-side HTTP, `walking`/`driving`, detailed WKT, фильтры, altitude normalization, typed errors | feature flag по умолчанию остаётся `stub`; локальный real-key smoke 2026-08-29 прошёл; production smoke ещё нет |
+| Данные generated route | provider geometry сохраняется вместо прямой линии; v1 quality gate проверяет geometry, leg metrics, mode/road contradictions, уклон, набор высоты, stop-data и region road events; v2 добавляет bounded OSM access/water/surface и straight-line geometry; execution повторно блокирует актуальное closure; время движения/остановок/итог разделено | береговая геометрия/SRTM и field survey ещё впереди |
 | Route detail | API отдаёт валидированную GeoJSON LineString, provenance, quality status/warnings, высоты и breakdown времени; mobile рисует эту линию и показывает понятный quality notice; execution получает revision-linked snapshot | полноценная карта 2ГИС, attribution и Active Route ещё впереди; retention cleanup уже добавлен |
 | Preferences | categories/difficulty/kids/pets участвуют в мягком backend scoring | это prior, а не жёсткий фильтр; поведение и diversity deck ещё впереди |
 | Mobile prompt | один invitation после загрузки API-профиля, переход в экран предпочтений, «Позже» | в local/mock не показывается, чтобы не ломать preview и тесты |
@@ -423,8 +423,8 @@ Acceptance: widget никогда не показывает live GPS или се
 | ID | Приоритет | Репозиторий | Результат | Зависимость |
 | --- | --- | --- | --- | --- |
 | GIS-01 | P0 | backend/platform | canonical HTTP key, expiry/quota registry, redaction | сразу |
-| GIS-02 | P0 | backend | adapter contract tests + real-key smoke | GIS-01 |
-| GIS-03 | P0 | backend/platform | provider-result + stop-data + region road-event quality gate v1 сделаны; full terrain/access gate остаётся | GIS-02 |
+| GIS-02 | P0 | backend | adapter contract tests + local real-key smoke 2026-08-29; production smoke pending | GIS-01 |
+| GIS-03 | P0 | backend/platform | provider-result + stop-data + OSM v2 + region road-event; coastline/SRTM remain | GIS-02 |
 | GIS-04 | P1 | backend | geometry/routing/freshness/time/warnings, append-only revision snapshot linkage, DB mutation trigger и bounded retention cleanup сделаны; scheduling/alerts остаются | GIS-03 |
 | GIS-05 | P1 | mobile | provider geometry projection + quality notice сделаны; real map/attribution/Active Route остаются | GIS-04 |
 | GIS-06 | P1 | backend | safe 2GIS catalog dry-run/reconciliation | GIS-01 |
@@ -458,13 +458,15 @@ retention scheduling/alerts и quality/admin review.
 
 - [ ] HTTP key type/expiry/terms recorded without value;
 - [x] adapter has timeout, typed errors, key redaction and response tests;
-- [ ] 2GIS smoke executed against test contour with quota checkpoint;
+- [x] 2GIS smoke executed locally (sanitized walking/driving, 2026-08-29);
+  production-contour smoke still pending;
 - [x] application-level append-only routing snapshot is linked to execution;
 - [x] DB-level snapshot mutation guard и bounded retention cleanup enabled;
 - [x] provider-result gate rejects missing geometry, invalid legs, pedestrian
   highway contradiction and extreme slope; flags pace/gain/dirt/ferry risks;
 - [x] provider + stop-data + region road-event quality gate v1 is active;
-- [ ] full geometry/terrain/water/access/availability gate active;
+- [x] OSM/editorial stop access/water/surface/season/closure projection is
+  active (quality policy v2); coastline/SRTM field survey still pending;
 - [x] RouteDetail exposes provider geometry, source/freshness, time breakdown,
   elevations, quality status and warnings;
 - [ ] catalog enrichment starts dry-run, stores provenance and never auto-publishes;
@@ -512,21 +514,17 @@ retention scheduling/alerts и quality/admin review.
 
 ## 11. Следующая конкретная очередь задач агенту
 
-1. Зафиксировать фактический тип/срок HTTP key в private ops registry.
-2. Выполнить sanitized two-point smoke `walking` и `driving`; сохранить только
-   response fixture без query key.
-3. Подключить расписание retention job и мониторинг попыток mutation для уже
-   реализованного `route_routing_snapshots`; revision связан с
-   `RouteExecution`, DB-level mutation guard и bounded cleanup уже включены.
-4. Расширить gate независимыми OSM/editorial water, access, surface, closure и
-   season checks; provider + stop-data + region road-event v1 уже работает,
-   но не сертифицирует тропу.
+1. ~~Выполнить sanitized two-point smoke `walking` и `driving`.~~ Локально
+   сделано 2026-08-29 (`scripts/check_two_gis_routing.py`); повторить на
+   production-хосте после injection секрета, без вывода ключа.
+2. Зафиксировать тип/срок HTTP key в private ops registry (без значения).
+3. Подключить расписание retention job и мониторинг попыток mutation.
+4. ~~Расширить gate OSM/editorial water, access, surface, closure и season.~~
+   Stop-level v2 сделан; береговая геометрия/SRTM остаются.
 5. Реализовать dry-run `enrich_places_2gis.py`, затем проверить 20 точек вручную.
-6. Реализовать Active Route/resume и L2 outbox; provider geometry уже
-   подключена к текущему preview.
+6. Реализовать Active Route/resume и L2 outbox.
 7. Добавить recommendation deck/feedback с diversity property tests.
-8. После vendor confirmation реализовать hand-off; отдельно принять решение по
-   Full SDK/offline territories.
+8. После vendor confirmation — hand-off; отдельно Full SDK/offline.
 9. Только после execution API — WidgetKit/Dynamic Island.
 
 Пока эти пункты не закрыты, продукт может честно показывать каталог и

@@ -4,15 +4,16 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** переход к Phase 9/9.5 (route execution + 2ГИС quality
-контур) и R8 (backend recommendations) — in progress.
+**Текущая фаза:** Phase 9/9.5 (route execution + 2ГИС quality) — local
+HTTP smoke и OSM independent gate v2 сделаны; production flag, retention
+cron, карта и recommendations ещё впереди.
 
 Единый детальный план текущего инкремента:
 [implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
 Расширение требований (2ГИС-квоты, enrichment, prompt, offline, hand-off и
 Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-offline-plan-2026-08-28.md).
 
-## Current snapshot — 2026-08-28
+## Current snapshot — 2026-08-29
 
 Этот блок имеет приоритет над более старыми changelog-записями ниже.
 
@@ -24,20 +25,22 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
 - **Deterministic Route Builder:** match/generate API и persistence существуют;
   добавлен provider-neutral `TwoGisRoutingProvider` (walking/driving,
   detailed geometry, filters, typed errors, altitude normalization) и сохранение
-  provider geometry. По умолчанию `stub`/synthetic всё ещё остаётся только для
-  local/test; production-grade navigation блокируют real-key smoke,
-  независимые terrain/access проверки и retention scheduling/alerts.
+  provider geometry. По умолчанию `stub`/synthetic остаётся для local/test.
+  Локальный sanitized smoke 2026-08-29 подтвердил живой HTTP key
+  (`configured=true`, алиас `TWO_GIS_API_KEY`); `ROUTING_PROVIDER` не
+  переключали. Production-контур и retention scheduling/alerts ещё впереди.
 - **2ГИС:** ключ должен использоваться как server-side HTTP API key. Наличие
   и имя переменной в окружении запуска нужно подтвердить перед реализацией
   adapter только по имени/наличию, не выводя значение. Demo key не
   предназначен для Mobile SDK; SDK key — отдельная subscription/licence задача.
-- **Route quality:** provider-result gate v1 уже блокирует отсутствующую
-  geometry, некорректные legs, pedestrian/highway contradiction и экстремальный
-  уклон; pace/gain/dirt/ferry переводятся в review. Stop-data gate v1 также
-  отбрасывает закрытые точки и явные конфликты «с детьми/питомцами», а воду,
-  поверхность, сезонность и safety warnings помечает на review. RouteDetail
-  отдаёт GeoJSON, provenance, breakdown времени, высоты и warnings. Полный
-  terrain/water/access контур и retention scheduling/alerts ещё впереди;
+- **Route quality:** policy `v2`. Provider-result gate блокирует отсутствующую
+  geometry, некорректные legs и экстремальный уклон; pace/gain/dirt/ferry и
+  пешеходный `highway` вопреки 2ГИС-фильтру — `needs_review` (живой smoke
+  Ялта→Ливадия это подтвердил). Stop-data + OSM-теги (access/ford/waterway/
+  sac_scale/smoothness) отбрасывают закрытые и запрещённые точки; двухточечная
+  длинная линия помечается как straight-line. RouteDetail отдаёт GeoJSON,
+  provenance, breakdown времени, высоты и warnings. Береговая геометрия/SRTM
+  и retention scheduling/alerts ещё впереди;
   region road-event gate и DB-level mutation trigger уже включены миграциями
   `0040_snapshot_immutable`/`0041_snapshot_retention`; execution повторно
   проверяет актуальные region-level closure events до старта.
@@ -53,14 +56,14 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   `ddfff19` и root `31de9ec` отправлены в GitLab и зеркалированы в GitHub с
   `[ci skip]`. Backend образ `8433721` развёрнут direct deploy, миграции
   `0039`–`0041` применены, production `/health/ready` вернул `{"status":"ready"}`.
-  Sanitized real-key smoke внутри production-контейнера проверил конфигурацию и
-  получил `configured: false`: canonical `TWO_GIS_HTTP_API_KEY` отсутствует и
-  локально, и в deploy environment. Реальные walking/driving запросы не
-  отправлялись; после secret injection на host нужно повторить smoke без
-  вывода ключа.
-- **Следующий порядок:** B0/B1 smoke → B2 полный independent quality и
-  retention scheduling → M1/M2 real map + execution → R1/R2 recommendations → safe 2ГИС catalog
-  enrichment → hand-off/SDK decision → widgets и production hardening.
+  Локальный sanitized smoke (`scripts/check_two_gis_routing.py`) 2026-08-29:
+  walking Ялта→Ливадия 4961 м / 300 точек; driving Ялта→Алупка 19646 м /
+  813 точек. Ключ и WKT в лог не попадали. Production-контейнер этот ключ
+  ещё не получал: там нужно повторить `--configured-only`, затем smoke, без
+  вывода значения.
+- **Следующий порядок:** production secret + optional `ROUTING_PROVIDER=2gis`
+  → retention scheduling/alerts → M1/M2 real map + execution → R1/R2
+  recommendations → safe 2ГИС catalog enrichment → hand-off/SDK.
 
 ### 2026-08-28 — 2ГИС, personalization prompt и L1 offline (первый срез)
 
@@ -88,10 +91,10 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   — green; mobile
   `flutter analyze --fatal-infos` — green, новые offline/prompt tests и
   существующие route/preferences/widget tests — green.
-- **Пока не сделано:** real-key smoke, retention scheduling/alerts и полный
-  terrain/water/access gate, catalog enrichment dry-run, Active
-  Route/resume/outbox, native
-  2ГИС SDK/handoff и WidgetKit/Dynamic Island. Детальная очередь — в
+- **Пока не сделано (после среза 28.08 и smoke 29.08):** production-contour
+  smoke, retention scheduling/alerts, coastline/SRTM, catalog enrichment
+  dry-run, Active Route/resume/outbox, native 2ГИС SDK/handoff и
+  WidgetKit/Dynamic Island. Детальная очередь — в
   [расширенном плане](2gis-personalization-offline-plan-2026-08-28.md).
 
 **Ревью 2026-08-25 — фазы 0–6 закрыты и смержены в `main` 2026-08-26.**
@@ -195,9 +198,22 @@ blueprint.
 никакого планировщика вообще), эндпоинты `GET .../recommendations/today`
 и `POST .../skip`.
 
-**Последнее обновление:** 2026-08-28
+**Последнее обновление:** 2026-08-29
 
 ## Changelog
+
+### 2026-08-29 — локальный 2ГИС smoke и OSM independent gate v2
+
+- Локальный `.env` содержит HTTP-ключ через алиас `TWO_GIS_API_KEY` (gitignore).
+  `scripts/check_two_gis_routing.py` подтвердил `configured=true` и построил
+  walking/driving без печати ключа, URL или WKT.
+- Живой пешеходный ответ вернул `filter_road_types=highway` вопреки запрошенному
+  фильтру: quality policy больше не делает такой маршрут `unusable`, а ставит
+  `needs_review` — как в документации 2ГИС («исключённый тип может вернуться»).
+- Independent gate читает bounded OSM-теги из `source_payload` (access, ford,
+  waterway, sac_scale, smoothness) и ловит двухточечную длинную geometry.
+- Backend ruff/mypy/pip-audit/pytest: 444 passed, 1 skipped, coverage 75.28%.
+  `ROUTING_PROVIDER` по умолчанию остаётся `stub`. Production smoke не делали.
 
 ### 2026-08-27 — Синхронизация документации с изменениями 26 августа
 
@@ -1114,10 +1130,10 @@ Code audit vs living docs. Corrected stale claims:
 | 6 | Authentication | in_progress |
 | 6.5 | Internal ops admin (SQLAdmin) | done |
 | 7 | Favorites and profile | done |
-| 8A | Deterministic Route Builder | in_progress (match/generate + provider/stop-data/road-event quality v1 shipped; full independent gate pending) |
+| 8A | Deterministic Route Builder | in_progress (match/generate + quality v2 OSM/stop/road-event; SRTM/coastline pending) |
 | 8B | AI-assisted Route Planning (experimental) | in_progress (chat/provider contracts shipped; eval hardening pending) |
 | 9 | Route execution | in_progress (backend v0 shipped; mobile/history pending) |
-| 9.5 | 2GIS maps and navigation provider | in_progress (HTTP adapter, contract tests, GeoJSON API/mobile projection, execution snapshots; smoke/real map/attribution pending) |
+| 9.5 | 2GIS maps and navigation provider | in_progress (HTTP adapter, local real-key smoke 2026-08-29; production flag/map/attribution pending) |
 | 10 | Stabilization and staging | pending |
 | 11 | User-created routes (publish + moderation) | in_progress |
 | 12 | Travel+ foundations | in_progress |
@@ -1186,17 +1202,17 @@ envelope, JSON logs.
 
 ## Что дальше
 
-### Ближайшие продуктовые приоритеты (2026-08-28)
+### Ближайшие продуктовые приоритеты (2026-08-29)
 
-1. **B0/B1** — 2ГИС HTTP contract и sanitized test-contour smoke (ADR-010).
-2. **B2** — полный quality gate: дороги/тропы, вода, доступ,
-   высота, сложность, availability; append-only execution snapshot уже есть.
+1. **Production 2ГИС** — тот же sanitized smoke на хосте после injection
+   секрета; `ROUTING_PROVIDER=2gis` только после этого.
+2. **Retention** — расписание `purge_route_routing_snapshots.py` и alert на
+   попытки mutation.
 3. **M1/M2** — карта в Route detail, полноценное прохождение, resume и
    history на backend API.
 4. **R1/R2** — рекомендации v1: preferences как prior, bounded behavior,
    diversity/exploration, feedback и cron.
-5. Rewards/achievements, SMS/APNs, stage backup и Travel+ — после выполнения
-   соответствующих release gates.
+5. Safe 2ГИС catalog dry-run (`enrich_places_2gis.py`), затем hand-off/SDK.
 
 ### Phase 5 — Flutter foundation (продолжение)
 
@@ -1451,10 +1467,9 @@ Home lab (Ollama + Qdrant, PostGIS vs RAG, Lab-0…5, RTX ~12 GB):
   Remaining Phase 6: real SMS provider (test contour uses OTP/debug paths).
   Cookies later for web (admin already cookie-session).
 - Routing provider — 2ГИС выбран первым test-contour provider (ADR-010);
-  `RoutingProvider`, HTTP adapter, deterministic builder и provider-result
-  quality gate v1 as-built, stop-data gate и immutable execution snapshot
-  as-built; real-key smoke и независимые terrain/access проверки ещё не
-  реализованы; region road-event gate v1 уже подключён.
+  `RoutingProvider`, HTTP adapter, deterministic builder, quality v2
+  (OSM/stop/road-event) и immutable execution snapshot as-built; локальный
+  real-key smoke 2026-08-29 прошёл, production flag и coastline/SRTM ещё нет.
 - Не коммитить `.tmp-ref-frames/` и локальные `.env`.
 - AI architecture + home-lab guide documented; adapters not in backend yet.
   Сводка: [stack.md](stack.md). Test-VPS без Ollama.
