@@ -4,6 +4,9 @@
 которая не требует бэкенда, уже поставлена сегодня (см. «Что уже
 сделано» ниже) — это фундамент, на который ляжет бэкенд-часть.
 
+Канонический общий контекст и Definition of Done: [implementation blueprint](implementation-blueprint-2026-08.md)
+и [ADR-011](decisions/ADR-011-personalized-route-recommendations.md).
+
 Связанные документы:
 
 - [route-intelligence-roadmap.md](route-intelligence-roadmap.md) —

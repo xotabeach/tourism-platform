@@ -4,7 +4,36 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 8B (AI chat sessions + LM Studio planning) — in progress.
+**Текущая фаза:** переход к Phase 9/9.5 (route execution + 2ГИС quality
+контур) и R8 (backend recommendations) — in progress.
+
+Единый детальный план текущего инкремента:
+[implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
+
+## Current snapshot — 2026-08-28
+
+Этот блок имеет приоритет над более старыми changelog-записями ниже.
+
+- **Backend route execution v0:** shipped in `f4f9774`; API, ownership/BOLA,
+  stop snapshots и state machine работают. Mobile journey и history ещё не
+  подключены.
+- **Deterministic Route Builder:** match/generate API и persistence существуют;
+  routing пока `stub`/synthetic, поэтому это не production-grade navigation.
+  2ГИС adapter и route quality gate — следующий backend slice.
+- **2ГИС:** ключ должен использоваться как server-side HTTP API key. Наличие
+  и имя переменной в окружении запуска нужно подтвердить перед реализацией
+  adapter только по имени/наличию, не выводя значение. Demo key не
+  предназначен для Mobile SDK; SDK key — отдельная subscription/licence задача.
+- **Route quality:** требования описаны в blueprint/ADR-010, кодовый gate,
+  routing snapshots, terrain/access/availability schema и 2ГИС adapter ещё
+  не реализованы.
+- **Recommendations:** swipe UI и preferences quiz работают, но backend deck,
+  feedback, ranker, diversity caps, lazy/cron generation и explainability ещё
+  не реализованы. Preferences пока сохраняются, но не используются в
+  рекомендациях.
+- **Следующий порядок:** B0 contract/ADR → B1 2ГИС HTTP adapter → B2 quality
+  gate/snapshots → M1/M2 map + execution → R1/R2 recommendations → rewards и
+  production hardening.
 
 **Ревью 2026-08-25 — фазы 0–6 закрыты и смержены в `main` 2026-08-26.**
 Полный план и статус —
@@ -37,8 +66,10 @@
 R4 mobile correctness закрыты. R1 media/admin и R3 AI request lifecycle ещё
 открыты; R4 остаются только задачи, не вошедшие в первый инкремент.
 
-**Next — R1/R3, затем R5–R9:** приватные media и admin surface, AI request
-lifecycle, серверные фильтры каталога, районы, публикация и execution.
+**Open remediation alongside the product track:** R1/R3 (private media/admin
+surface and AI request lifecycle), then R5/R7 data/catalog work. Product
+execution now follows B0→B1→B2→M1/M2; recommendations follow R1/R2 in the
+blueprint.
 Остаток mobile Phase 7–8: мёртвый экран `/search`, «назад» на
 экранах входа, a11y-контракт на иконочные кнопки, долг по дизайн-токенам
 (включая всплывший при мердже: `EntityReviewsSection` собран из
@@ -105,7 +136,7 @@ lifecycle, серверные фильтры каталога, районы, п�
 никакого планировщика вообще), эндпоинты `GET .../recommendations/today`
 и `POST .../skip`.
 
-**Последнее обновление:** 2026-08-27
+**Последнее обновление:** 2026-08-28
 
 ## Changelog
 
@@ -1027,7 +1058,7 @@ Code audit vs living docs. Corrected stale claims:
 | 8A | Deterministic Route Builder | pending |
 | 8B | AI-assisted Route Planning (experimental) | pending |
 | 9 | Route execution | in_progress (backend v0 shipped; mobile/history pending) |
-| 9.5 | 2GIS maps and navigation provider | pending (plan added 2026-08-28; trial key not issued) |
+| 9.5 | 2GIS maps and navigation provider | pending (HTTP demo key заявлен; adapter/quality gate не начаты) |
 | 10 | Stabilization and staging | pending |
 | 11 | User-created routes (publish + moderation) | in_progress |
 | 12 | Travel+ foundations | in_progress |
@@ -1096,15 +1127,17 @@ envelope, JSON logs.
 
 ## Что дальше
 
-### Ближайшие продуктовые приоритеты (2026-08)
+### Ближайшие продуктовые приоритеты (2026-08-28)
 
-1. **Phase 8A** — deterministic Route Builder (сейчас match UI + срез каталога).
-2. **Phase 9** — прохождение маршрута («Пройти маршрут» → soon).
-3. Polish: «Мои маршруты → История»; SMS OTP provider; iOS APNs; Stage host /
-   backup smoke.
-4. **Phase 14 remainder** — award pipeline достижений (события / Phase 9
-   executions); каталог и карусель уже с API.
-5. Phase 12 Travel+ entitlements (paywall пока mock).
+1. **B0/B1** — 2ГИС HTTP contract, adapter и test-contour smoke (ADR-010).
+2. **B2** — routing snapshots и quality gate: дороги/тропы, вода, доступ,
+   высота, сложность, availability.
+3. **M1/M2** — карта в Route detail, полноценное прохождение, resume и
+   history на backend API.
+4. **R1/R2** — рекомендации v1: preferences как prior, bounded behavior,
+   diversity/exploration, feedback и cron.
+5. Rewards/achievements, SMS/APNs, stage backup и Travel+ — после выполнения
+   соответствующих release gates.
 
 ### Phase 5 — Flutter foundation (продолжение)
 
@@ -1358,8 +1391,9 @@ Home lab (Ollama + Qdrant, PostGIS vs RAG, Lab-0…5, RTX ~12 GB):
 - Auth strategy: **ADR-007** implemented for mobile (JWT + opaque refresh).
   Remaining Phase 6: real SMS provider (test contour uses OTP/debug paths).
   Cookies later for web (admin already cookie-session).
-- Routing provider — open decision (ADR-004); Phase 8A not started (empty
-  `route_builder` / `route_execution` / `subscriptions` packages).
+- Routing provider — 2ГИС выбран первым test-contour provider (ADR-010);
+  `RoutingProvider` и deterministic builder as-built, внешний adapter и
+  quality gate ещё не реализованы.
 - Не коммитить `.tmp-ref-frames/` и локальные `.env`.
 - AI architecture + home-lab guide documented; adapters not in backend yet.
   Сводка: [stack.md](stack.md). Test-VPS без Ollama.

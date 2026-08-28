@@ -31,6 +31,8 @@ REQUIRED_FILES=(
   docs/local-development.md
   docs/application-business-logic.md
   docs/implementation-plan.md
+  docs/implementation-blueprint-2026-08.md
+  docs/implementation-readiness-review-2026-08-28.md
   docs/development-conventions.md
   docs/progress.md
   docs/stack.md
@@ -56,6 +58,8 @@ REQUIRED_FILES=(
   docs/decisions/ADR-005-kafka-as-planned-event-backbone.md
   docs/decisions/ADR-006-ai-assisted-route-planning.md
   docs/decisions/ADR-007-authentication-and-session-strategy.md
+  docs/decisions/ADR-010-2gis-routing-and-map-provider.md
+  docs/decisions/ADR-011-personalized-route-recommendations.md
   docs/security/security-baseline.md
   docs/security/threat-model.md
   docs/security/data-classification-and-retention.md

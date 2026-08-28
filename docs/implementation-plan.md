@@ -3,6 +3,15 @@
 План разбит на фазы. Phase 0–1 — foundation. Последующие фазы зависят от
 принятия предыдущих acceptance criteria. Backlog в конце файла.
 
+**Канонический executable-план текущего инкремента:**
+[implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
+Он связывает user journeys, API, модели данных, 2ГИС, route quality gates,
+рекомендации, mobile UX, тесты и release/rollback gates. Этот файл сохраняет
+высокоуровневую карту фаз; статусы сверяются с [progress.md](progress.md).
+
+Текущие архитектурные решения: [ADR-010 — 2ГИС](decisions/ADR-010-2gis-routing-and-map-provider.md)
+и [ADR-011 — персональные рекомендации](decisions/ADR-011-personalized-route-recommendations.md).
+
 См. также: [stack.md](stack.md),
 [application-business-logic.md](application-business-logic.md),
 [development-conventions.md](development-conventions.md),
@@ -245,6 +254,11 @@ entry points. Ранний срез тп/званий/лайков ушёл в �
 constraints, scoring, mock `RoutingProvider`, persistence, failure codes,
 foundation для fallback (без LLM).
 
+**Статус as-built (2026-08):** match/generate pipeline, persistence и
+`RoutingProvider` stub присутствуют. До подключения 2ГИС/OSRM результат с
+`synthetic=true` не является навигационным и не должен публиковаться как
+проверенный маршрут; quality gate описан в Phase 9.5.
+
 | Область | Задачи |
 | --- | --- |
 | Backend | Validation→editorial match→candidates→score→RoutingProvider→persist; UsageCounter stub |
@@ -290,6 +304,9 @@ experimental.
 
 **Цель:** старт прохождения, visited/skipped stops, история.
 
+**Статус:** backend v0 реализован; mobile journey, routing snapshot linkage,
+history UI и reward policy остаются в работе. См. [blueprint](implementation-blueprint-2026-08.md).
+
 | Область | Задачи |
 | --- | --- |
 | Backend | RouteExecution model + API |
@@ -310,7 +327,7 @@ experimental.
 
 | Область | Задачи |
 | --- | --- |
-| Trial / access | Создать demo/test key 2ГИС; проверить Maps API, Navigation API и Mobile SDK, квоты, ограничения и лицензионные условия |
+| Trial / access | Зафиксировать HTTP demo key 2ГИС, срок и квоты; Mobile SDK проверять отдельно — demo key для SDK не подходит, нужна отдельная subscription key и лицензия |
 | Backend | Ввести `RoutingProvider` adapter для 2ГИС; `driving`/`walking`, detailed geometry, `filters`/`hard_filters`, альтернативы и altitude profile; таймауты, retries/circuit breaker, кэш и feature flag `routing_provider=2gis`; ключ только в secret manager/env |
 | API contract | Сохранить `provider`, `synthetic`, geometry, distance/duration и warnings; ключ мобильному клиенту не выдавать; fallback на synthetic явно помечать |
 | Mobile | Интегрировать карту 2ГИС в Route detail и Active Route; показать polyline, stops, distance и ETA; выбрать native SDK или согласованный API bridge |
@@ -321,9 +338,10 @@ experimental.
 | Dependencies | Phase 8A, Phase 9; опубликованный каталог (R7) желателен для rollout |
 | Не входит | Полноценный live GPS/turn-by-turn, offline-карты, billing и обязательная миграция старых маршрутов |
 
-**Rollout:** server-side geometry в test contour → mobile map → smoke/quota checks →
-ограниченный production rollout. Тестовый ключ нельзя коммитить, помещать в
-Flutter bundle или присылать в чат.
+**Rollout:** server-side geometry в test contour → mobile map abstraction →
+smoke/quota checks → ограниченный production rollout. Тестовый HTTP-ключ нельзя
+коммитить, помещать в Flutter bundle или присылать в чат. Нативный 2ГИС SDK —
+отдельное решение после получения subscription key и проверки лицензии.
 
 ## Phase 10 — Production readiness and stabilization
 

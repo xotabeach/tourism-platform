@@ -199,14 +199,16 @@ Priority: closes the core loop. Complexity: **L**. Repos: both.
 
 Priority: P1/P2, после критичных security/reliability задач. Complexity: **L**. Repos: backend + mobile + platform.
 
-- [ ] **GIS-01** — завести demo/test key 2ГИС и зафиксировать в секрет-хранилище разрешённые продукты, квоты, ограничения по IP/заголовкам и лицензионные условия.
+- [ ] **GIS-01** — завести demo/test HTTP API key 2ГИС и зафиксировать в секрет-хранилище разрешённые продукты, срок (demo key — ограниченный), квоты, ограничения по IP/заголовкам и лицензионные условия; Mobile SDK key оформляется отдельно.
 - [ ] **GIS-02** — backend adapter `TwoGisRoutingProvider` через общий `RoutingProvider`; feature flag, таймауты/retry/circuit breaker, кэш и redaction.
 - [ ] **GIS-03** — контрактные тесты Navigation API и контролируемый fallback; ключ не попадает в API-ответы, логи, мобильный bundle и git.
 - [ ] **GIS-04** — mobile map surface: polyline/stops/ETA на Route detail и Active Route; native 2GIS Mobile SDK либо согласованный API bridge.
 - [ ] **GIS-05** — ограниченный rollout с метриками latency/error/quota и budget alert; сначала test contour, затем выбранные маршруты production.
 - [ ] **GIS-06** — route quality gate: режим транспорта, road/trail filters, закрытия и доступ, водные преграды, высотный профиль/уклон, realistic duration и availability объектов; неподтверждённую прямую линию не публиковать.
 
-**Progress (2026-08-28):** план добавлен; реализация и выдача ключа не начаты.
+**Progress (2026-08-28):** план и ADR добавлены; тестовый ключ заявлен пользователем,
+но его каноническое имя/наличие в текущем workspace не подтверждены. Adapter,
+quality gate и mobile integration не начаты.
 
 **Depends:** Phase 8A/9, published catalog (R7) для широкого rollout. Route execution v0
 может работать до 2ГИС на координатных snapshots и не блокируется этим провайдером.

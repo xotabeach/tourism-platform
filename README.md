@@ -20,6 +20,7 @@ Unsloth Gemma 4 26B A4B it UD-IQ4_XS; transport/probe подключены. В �
 
 - Стек: [docs/stack.md](docs/stack.md)
 - Прогресс: [docs/progress.md](docs/progress.md)
+- Единый план текущего инкремента: [implementation blueprint](docs/implementation-blueprint-2026-08.md)
 
 ## Архитектурное направление
 
@@ -28,10 +29,12 @@ Unsloth Gemma 4 26B A4B it UD-IQ4_XS; transport/probe подключены. В �
 - PostgreSQL/PostGIS, Redis; MinIO + Mailpit локально.
 - Test host: Caddy + backend + PostGIS + Redis.
 - Границы модулей: `identity`, `geography`, `places`, `routes`, `favorites`,
-  `support`, `notifications`, `admin`, `media`; `route_execution` остаётся
-  незапущенным stub.
-- `RoutingProvider` — абстракция (ADR-004); текущая реализация — deterministic
-  stub с коэффициентом расстояния, OSRM отложен до наполнения каталога.
+  `support`, `notifications`, `admin`, `media`, `route_execution`; backend
+  route-execution v0 уже доступен, mobile journey ещё в работе.
+- `RoutingProvider` — абстракция (ADR-004/010); текущая реализация для local —
+  deterministic stub с коэффициентом расстояния, первым внешним test-contour
+  provider выбран 2ГИС HTTP Routing API. Public synthetic geometry не считается
+  навигацией; OSRM остаётся будущим self-hosted вариантом.
 - AI: port `AIPlanningProvider` → mock / Gemini / **LM Studio Gemma 4**
   ([ai-self-hosted-home-lab.md](docs/ai-self-hosted-home-lab.md)).
 - Kafka — только после ADR-005. Helm — позже в этом repo.
@@ -148,6 +151,8 @@ workspace/
 - [Progress](docs/progress.md)
 - [Business logic](docs/application-business-logic.md)
 - [Implementation plan](docs/implementation-plan.md)
+- [Implementation blueprint 2026-08](docs/implementation-blueprint-2026-08.md)
+- [Implementation readiness review 2026-08-28](docs/implementation-readiness-review-2026-08-28.md)
 - [Development conventions](docs/development-conventions.md)
 - [Product vision](docs/product-vision.md)
 - [System context](docs/system-context.md)
@@ -164,9 +169,8 @@ workspace/
 
 ## Дальнейшие шаги
 
-1. Phase 8A — deterministic Route Builder + `RoutingProvider`.
-2. Phase 8B — `AIPlanningProvider` (mock, затем Gemini).
-3. Home lab: LM Studio + **Unsloth Gemma 4 26B A4B it UD-IQ4_XS** на Windows
-   GPU-ПК;
-   Qdrant после provider adapter, не на test-VPS.
-4. Остатки UX/ops: SMS provider, iOS push, Travel+ billing, offline.
+1. B0/B1 — 2ГИС HTTP contract, adapter и test-contour smoke.
+2. B2 — routing snapshots и route quality gate.
+3. M1/M2 — карта, активное прохождение, resume и history.
+4. R1/R2 — recommendations v1 с preferences, diversity и feedback.
+5. Rewards и production hardening после выполнения release gates.

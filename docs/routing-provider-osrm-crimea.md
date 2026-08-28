@@ -3,6 +3,12 @@
 Статус: **контракт и stub as-built** (2026-08-20); OSRM extract — план,
 ещё не поднят.
 
+В текущем rollout первым внешним провайдером выбран 2ГИС HTTP Routing API;
+этот документ сохраняет self-host OSRM как независимый будущий adapter и
+fallback-кандидат. Общие quality gates и key policy описаны в
+[ADR-010](decisions/ADR-010-2gis-routing-and-map-provider.md) и
+[implementation blueprint](implementation-blueprint-2026-08.md).
+
 Связанные документы:
 
 - [ADR-004](decisions/ADR-004-routing-provider-abstraction.md)
