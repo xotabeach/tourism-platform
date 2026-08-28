@@ -1026,7 +1026,8 @@ Code audit vs living docs. Corrected stale claims:
 | 7 | Favorites and profile | done |
 | 8A | Deterministic Route Builder | pending |
 | 8B | AI-assisted Route Planning (experimental) | pending |
-| 9 | Route execution | pending |
+| 9 | Route execution | in_progress (backend v0 shipped; mobile/history pending) |
+| 9.5 | 2GIS maps and navigation provider | pending (plan added 2026-08-28; trial key not issued) |
 | 10 | Stabilization and staging | pending |
 | 11 | User-created routes (publish + moderation) | in_progress |
 | 12 | Travel+ foundations | in_progress |
