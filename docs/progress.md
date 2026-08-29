@@ -4,10 +4,10 @@
 [implementation-plan.md](implementation-plan.md). После завершения фазы
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
-**Текущая фаза:** Phase 9/9.5 (route execution + 2ГИС quality) — local
-HTTP smoke, OSM independent gate v2, GIS-06 catalog dry-run, retention
-maintenance wrapper и mobile Active Route v0 сделаны; production flag, server
-cron installation, real map и recommendations ещё впереди.
+**Текущая фаза:** Phase 9/9.5/9.6 — local HTTP smoke, OSM independent
+gate v2, GIS-06 catalog dry-run, retention wrapper, mobile Active Route v0
+и backend recommendations v1 сделаны; production flag, server cron,
+real map, mobile deck (R2) и coastline/SRTM ещё впереди.
 
 Единый детальный план текущего инкремента:
 [implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
@@ -21,8 +21,8 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
 - **Backend route execution v0:** shipped in `f4f9774`; API, ownership/BOLA,
   stop snapshots и state machine работают. Миграции `0039`/`0040` добавляют
   append-only routing revisions: execution фиксирует fingerprint, geometry,
-  время, высоты, provider и quality status на момент старта. Mobile journey и
-  history ещё не подключены.
+  время, высоты, provider и quality status на момент старта. Mobile Active
+  Route v0 подключён; история прохождений ещё нет.
 - **Deterministic Route Builder:** match/generate API и persistence существуют;
   добавлен provider-neutral `TwoGisRoutingProvider` (walking/driving,
   detailed geometry, filters, typed errors, altitude normalization) и сохранение
@@ -47,10 +47,15 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   проверяет актуальные region-level closure events до старта. Для deploy/test
   добавлен maintenance Compose profile и host-level `flock` wrapper;
   фактическая установка cron на сервере ещё не выполнена.
-- **Recommendations:** preferences quiz работает; первый мягкий preference
-  signal подключён к backend match/generate и не меняет профиль. Backend deck,
-  feedback, diversity caps, decay, lazy/cron generation и explainability ещё
-  не реализованы.
+- **Recommendations (R1 v1):** `GET /routes/recommendations/today` и
+  `POST /routes/{id}/recommendation-feedback` (только `skip`, idempotent
+  `client_event_id`). Миграция `0042`: append-only feedback и дневная колода
+  по дате МСК. Ranker v1 без эмбеддингов: publication/quality/kids/pets
+  hard gates, explicit preferences, popularity/freshness, skip cooldown
+  14 дней, category/region caps, exploration slots и `explanation_code`.
+  Ленивая генерация при первом запросе; host-скрипт
+  `scripts/generate_route_recommendations.py` dry-run по умолчанию. Mobile
+  колода на этот API ещё не переведена.
 - **Mobile first slice:** prompt для незаполненных API-preferences, улучшенный
   quiz, L1 read-only offline snapshots (сохранить/открыть/удалить), список
   скачанных маршрутов и logout с очисткой локальных данных реализованы.
@@ -69,11 +74,12 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   Локальный прогон 20 точек 2026-08-29: 1 matched, 4 ambiguous, 15
   not_found (в т.ч. catalog meta 404 = пустой результат), 0 ошибок,
   `--apply` не запускали. Ключ в отчёт не попадал. Backend `e5471eb`.
-- **Release/deploy:** backend `e5471eb` и mobile `56ba37a`, а также актуальные
-  platform/root указатели отправлены в GitLab и зеркалированы в GitHub с
-  `[ci skip]`. Backend образ `e5471eb9bc2e971e45786442c0c3fa212411f086`
-  развёрнут direct deploy, миграции
-  `0039`–`0041` применены, production `/health/ready` вернул `{"status":"ready"}`.
+- **Release/deploy:** backend `d616726` (R1 recommendations) и mobile
+  `b970333`, а также актуальные platform/root указатели отправлены в GitLab
+  и зеркалированы в GitHub с `[ci skip]`. Backend образ
+  `d6167268581933cabb7b4ee93578f7cf70389318` развёрнут direct deploy,
+  миграции `0039`–`0042` применены, production `/health/ready` вернул
+  `{"status":"ready"}`. Новые reco-эндпоинты без токена отвечают `401`.
   Локальный sanitized smoke (`scripts/check_two_gis_routing.py`) 2026-08-29:
   walking Ялта→Ливадия 4961 м / 300 точек; driving Ялта→Алупка 19646 м /
   813 точек. Ключ и WKT в лог не попадали. Production-контейнер этот ключ
@@ -82,8 +88,8 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   но cron на сервере пока не установлен; handoff для Cursor — в
   [cursor-backend-handoff-2026-08-29.md](cursor-backend-handoff-2026-08-29.md).
 - **Следующий порядок:** production secret + optional `ROUTING_PROVIDER=2gis`
-  → установить retention cron/alerts → M1/M2 real map + execution → R1/R2
-  recommendations → GIS-07 scheduled catalog refresh → hand-off/SDK.
+  → установить retention cron/alerts → R2 mobile deck на новый API →
+  M1/M2 real map → GIS-07 / coastline-SRTM → hand-off/SDK.
 
 ### 2026-08-28 — 2ГИС, personalization prompt и L1 offline (первый срез)
 
@@ -111,9 +117,9 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   — green; mobile
   `flutter analyze --fatal-infos` — green, новые offline/prompt tests и
   существующие route/preferences/widget tests — green.
-- **Пока не сделано (после среза 28.08, smoke и GIS-06 29.08):** production-contour
+- **Пока не сделано (после среза 28.08, smoke, GIS-06 и R1 29.08):** production-contour
   smoke, установка retention cron/alerts на сервере, coastline/SRTM, GIS-07 scheduled
-  catalog refresh, Active Route/resume/outbox, native 2ГИС SDK/handoff и
+  catalog refresh, mobile R2 deck, execution history/outbox, native 2ГИС SDK/handoff и
   WidgetKit/Dynamic Island. Детальная очередь — в
   [расширенном плане](2gis-personalization-offline-plan-2026-08-28.md).
 
@@ -210,17 +216,28 @@ blueprint.
 
 **Next (мобайл, отдельный трек от P0-bis выше) — маршруты-слайдер:**
 полный план — [route-swipe-recommendations.md](route-swipe-recommendations.md).
-Клиентская часть (конечная колода, исключение избранного, экран конца
-дня) в `main` с 2026-08-26. Бэкенд не начат: миграция
-`route_recommendation_feedback`/`route_recommendation_deck_items`,
-алгоритм v1 (категории/регион/популярность/свежесть, без эмбеддингов —
-согласуется с ADR-009), cron на хосте в 03:00 МСК (в проекте пока нет
-никакого планировщика вообще), эндпоинты `GET .../recommendations/today`
-и `POST .../skip`.
+Клиентская конечная колода в `main` с 2026-08-26. Backend v1 (миграция
+`0042`, ranker, `GET .../recommendations/today`, skip feedback, lazy +
+dry-run cron script) сделан 2026-08-29; mobile ещё ходит в общий каталог.
 
 **Последнее обновление:** 2026-08-29
 
 ## Changelog
+
+### 2026-08-29 — recommendations v1 (R1)
+
+- Миграция `0042_route_recommendations`: `route_recommendation_feedback`
+  (append-only `skip`, idempotent `client_event_id`) и
+  `route_recommendation_deck_items` (колода на календарную дату МСК).
+- Ranker v1: hard gates (publication, `unusable`, kids/pets, favorite/skip/
+  recent completion), ADR-011 веса, diversity caps без relax-pass,
+  exploration slots, `explanation_code`. Просмотр карточки в сигналы не
+  входит.
+- API: `GET /api/v1/routes/recommendations/today` (ленивая генерация) и
+  `POST /api/v1/routes/{id}/recommendation-feedback`.
+- Host-скрипт `scripts/generate_route_recommendations.py` — dry-run по
+  умолчанию, без 2ГИС. Cron на сервере не ставили.
+- Production direct deploy `d616726`; миграция `0042` применена.
 
 ### 2026-08-29 — локальный 2ГИС smoke и OSM independent gate v2
 
@@ -1230,8 +1247,8 @@ envelope, JSON logs.
    попытки mutation.
 3. **M1/M2** — карта в Route detail, полноценное прохождение, resume и
    history на backend API.
-4. **R1/R2** — рекомендации v1: preferences как prior, bounded behavior,
-   diversity/exploration, feedback и cron.
+4. **R2** — mobile колода на `GET /routes/recommendations/today` и skip
+   feedback; R1 backend v1 уже есть.
 5. GIS-07 — scheduled stale catalog refresh и quota alerts; затем hand-off/SDK.
 
 ### Phase 5 — Flutter foundation (продолжение)

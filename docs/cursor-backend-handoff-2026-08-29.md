@@ -18,12 +18,11 @@ history UI теперь читает backend list endpoint, но отдельн�
 
 ## Последнее подтверждённое состояние
 
-- Backend `main`: `e5471eb` (`2GIS Places` safe dry-run + test fixture fix).
-  Recommendations v1 (**R1**) лежит локально, не закоммичен: миграция `0042`,
-  ranker, `GET /routes/recommendations/today`, skip feedback.
-- Production image: `e5471eb9bc2e971e45786442c0c3fa212411f086`, direct SSH deploy
-  завершён, container healthy, migrations `0039`–`0041` применены (`0042` только
-  локально).
+- Backend `main`: `d616726` (recommendations v1: миграция `0042`, ranker,
+  `GET /routes/recommendations/today`, skip feedback).
+- Production image: `d6167268581933cabb7b4ee93578f7cf70389318`, direct SSH deploy
+  2026-08-29, container healthy, migrations `0039`–`0042` применены.
+  Unauthenticated today/skip API возвращает `401`, не `404`.
 - `ROUTING_PROVIDER` в production не переключён и остаётся `stub`.
 - Server-side 2GIS key в deploy environment на момент проверки отсутствовал;
   значение ключа не читать, не печатать и не коммитить.
@@ -42,6 +41,9 @@ history UI теперь читает backend list endpoint, но отдельн�
 4. Для retention переданы в `/opt/crimeatrip-test` обновлённые Compose и
    `run-route-snapshot-retention.sh`, с backup старого Compose.
    Cron-запись на сервере **не установлена**.
+5. Recommendations v1 (`d616726`) задеплоен: `0042`, lazy deck, skip
+   feedback, host-скрипт dry-run. Cron колоды на сервере не ставили;
+   mobile R2 не подключён.
 
 ## Следующая backend-очередь
 

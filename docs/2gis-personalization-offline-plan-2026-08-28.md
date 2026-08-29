@@ -426,12 +426,12 @@ Acceptance: widget никогда не показывает live GPS или се
 | GIS-02 | P0 | backend | adapter contract tests + local real-key smoke 2026-08-29; production smoke pending | GIS-01 |
 | GIS-03 | P0 | backend/platform | provider-result + stop-data + OSM v2 + region road-event; coastline/SRTM remain | GIS-02 |
 | GIS-04 | P1 | backend | geometry/routing/freshness/time/warnings, append-only revision snapshot linkage, DB mutation trigger и bounded retention cleanup сделаны; scheduling/alerts остаются | GIS-03 |
-| GIS-05 | P1 | mobile | provider geometry projection + quality notice сделаны; real map/attribution/Active Route остаются | GIS-04 |
+| GIS-05 | P1 | mobile | geometry projection + quality notice + Active Route v0 сделаны; real map/attribution/history/L2 outbox остаются | GIS-04 |
 | GIS-06 | P1 | backend | safe 2GIS catalog dry-run/reconciliation | GIS-01 |
 | GIS-07 | P1 | backend/platform | scheduled stale refresh + quota alerts | GIS-06 |
 | PREF-01 | P0 | mobile | prompt + lightweight quiz | current API (done first slice) |
 | PREF-02 | P0 | backend | bounded preferences scoring (done first slice) | PREF-01 |
-| RECO-01 | P1 | backend | feedback/deck tables and deterministic ranker | GIS-03 |
+| RECO-01 | P1 | backend | feedback/deck tables and deterministic ranker (done 2026-08-29) | GIS-03 |
 | RECO-02 | P1 | mobile | deck, explanations, skip/reset/opt-out | RECO-01 |
 | AI-01 | P1 | backend | AI intent → approved candidates only | GIS-03, RECO-01 |
 | OFF-01 | P0 | mobile | L1 route snapshots/list/clear (done first slice) | current route detail |
@@ -448,7 +448,8 @@ PREF-01/02, OFF-01, provider-result часть GIS-03, GIS-04 и mobile geometry
 projection/quality notice.  
 **Sprint B — частично:** OSM independent gate v2 и GIS-06 dry-run сделаны;
 остаются coastline/SRTM, retention scheduling/alerts и quality/admin review.  
-**Sprint C:** GIS-05, mobile Active Route, L2 outbox, RECO-01.  
+**Sprint C — частично:** GIS-05 geometry/quality notice, Active Route v0
+и RECO-01 сделаны; остаются real map, history и L2 outbox.  
 **Sprint D:** RECO-02, AI-01, scheduled enrichment and quota dashboards.  
 **Sprint E:** vendor hand-off, SDK spike, WidgetKit/Live Activity decision.
 
@@ -471,7 +472,7 @@ projection/quality notice.
   elevations, quality status and warnings;
 - [x] catalog enrichment starts dry-run, stores provenance and never auto-publishes;
 - [x] explicit preferences affect ranking softly and explainably;
-- [ ] deck feedback, decay, caps and exploration pass property fixtures;
+- [x] deck feedback, decay, caps and exploration pass property fixtures;
 - [ ] AI sees only approved candidate DTOs.
 
 ### Mobile
@@ -524,7 +525,8 @@ projection/quality notice.
 5. ~~Реализовать dry-run `enrich_places_2gis.py`, затем проверить 20 точек вручную.~~
    Скрипт и локальный dry-run 20 точек 2026-08-29; `--apply` не запускали.
 6. Реализовать Active Route/resume и L2 outbox.
-7. Добавить recommendation deck/feedback с diversity property tests.
+7. ~~Добавить recommendation deck/feedback с diversity property tests.~~
+   Backend v1 2026-08-29; mobile R2 остаётся.
 8. После vendor confirmation — hand-off; отдельно Full SDK/offline.
 9. Только после execution API — WidgetKit/Dynamic Island.
 

@@ -358,7 +358,7 @@ offline-контур, не превращая рекомендации в filter
 | Область | Задачи |
 | --- | --- |
 | Mobile UX | Одноразовый prompt после API-входа; лёгкий quiz с reset/clear; выход из аккаунта; список и очистка скачанных snapshots |
-| Backend | Мягкий preference signal (первый срез сделан); затем recommendation deck/feedback, caps, decay, diversity и explainability |
+| Backend | Мягкий preference signal и recommendation deck/feedback v1 сделаны; host cron для ночной генерации ещё не установлен; mobile R2 не подключён |
 | Data | Dry-run 2ГИС Places/Geocoder reconciliation, provenance, confidence, stale status, manual review; никаких auto-publish и blind overwrite |
 | Offline | L0 bounded offline session, L1 snapshots, L2 execution outbox; L3 map territories только после SDK/licence decision |
 | Apple | App Group snapshot → WidgetKit → Live Activity/Dynamic Island после Active Route и privacy review |

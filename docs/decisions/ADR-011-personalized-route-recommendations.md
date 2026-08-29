@@ -1,6 +1,6 @@
 # ADR-011 — Персональные рекомендации маршрутов без filter bubble
 
-- **Статус:** proposed; backend implementation pending
+- **Статус:** accepted; backend v1 implemented 2026-08-29, mobile R2 pending
 - **Дата:** 2026-08-28
 - **Владельцы:** product + backend + mobile
 - **Связанные документы:** [route-swipe-recommendations.md](../route-swipe-recommendations.md),

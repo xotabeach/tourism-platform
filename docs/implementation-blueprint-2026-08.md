@@ -1135,17 +1135,21 @@ remain open tasks.
 ### R1 — Recommendation backend
 
 **Owner:** backend/data  
-**IDs:** BE-FNC-04, RECO-01..08
+**IDs:** BE-FNC-04, RECO-01..08  
+**Status (2026-08-29):** v1 implemented — migration `0042`, ranker, today/skip
+API, lazy generation and dry-run host script. Metrics dashboards and host
+cron installation remain. Mobile R2 is not wired yet.
 
 Tasks:
 
-- feedback/deck tables and indexes;
-- ranker v1 with explicit preferences;
-- bounded decay/caps/diversity;
-- lazy + cron generation;
-- recommendation endpoints;
-- explainability code;
-- metrics and ranker fixtures.
+- [x] feedback/deck tables and indexes;
+- [x] ranker v1 with explicit preferences;
+- [x] bounded decay/caps/diversity;
+- [x] lazy + cron generation script (cron not installed on the host);
+- [x] recommendation endpoints;
+- [x] explainability code;
+- [x] ranker fixtures;
+- [ ] metrics dashboards.
 
 ### R2 — Recommendation mobile
 
