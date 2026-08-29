@@ -1,4 +1,4 @@
-# Оценка готовности плана реализации — 2026-08-28
+# Оценка готовности плана реализации — 2026-08-29
 
 Статус: **актуальный инженерный аудит и вход в детальное планирование**.
 
@@ -11,7 +11,7 @@
    догадок, скрытых зависимостей и опасных обещаний пользователю.
 
 Это не сертификат соответствия стандартам и не независимый penetration test.
-Оценка сделана по состоянию workspace на 2026-08-28 и должна обновляться при
+Оценка сделана по состоянию workspace на 2026-08-29 и должна обновляться при
 изменении контракта или архитектурного решения.
 
 ## Итоговый вердикт
@@ -36,7 +36,7 @@ monolith, ADR, typed API schemas, миграции Alembic, security baseline,
 документация считается пригодной как executable-план: у каждой крупной части
 есть владелец, входы, выходы, зависимости, ошибки, тесты и Definition of Done.
 
-### Delta после первого implementation slice (28.08.2026)
+### Delta после первого implementation slice (28.08–29.08.2026)
 
 После первоначальной оценки реализован безопасный первый срез, который нужно
 учитывать при чтении таблиц ниже:
@@ -48,12 +48,13 @@ monolith, ADR, typed API schemas, миграции Alembic, security baseline,
   offline route snapshots/list/clear и logout cleanup;
 - provider-result quality gate v1 и RouteDetail GeoJSON/time/altitude/quality
   DTO уже добавлены; mobile использует geometry и объясняет quality status;
-- остаются release-blocking: реальный key smoke, retention scheduling/alerts,
-  независимая проверка полного terrain/water/access контура, Active
-  Route/resume/outbox, recommendation deck/
-  feedback, catalog dry-run и native SDK/handoff/widgets. Application-level
-  append-only snapshots, DB trigger mutation guard и stop-data gate v1 уже
-  добавлены.
+- локальный sanitized real-key smoke walking/driving и OSM independent gate v2
+  выполнены; catalog Places dry-run выполнен на 20 точках без `--apply`;
+- остаются release-blocking: production-contour smoke/rollout, retention
+  scheduling/alerts, независимая проверка полного terrain/water/access
+  контура, Active Route/resume/outbox, recommendation deck/feedback и native
+  SDK/handoff/widgets. Application-level append-only snapshots, DB trigger
+  mutation guard и stop-data gate v2 уже добавлены.
 
 Актуальный breakdown и статусы находятся в [progress.md](progress.md) и
 [расширенном плане](2gis-personalization-offline-plan-2026-08-28.md). Ниже
@@ -71,14 +72,14 @@ monolith, ADR, typed API schemas, миграции Alembic, security baseline,
 | Архитектура и границы модулей | 7/10 | 8/10 | Modular monolith и ports/adapters уже есть; нужно закрепить routing/recommendation contracts |
 | Backend foundation | 7/10 | 8/10 | Auth, миграции, typed schemas и route-execution v0 работают |
 | Route execution | 4/10 | 8/10 | API есть, mobile journey, resume/offline и rewards ещё впереди |
-| Дорожная реалистичность | 6/10 | 8/10 | HTTP adapter, provider-result/stop-data/region-road-event gate v1 и immutable execution snapshots есть; полноценные terrain/access checks и real smoke ещё впереди |
-| 2ГИС integration readiness | 6/10 | 8/10 | HTTP adapter, quota guards, contract tests и key separation есть; real-key smoke, vendor confirmation и mobile SDK остаются |
+| Дорожная реалистичность | 7/10 | 8/10 | HTTP adapter, provider-result/stop-data/OSM/region-road-event gate v2 и immutable execution snapshots есть; полноценные segment-level terrain/access checks ещё впереди |
+| 2ГИС integration readiness | 7/10 | 8/10 | HTTP adapter, quota guards, contract tests, local real-key smoke и key separation есть; production rollout, vendor confirmation и mobile SDK остаются |
 | Данные каталога | 5/10 | 8/10 | Есть publish gate и импорт, но районность, freshness и trail metadata неполны |
 | Recommendations | 3/10 | 8/10 | Хорошая концептуальная записка, backend deck/feedback пока не реализованы |
 | Использование preferences | 5/10 | 8/10 | Профильные сигналы уже участвуют в match/generate как мягкий prior; feedback/decay/diversity ещё впереди |
 | Mobile UX | 6/10 | 8/10 | Сильный shell и visual system; route map/execution states отсутствуют |
 | Security/privacy | 6/10 | 8/10 | Baseline и security tests есть; точная геолокация, vendor keys и admin gaps требуют закрытия |
-| Наблюдаемость и operations | 5/10 | 8/10 | Deploy/health/runbook есть, продуктовые SLO, quota alerts и trace correlation нужно добавить |
+| Наблюдаемость и operations | 6/10 | 8/10 | Deploy/health/runbook и bounded retention job есть; product SLO, quota alerts и trace correlation нужно добавить |
 | API/documentation governance | 5/10 | 8/10 | OpenAPI генерируется, но нет стабильного snapshot/compatibility gate и единого source of truth |
 
 **Общая готовность плана:** примерно **6/10** до blueprint и **8/10** после

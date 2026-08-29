@@ -443,7 +443,7 @@ Acceptance: widget никогда не показывает live GPS или се
 
 ### Рекомендуемый спринтовый порядок
 
-**Sprint A — локальный срез выполнен:** GIS-01/02 без real-key smoke,
+**Sprint A — локальный срез выполнен:** GIS-01/02 с sanitized real-key smoke,
 PREF-01/02, OFF-01, provider-result часть GIS-03, GIS-04 и mobile geometry
 projection/quality notice.  
 **Sprint B — частично:** OSM independent gate v2 и GIS-06 dry-run сделаны;

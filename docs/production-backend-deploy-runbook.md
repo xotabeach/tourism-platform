@@ -102,6 +102,39 @@ ssh crimeatrip-test \
   "docker inspect --format='{{.Config.Image}}' crimeatrip-test-backend-1"
 ```
 
+## Snapshot retention maintenance
+
+Routing snapshots are immutable audit records. The cleanup command removes
+only rows older than the retention window that are neither referenced by a
+`RouteExecution` nor the newest revision of a route. It is bounded to 20
+batches per invocation and runs as a short-lived Compose task on the private
+network; it does not call 2GIS or any other external API.
+
+Install the reviewed platform checkout on the host and run the wrapper from a
+host-level cron (not inside the backend request process):
+
+```cron
+# 03:20 MSK / 00:20 UTC; cron MAILTO or syslog monitoring is the alert path.
+20 0 * * * /opt/crimeatrip-platform/scripts/run-route-snapshot-retention.sh >>/var/log/crimeatrip-retention.log 2>&1
+```
+
+The wrapper uses `flock` to prevent overlapping runs. A failed Compose task
+returns non-zero and emits a `crimeatrip-retention` syslog event, so the host
+cron/mail or log monitor can alert without receiving credentials. Before the
+first scheduled apply, run a dry-run manually from the backend image and
+review the count:
+
+```bash
+docker compose --env-file /opt/crimeatrip-test/.env \
+  --file /opt/crimeatrip-platform/deploy/test/compose.yaml \
+  --profile maintenance run --rm retention \
+  python scripts/purge_route_routing_snapshots.py
+```
+
+The default retention is 365 days. Adjust `--days`, `--batch-size` and
+`--max-batches` only through a reviewed command change; all values are bounded
+by the backend script.
+
 ## Rollback
 
 Read the previous `BACKEND_IMAGE` value from deployment output. To roll back,

@@ -203,6 +203,26 @@ services:
       - no-new-privileges:true
     logging: *default-logging
 
+  retention:
+    image: ${BACKEND_IMAGE}
+    profiles:
+      - maintenance
+    mem_limit: 192m
+    pids_limit: 128
+    environment: *backend-environment
+    command:
+      - python
+      - scripts/purge_route_routing_snapshots.py
+      - --apply
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
 volumes:
   caddy-data:
   caddy-config:

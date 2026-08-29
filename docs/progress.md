@@ -5,8 +5,9 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 9/9.5 (route execution + 2ГИС quality) — local
-HTTP smoke, OSM independent gate v2 и GIS-06 catalog dry-run сделаны;
-production flag, retention cron, карта и recommendations ещё впереди.
+HTTP smoke, OSM independent gate v2, GIS-06 catalog dry-run и retention
+maintenance wrapper сделаны; production flag, server cron installation, карта
+и recommendations ещё впереди.
 
 Единый детальный план текущего инкремента:
 [implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
@@ -43,7 +44,9 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   и retention scheduling/alerts ещё впереди;
   region road-event gate и DB-level mutation trigger уже включены миграциями
   `0040_snapshot_immutable`/`0041_snapshot_retention`; execution повторно
-  проверяет актуальные region-level closure events до старта.
+  проверяет актуальные region-level closure events до старта. Для deploy/test
+  добавлен maintenance Compose profile и host-level `flock` wrapper;
+  фактическая установка cron на сервере ещё не выполнена.
 - **Recommendations:** preferences quiz работает; первый мягкий preference
   signal подключён к backend match/generate и не меняет профиль. Backend deck,
   feedback, diversity caps, decay, lazy/cron generation и explainability ещё
@@ -63,7 +66,7 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   not_found (в т.ч. catalog meta 404 = пустой результат), 0 ошибок,
   `--apply` не запускали. Ключ в отчёт не попадал. Backend `e5471eb`.
 - **Release/deploy:** коммиты backend `e5471eb`, mobile `3a58872`, platform
-  `ddfff19` и root `31de9ec` отправлены в GitLab и зеркалированы в GitHub с
+  `2f7b06b` и root `bd2592f` отправлены в GitLab и зеркалированы в GitHub с
   `[ci skip]`. Backend образ `8433721` развёрнут direct deploy, миграции
   `0039`–`0041` применены, production `/health/ready` вернул `{"status":"ready"}`.
   Локальный sanitized smoke (`scripts/check_two_gis_routing.py`) 2026-08-29:
@@ -72,7 +75,7 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   ещё не получал: там нужно повторить `--configured-only`, затем smoke, без
   вывода значения.
 - **Следующий порядок:** production secret + optional `ROUTING_PROVIDER=2gis`
-  → retention scheduling/alerts → M1/M2 real map + execution → R1/R2
+  → установить retention cron/alerts → M1/M2 real map + execution → R1/R2
   recommendations → GIS-07 scheduled catalog refresh → hand-off/SDK.
 
 ### 2026-08-28 — 2ГИС, personalization prompt и L1 offline (первый срез)
@@ -102,7 +105,7 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   `flutter analyze --fatal-infos` — green, новые offline/prompt tests и
   существующие route/preferences/widget tests — green.
 - **Пока не сделано (после среза 28.08, smoke и GIS-06 29.08):** production-contour
-  smoke, retention scheduling/alerts, coastline/SRTM, GIS-07 scheduled
+  smoke, установка retention cron/alerts на сервере, coastline/SRTM, GIS-07 scheduled
   catalog refresh, Active Route/resume/outbox, native 2ГИС SDK/handoff и
   WidgetKit/Dynamic Island. Детальная очередь — в
   [расширенном плане](2gis-personalization-offline-plan-2026-08-28.md).
