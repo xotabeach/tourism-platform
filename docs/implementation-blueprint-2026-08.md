@@ -1127,10 +1127,11 @@ Tasks:
 - map uses immutable routing snapshot.
 
 **Mobile slice status (2026-08-29):** CTA, start/resume, active progress,
-stop completion, complete/cancel and conflict handling are implemented in
-`tourism-mobile` commit `56ba37a` against the existing execution API. The
-offline outbox, execution history, GPS/turn-by-turn and provider-native map
-remain open tasks.
+stop completion, complete/cancel, conflict handling, history via
+`GET /route-executions` and L2 secure outbox with idempotent replay against
+`client_event_id`/`occurred_at` are implemented. GPS/turn-by-turn and
+provider-native map remain open tasks. Backend ledger is migration `0043`
+(not yet deployed).
 
 ### R1 — Recommendation backend
 
@@ -1138,7 +1139,7 @@ remain open tasks.
 **IDs:** BE-FNC-04, RECO-01..08  
 **Status (2026-08-29):** v1 implemented — migration `0042`, ranker, today/skip
 API, lazy generation and dry-run host script. Metrics dashboards and host
-cron installation remain. Mobile R2 is not wired yet.
+cron installation remain. Mobile R2 is wired (`4fddf6d`/`cc5a6e2`).
 
 Tasks:
 
@@ -1154,16 +1155,19 @@ Tasks:
 ### R2 — Recommendation mobile
 
 **Owner:** mobile  
-**IDs:** MO-RECO-01..06
+**IDs:** MO-RECO-01..06  
+**Status (2026-08-29):** deck fetch, skip feedback and card explanation are
+wired; reset/opt-out and a dedicated “why this route” screen remain.
 
 Tasks:
 
-- fetch server deck;
-- send skip/feedback idempotently;
-- cache by local date but trust server;
-- empty/offline/retry states;
-- “why this route”, reset and opt-out controls;
-- preserve current deck after preference update.
+- [x] fetch server deck;
+- [x] send skip/feedback idempotently;
+- [ ] cache by local date but trust server;
+- [ ] empty/offline/retry states;
+- [x] card explanation from `explanation_code`;
+- [ ] “why this route” screen, reset and opt-out controls;
+- [ ] preserve current deck after preference update.
 
 ### B4 — Rewards and production hardening
 
@@ -1423,7 +1427,7 @@ Unresolved decisions must not be hidden inside implementation code.
 - [x] provider + stop-data + region road-event gate v1 protects generated
   drafts (full independent terrain/water/access gate remains);
 - [x] append-only routing snapshot with DB mutation guard and bounded cleanup
-  protects each execution; retention scheduling/alerts remain;
+  protects each execution; host retention cron installed 2026-08-29;
 - [ ] active execution starts, resumes, updates stops and appears in history;
 - [ ] retries and duplicate taps are idempotent;
 - [ ] recommendation deck reads preferences without mutating them;

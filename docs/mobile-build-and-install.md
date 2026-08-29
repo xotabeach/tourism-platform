@@ -22,7 +22,7 @@ flutter devices   # список телефонов / симуляторов / C
 
 | Ключ | Значения | По умолчанию | Правила |
 | --- | --- | --- | --- |
-| `APP_ENV` | `local` \| `test` \| `staging` \| `production` | debug → `local`; **release без флага → `production`** | Имя приложения в UI зависит от env |
+| `APP_ENV` | `local` \| `test` \| `staging` \| `production` (`prod` = то же) | debug → `local`; **release без флага → `production`** | Имя приложения в UI зависит от env. `prod` — алиас; иное значение в release даёт серый экран |
 | `DATA_SOURCE` | `mock` \| `api` | local → `mock`; иначе → `api` | `mock` **только** при `APP_ENV=local` |
 | `API_BASE_URL` | абсолютный URL без credentials | local → `http://localhost:8000`; иначе **обязателен** | Для `test`/`staging`/`production` только **HTTPS**; host не может быть `*.example.com` |
 
@@ -363,6 +363,7 @@ flutter run -d 00008140-001A7D0C2668801C \
 | --- | --- |
 | `API_BASE_URL is required` | Для non-local не передан URL |
 | `must use HTTPS` | Для test/staging/production нужен `https://` |
+| Серый экран сразу при запуске release | Часто `APP_ENV=prod` без алиаса или опечатка в env: в debug это красный `Unsupported APP_ENV`, в release — пустой ErrorWidget. Нужен `production` или `prod` |
 | `Mock data is allowed only in local` | `DATA_SOURCE=mock` с `APP_ENV=test` и т.п. |
 | iOS install fail после `--no-codesign` | Нужна подпись Xcode / `flutter run` без `--no-codesign` |
 | Android release без подписи | Нет `android/key.properties` или неверный `storeFile` |

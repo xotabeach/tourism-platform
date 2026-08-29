@@ -343,7 +343,7 @@ Offline/ошибка AI использует deterministic matcher; ответ �
 | --- | --- | --- |
 | L0 | offline login shell + last-known profile | следующий backend/mobile contract |
 | L1 | полный read-only route snapshot + stops + cached media | первый mobile slice уже есть |
-| L2 | active execution snapshot + idempotent outbox | после execution mobile |
+| L2 | active execution snapshot + idempotent outbox | сделано 2026-08-29: secure-storage snapshot/outbox на клиенте и `client_event_id`/`occurred_at` ledger в API; не задеплоено |
 | L3 | map tiles/places/routing territories 2ГИС | только после SDK/offline license decision |
 
 L1 не называется «офлайн-навигацией»: это открытие сохранённого маршрута без
@@ -425,17 +425,17 @@ Acceptance: widget никогда не показывает live GPS или се
 | GIS-01 | P0 | backend/platform | canonical HTTP key, expiry/quota registry, redaction | сразу |
 | GIS-02 | P0 | backend | adapter contract tests + local real-key smoke 2026-08-29; production smoke pending | GIS-01 |
 | GIS-03 | P0 | backend/platform | provider-result + stop-data + OSM v2 + region road-event; coastline/SRTM remain | GIS-02 |
-| GIS-04 | P1 | backend | geometry/routing/freshness/time/warnings, append-only revision snapshot linkage, DB mutation trigger и bounded retention cleanup сделаны; scheduling/alerts остаются | GIS-03 |
+| GIS-04 | P1 | backend | geometry/routing/freshness/time/warnings, snapshots, DB mutation trigger, retention cleanup и host cron 2026-08-29; dashboard alerts остаются | GIS-03 |
 | GIS-05 | P1 | mobile | geometry projection + quality notice + Active Route v0 сделаны; real map/attribution/history/L2 outbox остаются | GIS-04 |
 | GIS-06 | P1 | backend | safe 2GIS catalog dry-run/reconciliation | GIS-01 |
 | GIS-07 | P1 | backend/platform | scheduled stale refresh + quota alerts | GIS-06 |
 | PREF-01 | P0 | mobile | prompt + lightweight quiz | current API (done first slice) |
 | PREF-02 | P0 | backend | bounded preferences scoring (done first slice) | PREF-01 |
 | RECO-01 | P1 | backend | feedback/deck tables and deterministic ranker (done 2026-08-29) | GIS-03 |
-| RECO-02 | P1 | mobile | deck, explanations, skip/reset/opt-out | RECO-01 |
-| AI-01 | P1 | backend | AI intent → approved candidates only | GIS-03, RECO-01 |
+| RECO-02 | P1 | mobile | deck + explanations + skip wired 2026-08-29; reset/opt-out remain | RECO-01 |
+| AI-01 | P1 | backend | AI intent → approved candidates only (done 2026-08-29) | GIS-03, RECO-01 |
 | OFF-01 | P0 | mobile | L1 route snapshots/list/clear (done first slice) | current route detail |
-| OFF-02 | P1 | backend+mobile | L0 offline session and L2 execution outbox | execution API |
+| OFF-02 | P1 | backend+mobile | L2 execution outbox + idempotent sync done 2026-08-29 (not deployed); L0 offline session remains | execution API |
 | OFF-03 | P2 | mobile/platform | 2GIS territory/map offline | SDK/license decision |
 | HAND-01 | P1 | mobile | vendor-confirmed 2GIS hand-off + web fallback | vendor docs |
 | APPLE-01 | P2 | mobile | WidgetKit/App Group snapshot | active execution |
@@ -446,11 +446,13 @@ Acceptance: widget никогда не показывает live GPS или се
 **Sprint A — локальный срез выполнен:** GIS-01/02 с sanitized real-key smoke,
 PREF-01/02, OFF-01, provider-result часть GIS-03, GIS-04 и mobile geometry
 projection/quality notice.  
-**Sprint B — частично:** OSM independent gate v2 и GIS-06 dry-run сделаны;
-остаются coastline/SRTM, retention scheduling/alerts и quality/admin review.  
-**Sprint C — частично:** GIS-05 geometry/quality notice, Active Route v0
-и RECO-01 сделаны; остаются real map, history и L2 outbox.  
-**Sprint D:** RECO-02, AI-01, scheduled enrichment and quota dashboards.  
+**Sprint B — частично:** OSM independent gate v2, GIS-06 dry-run и
+retention host cron сделаны; остаются coastline/SRTM и quality/admin review.  
+**Sprint C — частично:** GIS-05 geometry/quality notice, Active Route v0,
+RECO-01, history и L2 outbox сделаны; остаётся real map.  
+**Sprint D — частично:** AI-01 approved candidate DTOs и RECO-02 deck/
+explanations сделаны; остаются reset/opt-out, scheduled enrichment и quota
+dashboards.  
 **Sprint E:** vendor hand-off, SDK spike, WidgetKit/Live Activity decision.
 
 ## 9. Definition of Done
@@ -473,7 +475,9 @@ projection/quality notice.
 - [x] catalog enrichment starts dry-run, stores provenance and never auto-publishes;
 - [x] explicit preferences affect ranking softly and explainably;
 - [x] deck feedback, decay, caps and exploration pass property fixtures;
-- [ ] AI sees only approved candidate DTOs.
+- [x] AI sees only approved candidate DTOs;
+- [x] execution mutations are idempotent by client event id and bound the
+  client-reported time; terminal conflicts are marked non-retryable.
 
 ### Mobile
 
@@ -482,9 +486,9 @@ projection/quality notice.
 - [x] route snapshot can be saved, opened without network and removed;
 - [x] logout removes local account content;
 - [x] route detail projects provider geometry and explains quality status;
-- [ ] Active Route starts/resumes/updates against execution API;
+- [x] Active Route starts/resumes/updates against execution API;
 - [ ] map renders verified provider geometry with attribution;
-- [ ] offline state is explicit and does not claim turn-by-turn;
+- [x] offline state is explicit and does not claim turn-by-turn;
 - [ ] 2GIS hand-off has documented fallback and device smoke;
 - [ ] widgets/Live Activity show only minimal stale-safe snapshot.
 
@@ -524,9 +528,11 @@ projection/quality notice.
    Stop-level v2 сделан; береговая геометрия/SRTM остаются.
 5. ~~Реализовать dry-run `enrich_places_2gis.py`, затем проверить 20 точек вручную.~~
    Скрипт и локальный dry-run 20 точек 2026-08-29; `--apply` не запускали.
-6. Реализовать Active Route/resume и L2 outbox.
+6. ~~Реализовать Active Route/resume и L2 outbox.~~ Сделано 2026-08-29
+   (mobile secure outbox + backend `0043` idempotent sync); остаётся L0
+   offline session и deploy.
 7. ~~Добавить recommendation deck/feedback с diversity property tests.~~
-   Backend v1 2026-08-29; mobile R2 остаётся.
+   Backend v1 и mobile deck/explanations 2026-08-29; остаются reset/opt-out.
 8. После vendor confirmation — hand-off; отдельно Full SDK/offline.
 9. Только после execution API — WidgetKit/Dynamic Island.
 

@@ -310,7 +310,8 @@ experimental.
 
 **Статус:** backend v0 реализован; routing snapshot linkage добавлен; mobile
 Active Route v0 (start/resume, stop completion, complete/cancel) подключён к
-API; history UI, offline outbox и reward policy остаются в работе. См.
+API; history UI и L2 offline outbox с idempotent sync (миграция `0043`)
+сделаны, deploy остаётся; reward policy в работе. См.
 [blueprint](implementation-blueprint-2026-08.md).
 
 | Область | Задачи |
@@ -335,8 +336,8 @@ API; history UI, offline outbox и reward policy остаются в работ�
 | --- | --- |
 | Trial / access | Зафиксировать HTTP demo key 2ГИС, срок и квоты; Mobile SDK проверять отдельно — demo key для SDK не подходит, нужна отдельная subscription key и лицензия |
 | Backend | **Первый срез сделан:** `TwoGisRoutingProvider` с `driving`/`walking`, detailed geometry, filters, typed errors, timeouts, altitude normalization, provider-result/stop-data/OSM/region-road-event quality gate v2, append-only routing snapshots и DB mutation trigger. Локальный sanitized real-key smoke пройден; остаются production smoke/rollout, полный segment-level terrain/access gate, bounded retry/circuit breaker и cache/freshness; ключ только в secret manager/env |
-| API contract | **Сделано:** `provider`, `synthetic`, GeoJSON geometry, movement/visit/total time, altitude, quality status и warnings; fallback на synthetic явно помечен; execution API получает revision-linked snapshot. Bounded retention cleanup, maintenance Compose profile и host-cron wrapper добавлены; остаются настройка расписания/alert routing на сервере |
-| Mobile | **Сделано:** provider geometry projection, quality notice, L1 read-only offline snapshot и Active Route v0 (start/resume, stop completion, complete/cancel). Real 2ГИС map/attribution и Native SDK/handoff выбираются только после отдельной subscription/licence проверки; history/outbox остаются в работе |
+| API contract | **Сделано:** `provider`, `synthetic`, GeoJSON geometry, movement/visit/total time, altitude, quality status и warnings; fallback на synthetic явно помечен; execution API получает revision-linked snapshot. Bounded retention cleanup, maintenance Compose profile, host-cron wrapper и crontab (`20 0 * * *` UTC) установлены 2026-08-29 |
+| Mobile | **Сделано:** provider geometry projection, quality notice, L1 read-only offline snapshot, Active Route v0 (start/resume, stop completion, complete/cancel), history и L2 outbox с idempotency key. Real 2ГИС map/attribution и Native SDK/handoff выбираются только после отдельной subscription/licence проверки |
 | Observability | Метрики latency/error/quota, redaction ключей, budget alert и health-check без утечки credentials |
 | Tests | Mock HTTP contract tests, timeout/fallback, key-redaction и iOS/Android map smoke tests |
 | Quality gate | Не принимать прямые линии: provider-result, stop-data и region-road-event gate блокируют отсутствующую geometry, противоречия режима, жёсткие закрытия/неподходящие точки; execution повторно блокирует актуальное closure; water crossing и полный terrain/access контур остаются отдельным release gate |
@@ -358,9 +359,9 @@ offline-контур, не превращая рекомендации в filter
 | Область | Задачи |
 | --- | --- |
 | Mobile UX | Одноразовый prompt после API-входа; лёгкий quiz с reset/clear; выход из аккаунта; список и очистка скачанных snapshots |
-| Backend | Мягкий preference signal и recommendation deck/feedback v1 сделаны; host cron для ночной генерации ещё не установлен; mobile R2 не подключён |
+| Backend | Мягкий preference signal, recommendation deck/feedback v1, AI-01 approved candidate DTOs и OFF-02 idempotent execution sync (`0043`) сделаны; host cron колоды ещё не установлен; OFF-02 не задеплоен |
 | Data | Dry-run 2ГИС Places/Geocoder reconciliation, provenance, confidence, stale status, manual review; никаких auto-publish и blind overwrite |
-| Offline | L0 bounded offline session, L1 snapshots, L2 execution outbox; L3 map territories только после SDK/licence decision |
+| Offline | L1 snapshots и L2 execution outbox сделаны; L0 bounded offline session — следующий шаг; L3 map territories только после SDK/licence decision |
 | Apple | App Group snapshot → WidgetKit → Live Activity/Dynamic Island после Active Route и privacy review |
 | Handoff | Vendor-confirmed 2ГИС universal/app link с web fallback; не передавать tokens/PII |
 | Acceptance | Пользователь понимает, почему показан маршрут; просмотр не меняет профиль; offline snapshot открывается/удаляется; logout очищает локальные данные; stale/unknown явно маркируются |

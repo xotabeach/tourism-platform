@@ -5,9 +5,10 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 9/9.5/9.6 — local HTTP smoke, OSM independent
-gate v2, GIS-06 catalog dry-run, retention wrapper, mobile Active Route v0
-и backend recommendations v1 сделаны; production flag, server cron,
-real map, mobile deck (R2) и coastline/SRTM ещё впереди.
+gate v2, GIS-06 catalog dry-run, retention wrapper, mobile Active Route v0,
+backend recommendations v1, mobile deck (R2) и L2 execution outbox
+(mobile + backend idempotent sync) сделаны; production 2GIS flag,
+real map и coastline/SRTM ещё впереди.
 
 Единый детальный план текущего инкремента:
 [implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
@@ -29,7 +30,7 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   provider geometry. По умолчанию `stub`/synthetic остаётся для local/test.
   Локальный sanitized smoke 2026-08-29 подтвердил живой HTTP key
   (`configured=true`, алиас `TWO_GIS_API_KEY`); `ROUTING_PROVIDER` не
-  переключали. Production-контур и retention scheduling/alerts ещё впереди.
+  переключали. Production-контур 2ГИС ещё впереди.
 - **2ГИС:** ключ должен использоваться как server-side HTTP API key. Наличие
   и имя переменной в окружении запуска нужно подтвердить перед реализацией
   adapter только по имени/наличию, не выводя значение. Demo key не
@@ -41,12 +42,17 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   sac_scale/smoothness) отбрасывают закрытые и запрещённые точки; двухточечная
   длинная линия помечается как straight-line. RouteDetail отдаёт GeoJSON,
   provenance, breakdown времени, высоты и warnings. Береговая геометрия/SRTM
-  и retention scheduling/alerts ещё впереди;
+  и coastline/SRTM ещё впереди;
   region road-event gate и DB-level mutation trigger уже включены миграциями
   `0040_snapshot_immutable`/`0041_snapshot_retention`; execution повторно
   проверяет актуальные region-level closure events до старта. Для deploy/test
   добавлен maintenance Compose profile и host-level `flock` wrapper;
-  фактическая установка cron на сервере ещё не выполнена.
+  retention cron на сервере установлен 2026-08-29 (`20 0 * * *` UTC).
+- **AI planning (AI-01):** инструменты чата отдают только quality-approved
+  place DTO (published, не closed/rejected/merged, OSM `access` hard gate,
+  kids/pets из constraints). В карточке `freshness_status` и
+  `data_quality_status`; payload, координаты и часы работы в модель не
+  попадают. Mobile R2 не затронут.
 - **Recommendations (R1 v1):** `GET /routes/recommendations/today` и
   `POST /routes/{id}/recommendation-feedback` (только `skip`, idempotent
   `client_event_id`). Миграция `0042`: append-only feedback и дневная колода
@@ -55,15 +61,32 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   14 дней, category/region caps, exploration slots и `explanation_code`.
   Ленивая генерация при первом запросе; host-скрипт
   `scripts/generate_route_recommendations.py` dry-run по умолчанию. Mobile
-  колода на этот API ещё не переведена.
+  колода переведена на этот API (`tourism-mobile` `4fddf6d`/`cc5a6e2`):
+  карточки показывают причину рекомендации, свайп-скип отправляет
+  `client_event_id`.
+- **Offline execution sync (OFF-02, L2):** мутации
+  `/route-executions/{id}/stops/{stop_id}/complete`, `/complete` и `/cancel`
+  принимают необязательный `{client_event_id, occurred_at}`. Миграция `0043`
+  добавляет append-only `route_execution_events`: повтор с тем же
+  `client_event_id` возвращает текущее состояние и `sync.replayed=true`,
+  не применяя действие дважды. Клиентское время не доверенное: будущее
+  (> 5 минут skew) и старше 30 дней отклоняются `422`, значение раньше старта
+  прохождения зажимается до `started_at`, в ledger остаётся и сырое
+  `occurred_at`, и зажатое `effective_at`. Конфликты на завершённом
+  прохождении отдают `details.retryable=false`, чтобы клиент удалил запись из
+  очереди, а не повторял её бесконечно. Mobile outbox (`tourism-mobile`
+  `a37cf24` + текущий срез) шлёт ключ и момент действия, дропает
+  non-retryable записи и ограничивает число попыток.
 - **Mobile first slice:** prompt для незаполненных API-preferences, улучшенный
   quiz, L1 read-only offline snapshots (сохранить/открыть/удалить), список
   скачанных маршрутов и logout с очисткой локальных данных реализованы.
   **Active Route v0** (`tourism-mobile` `630efad`) теперь подключён к
   route-executions API: start/resume, completion остановок, complete/cancel,
   conflict с другим активным маршрутом, quality warnings и честные error
-  states. История завершённых прохождений, L2 offline outbox/idempotent retry,
-  GPS/real map и native 2ГИС surfaces остаются следующими срезами.
+  states. История завершённых прохождений (`b970333`), персонализированная
+  колода (`4fddf6d`/`cc5a6e2`) и L2 execution outbox с idempotent retry
+  (`a37cf24` + текущий срез) подключены. GPS/real map, native 2ГИС surfaces
+  и L0 offline session остаются следующими срезами.
 - **2ГИС catalog (GIS-06):** `scripts/enrich_places_2gis.py` dry-run по
   умолчанию. Сверяет bounded batch с Places API (`q` + точка + радиус),
   считает confidence, пишет sanitized JSON (`matched` / `ambiguous` /
@@ -84,12 +107,15 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   walking Ялта→Ливадия 4961 м / 300 точек; driving Ялта→Алупка 19646 м /
   813 точек. Ключ и WKT в лог не попадали. Production-контейнер этот ключ
   ещё не получал: там нужно повторить `--configured-only`, затем smoke, без
-  вывода значения. Retention Compose/wrapper переданы в `/opt/crimeatrip-test`,
-  но cron на сервере пока не установлен; handoff для Cursor — в
+  вывода значения. Retention cron установлен 2026-08-29 (`20 0 * * *` UTC,
+  wrapper `/opt/crimeatrip-test/run-route-snapshot-retention.sh`); dry-run
+  перед установкой: scanned=0. Handoff — в
   [cursor-backend-handoff-2026-08-29.md](cursor-backend-handoff-2026-08-29.md).
-- **Следующий порядок:** production secret + optional `ROUTING_PROVIDER=2gis`
-  → установить retention cron/alerts → R2 mobile deck на новый API →
-  M1/M2 real map → GIS-07 / coastline-SRTM → hand-off/SDK.
+- **Не задеплоено:** миграция `0043` и OFF-02 backend-контракт применены
+  только локально; production остаётся на `0042` до отдельного deploy-окна.
+- **Следующий порядок:** deploy OFF-02 (`0043`) → production secret +
+  optional `ROUTING_PROVIDER=2gis` → L0 offline session → M1/M2 real map →
+  GIS-07 / coastline-SRTM → hand-off/SDK.
 
 ### 2026-08-28 — 2ГИС, personalization prompt и L1 offline (первый срез)
 
@@ -117,10 +143,10 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   — green; mobile
   `flutter analyze --fatal-infos` — green, новые offline/prompt tests и
   существующие route/preferences/widget tests — green.
-- **Пока не сделано (после среза 28.08, smoke, GIS-06 и R1 29.08):** production-contour
-  smoke, установка retention cron/alerts на сервере, coastline/SRTM, GIS-07 scheduled
-  catalog refresh, mobile R2 deck, execution history/outbox, native 2ГИС SDK/handoff и
-  WidgetKit/Dynamic Island. Детальная очередь — в
+- **Пока не сделано (после среза 28.08, smoke, GIS-06, R1 и retention cron 29.08):**
+  production-contour smoke, coastline/SRTM, GIS-07 scheduled catalog refresh,
+  mobile R2 deck, L2 outbox, native 2ГИС SDK/handoff и WidgetKit/Dynamic Island.
+  Детальная очередь — в
   [расширенном плане](2gis-personalization-offline-plan-2026-08-28.md).
 
 **Ревью 2026-08-25 — фазы 0–6 закрыты и смержены в `main` 2026-08-26.**
@@ -223,6 +249,32 @@ dry-run cron script) сделан 2026-08-29; mobile ещё ходит в общ
 **Последнее обновление:** 2026-08-29
 
 ## Changelog
+
+### 2026-08-29 — OFF-02 L2: idempotent offline execution sync
+
+- Миграция `0043_route_execution_events`: append-only ledger действий
+  прохождения с `UNIQUE (user_id, client_event_id)`, `occurred_at`,
+  зажатым `effective_at` и флагом `applied`.
+- Мутации execution принимают необязательный `{client_event_id, occurred_at}`;
+  повтор возвращает текущее состояние и `sync.replayed=true` вместо второго
+  применения. Тело остаётся необязательным, старые клиенты не ломаются.
+- Клиентское время валидируется: будущее сверх 5 минут skew и старше 30 дней —
+  `422`; момент раньше `started_at` зажимается до старта прохождения.
+- Конфликт на завершённом/отменённом прохождении и незакрытые обязательные
+  остановки помечены `details.retryable=false`, чтобы offline-очередь удаляла
+  такие записи вместо бесконечных повторов.
+- Mobile: outbox отправляет ключ и момент действия, у записей ограничено
+  число попыток, non-retryable и not-found записи дропаются; `RejectedFailure`
+  отделён от сетевых ошибок в `api_guard`.
+- Проверки: backend ruff/mypy/pytest (в т.ч. 5 новых live integration тестов
+  на replay/bounds/ownership), mobile analyze + tests. Deploy не делали.
+
+### 2026-08-29 — AI-01 approved candidate DTOs
+
+- Planning tools и prefetch hints больше не отдают draft/closed/rejected
+  места и OSM `access=no/private/military`.
+- DTO allowlist: `place_id`, title, subtitle, freshness, data_quality;
+  details без координат, часов и `source_payload`.
 
 ### 2026-08-29 — recommendations v1 (R1)
 
