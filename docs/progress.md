@@ -7,8 +7,8 @@
 **Текущая фаза:** Phase 9/9.5/9.6 — local HTTP smoke, OSM independent
 gate v2, GIS-06 catalog dry-run, retention wrapper, mobile Active Route v0,
 backend recommendations v1, mobile deck (R2) и L2 execution outbox
-(mobile + backend idempotent sync) сделаны; production 2GIS flag,
-real map и coastline/SRTM ещё впереди.
+(mobile + backend idempotent sync) сделаны; Static API preview proxy deployed,
+production 2GIS flag, interactive SDK map и coastline/SRTM ещё впереди.
 
 Единый детальный план текущего инкремента:
 [implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
@@ -24,6 +24,14 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   append-only routing revisions: execution фиксирует fingerprint, geometry,
   время, высоты, provider и quality status на момент старта. Mobile Active
   Route v0 подключён; история прохождений ещё нет.
+
+- **2GIS Static API preview:** backend `8594372` добавил публичные preview
+  endpoints для опубликованных маршрутов и мест. Ключ остаётся server-side;
+  PNG ограничен по размеру, ответы защищены `ETag`/`Cache-Control`, добавлен
+  bounded in-process cache на 128 изображений. Образ развернут direct deploy,
+  миграция `0043` применена, readiness зелёный. Production env пока не
+  подтверждён с `TWO_GIS_HTTP_API_KEY`, поэтому реальный PNG smoke выполняется
+  после безопасной проверки наличия секрета.
 - **Deterministic Route Builder:** match/generate API и persistence существуют;
   добавлен provider-neutral `TwoGisRoutingProvider` (walking/driving,
   detailed geometry, filters, typed errors, altitude normalization) и сохранение
