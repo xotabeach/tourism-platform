@@ -66,14 +66,17 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   not_found (в т.ч. catalog meta 404 = пустой результат), 0 ошибок,
   `--apply` не запускали. Ключ в отчёт не попадал. Backend `e5471eb`.
 - **Release/deploy:** коммиты backend `e5471eb`, mobile `3a58872`, platform
-  `8f7535a` и root `3ca77fc` отправлены в GitLab и зеркалированы в GitHub с
-  `[ci skip]`. Backend образ `8433721` развёрнут direct deploy, миграции
+  `f7d249f` и root `0606568` отправлены в GitLab и зеркалированы в GitHub с
+  `[ci skip]`. Backend образ `e5471eb9bc2e971e45786442c0c3fa212411f086`
+  развёрнут direct deploy, миграции
   `0039`–`0041` применены, production `/health/ready` вернул `{"status":"ready"}`.
   Локальный sanitized smoke (`scripts/check_two_gis_routing.py`) 2026-08-29:
   walking Ялта→Ливадия 4961 м / 300 точек; driving Ялта→Алупка 19646 м /
   813 точек. Ключ и WKT в лог не попадали. Production-контейнер этот ключ
   ещё не получал: там нужно повторить `--configured-only`, затем smoke, без
-  вывода значения.
+  вывода значения. Retention Compose/wrapper переданы в `/opt/crimeatrip-test`,
+  но cron на сервере пока не установлен; handoff для Cursor — в
+  [cursor-backend-handoff-2026-08-29.md](cursor-backend-handoff-2026-08-29.md).
 - **Следующий порядок:** production secret + optional `ROUTING_PROVIDER=2gis`
   → установить retention cron/alerts → M1/M2 real map + execution → R1/R2
   recommendations → GIS-07 scheduled catalog refresh → hand-off/SDK.

@@ -115,11 +115,15 @@ host-level cron (not inside the backend request process):
 
 ```cron
 # 03:20 MSK / 00:20 UTC; cron MAILTO or syslog monitoring is the alert path.
-20 0 * * * RETENTION_DEPLOY_DIR=/opt/crimeatrip-test RETENTION_ENV_FILE=/opt/crimeatrip-test/.env /opt/crimeatrip-test/run-route-snapshot-retention.sh >>/var/log/crimeatrip-retention.log 2>&1
+20 0 * * * RETENTION_DEPLOY_DIR=/opt/crimeatrip-test \
+  RETENTION_ENV_FILE=/opt/crimeatrip-test/.env \
+  /opt/crimeatrip-test/run-route-snapshot-retention.sh \
+  >>/var/log/crimeatrip-retention.log 2>&1
 ```
 
 The wrapper accepts an explicit deploy directory/env path so it can live next
-to the server's existing Compose file. It uses `flock` to prevent overlapping runs. A failed Compose task
+to the server's existing Compose file. It uses `flock` to prevent overlapping
+runs. A failed Compose task
 returns non-zero and emits a `crimeatrip-retention` syslog event, so the host
 cron/mail or log monitor can alert without receiving credentials. Before the
 first scheduled apply, run a dry-run manually from the backend image and
