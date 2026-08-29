@@ -8,8 +8,8 @@ set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-DEPLOY_DIR="${PROJECT_ROOT}/deploy/test"
-ENV_FILE="${TEST_ENV_FILE:-${DEPLOY_DIR}/.env}"
+DEPLOY_DIR="${RETENTION_DEPLOY_DIR:-${PROJECT_ROOT}/deploy/test}"
+ENV_FILE="${RETENTION_ENV_FILE:-${TEST_ENV_FILE:-${DEPLOY_DIR}/.env}}"
 LOCK_FILE="${RETENTION_LOCK_FILE:-/tmp/crimeatrip-route-snapshot-retention.lock}"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
@@ -45,4 +45,3 @@ if (( status != 0 )); then
     "route snapshot retention failed with exit code ${status}" 2>/dev/null || true
   exit "${status}"
 fi
-
