@@ -7,22 +7,28 @@
 ## Граница текущей работы
 
 Основной фокус текущего инкремента перенесён на mobile. Mobile Active Route v0
-уже реализован в `tourism-mobile` (`630efad`): start/resume, completion
-остановок, complete/cancel и обработка конфликта активного прохождения. Cursor
+уже реализован в `tourism-mobile` (`b970333`): start/resume, completion
+остановок, complete/cancel, история через `GET /route-executions` и обработка
+конфликта активного прохождения. Cursor
 может продолжать backend-очередь ниже, не переделывая этот срез и не меняя
-production без отдельного операционного решения. История, L2 offline outbox,
-реальная карта/2ГИС SDK и Apple surfaces пока не считаются завершёнными.
+production без отдельного операционного решения. L2 offline outbox,
+реальная карта/2ГИС SDK и Apple surfaces пока не считаются завершёнными;
+history UI теперь читает backend list endpoint, но отдельная аналитика и
+глубокая history pagination остаются вне текущего среза.
 
 ## Последнее подтверждённое состояние
 
 - Backend `main`: `e5471eb` (`2GIS Places` safe dry-run + test fixture fix).
+  Recommendations v1 (**R1**) лежит локально, не закоммичен: миграция `0042`,
+  ranker, `GET /routes/recommendations/today`, skip feedback.
 - Production image: `e5471eb9bc2e971e45786442c0c3fa212411f086`, direct SSH deploy
-  завершён, container healthy, migrations `0039`–`0041` применены.
+  завершён, container healthy, migrations `0039`–`0041` применены (`0042` только
+  локально).
 - `ROUTING_PROVIDER` в production не переключён и остаётся `stub`.
 - Server-side 2GIS key в deploy environment на момент проверки отсутствовал;
   значение ключа не читать, не печатать и не коммитить.
-- Последний backend gate: 471 passed, 1 skipped, coverage 75.66%; Ruff,
-  MyPy и pip-audit зелёные.
+- Последний backend gate (после R1): 484 passed, 1 skipped, coverage 75.57%;
+  Ruff, MyPy и pip-audit зелёные.
 - Вызовы 2ГИС после локального smoke не выполнялись. Demo quota ограничена.
 
 ## Что уже сделано
@@ -48,8 +54,10 @@ production без отдельного операционного решения
 3. Закрыть segment-level terrain/access gate: coastline/SRTM, тропы,
    переправы и актуальность дорог; OSM stop tags не являются полным доказательством
    безопасности всего пути.
-4. Реализовать recommendations v1: feedback/deck tables, bounded scoring,
-   cooldown, diversity/exploration, lazy generation и host cron.
+4. ~~Реализовать recommendations v1: feedback/deck tables, bounded scoring,
+   cooldown, diversity/exploration, lazy generation и host cron.~~ Сделано
+   2026-08-29 (`0042`, API, dry-run script). Cron на сервере не ставили;
+   mobile R2 не подключён.
 5. Сделать GIS-07 scheduled catalog refresh только после ручного review
    dry-run и quota budget.
 
