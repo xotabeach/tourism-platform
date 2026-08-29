@@ -32,6 +32,10 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   миграция `0043` применена, readiness зелёный. Production env пока не
   подтверждён с `TWO_GIS_HTTP_API_KEY`, поэтому реальный PNG smoke выполняется
   после безопасной проверки наличия секрета.
+- **Mobile route execution navigation:** исправлен GoRouter path mismatch,
+  из-за которого переход `/routes/{id}/execution` иногда завершался ошибкой
+  `no routes for location`. Execution screen теперь вложен в route-details,
+  а не в каталог мест; route-details regression tests зелёные.
 - **Deterministic Route Builder:** match/generate API и persistence существуют;
   добавлен provider-neutral `TwoGisRoutingProvider` (walking/driving,
   detailed geometry, filters, typed errors, altitude normalization) и сохранение
