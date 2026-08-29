@@ -66,7 +66,7 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   not_found (в т.ч. catalog meta 404 = пустой результат), 0 ошибок,
   `--apply` не запускали. Ключ в отчёт не попадал. Backend `e5471eb`.
 - **Release/deploy:** коммиты backend `e5471eb`, mobile `3a58872`, platform
-  `2f7b06b` и root `bd2592f` отправлены в GitLab и зеркалированы в GitHub с
+  `8f7535a` и root `3ca77fc` отправлены в GitLab и зеркалированы в GitHub с
   `[ci skip]`. Backend образ `8433721` развёрнут direct deploy, миграции
   `0039`–`0041` применены, production `/health/ready` вернул `{"status":"ready"}`.
   Локальный sanitized smoke (`scripts/check_two_gis_routing.py`) 2026-08-29:
