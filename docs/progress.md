@@ -5,9 +5,9 @@
 обновляй этот файл: статус, что сделано, что дальше, блокеры.
 
 **Текущая фаза:** Phase 9/9.5 (route execution + 2ГИС quality) — local
-HTTP smoke, OSM independent gate v2, GIS-06 catalog dry-run и retention
-maintenance wrapper сделаны; production flag, server cron installation, карта
-и recommendations ещё впереди.
+HTTP smoke, OSM independent gate v2, GIS-06 catalog dry-run, retention
+maintenance wrapper и mobile Active Route v0 сделаны; production flag, server
+cron installation, real map и recommendations ещё впереди.
 
 Единый детальный план текущего инкремента:
 [implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
@@ -53,8 +53,12 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   не реализованы.
 - **Mobile first slice:** prompt для незаполненных API-preferences, улучшенный
   quiz, L1 read-only offline snapshots (сохранить/открыть/удалить), список
-  скачанных маршрутов и logout с очисткой локальных данных реализованы;
-  Active Route/resume/outbox и реальная карта ещё в работе.
+  скачанных маршрутов и logout с очисткой локальных данных реализованы.
+  **Active Route v0** (`tourism-mobile` `630efad`) теперь подключён к
+  route-executions API: start/resume, completion остановок, complete/cancel,
+  conflict с другим активным маршрутом, quality warnings и честные error
+  states. История завершённых прохождений, L2 offline outbox/idempotent retry,
+  GPS/real map и native 2ГИС surfaces остаются следующими срезами.
 - **2ГИС catalog (GIS-06):** `scripts/enrich_places_2gis.py` dry-run по
   умолчанию. Сверяет bounded batch с Places API (`q` + точка + радиус),
   считает confidence, пишет sanitized JSON (`matched` / `ambiguous` /
@@ -65,7 +69,7 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   Локальный прогон 20 точек 2026-08-29: 1 matched, 4 ambiguous, 15
   not_found (в т.ч. catalog meta 404 = пустой результат), 0 ошибок,
   `--apply` не запускали. Ключ в отчёт не попадал. Backend `e5471eb`.
-- **Release/deploy:** коммиты backend `e5471eb`, mobile `3a58872`, platform
+- **Release/deploy:** коммиты backend `e5471eb`, mobile `56ba37a`, platform
   `f7d249f` и root `0606568` отправлены в GitLab и зеркалированы в GitHub с
   `[ci skip]`. Backend образ `e5471eb9bc2e971e45786442c0c3fa212411f086`
   развёрнут direct deploy, миграции

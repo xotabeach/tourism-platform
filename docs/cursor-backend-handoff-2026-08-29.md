@@ -4,6 +4,15 @@
 по [implementation-plan.md](implementation-plan.md) и
 [2GIS/personalization/offline plan](2gis-personalization-offline-plan-2026-08-28.md).
 
+## Граница текущей работы
+
+Основной фокус текущего инкремента перенесён на mobile. Mobile Active Route v0
+уже реализован в `tourism-mobile` (`630efad`): start/resume, completion
+остановок, complete/cancel и обработка конфликта активного прохождения. Cursor
+может продолжать backend-очередь ниже, не переделывая этот срез и не меняя
+production без отдельного операционного решения. История, L2 offline outbox,
+реальная карта/2ГИС SDK и Apple surfaces пока не считаются завершёнными.
+
 ## Последнее подтверждённое состояние
 
 - Backend `main`: `e5471eb` (`2GIS Places` safe dry-run + test fixture fix).

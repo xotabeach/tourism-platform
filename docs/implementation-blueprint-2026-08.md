@@ -1126,6 +1126,12 @@ Tasks:
 - honest manual confirmation copy;
 - map uses immutable routing snapshot.
 
+**Mobile slice status (2026-08-29):** CTA, start/resume, active progress,
+stop completion, complete/cancel and conflict handling are implemented in
+`tourism-mobile` commit `56ba37a` against the existing execution API. The
+offline outbox, execution history, GPS/turn-by-turn and provider-native map
+remain open tasks.
+
 ### R1 — Recommendation backend
 
 **Owner:** backend/data  

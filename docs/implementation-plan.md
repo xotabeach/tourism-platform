@@ -309,7 +309,9 @@ experimental.
 **Цель:** старт прохождения, visited/skipped stops, история.
 
 **Статус:** backend v0 реализован; routing snapshot linkage добавлен; mobile
-journey, history UI и reward policy остаются в работе. См. [blueprint](implementation-blueprint-2026-08.md).
+Active Route v0 (start/resume, stop completion, complete/cancel) подключён к
+API; history UI, offline outbox и reward policy остаются в работе. См.
+[blueprint](implementation-blueprint-2026-08.md).
 
 | Область | Задачи |
 | --- | --- |
@@ -334,7 +336,7 @@ journey, history UI и reward policy остаются в работе. См. [bl
 | Trial / access | Зафиксировать HTTP demo key 2ГИС, срок и квоты; Mobile SDK проверять отдельно — demo key для SDK не подходит, нужна отдельная subscription key и лицензия |
 | Backend | **Первый срез сделан:** `TwoGisRoutingProvider` с `driving`/`walking`, detailed geometry, filters, typed errors, timeouts, altitude normalization, provider-result/stop-data/OSM/region-road-event quality gate v2, append-only routing snapshots и DB mutation trigger. Локальный sanitized real-key smoke пройден; остаются production smoke/rollout, полный segment-level terrain/access gate, bounded retry/circuit breaker и cache/freshness; ключ только в secret manager/env |
 | API contract | **Сделано:** `provider`, `synthetic`, GeoJSON geometry, movement/visit/total time, altitude, quality status и warnings; fallback на synthetic явно помечен; execution API получает revision-linked snapshot. Bounded retention cleanup, maintenance Compose profile и host-cron wrapper добавлены; остаются настройка расписания/alert routing на сервере |
-| Mobile | **Первый срез сделан:** provider geometry projection, quality notice и L1 read-only offline snapshot. Real 2ГИС map/attribution и Active Route остаются в работе; Native SDK/handoff выбираются только после отдельной subscription/licence проверки |
+| Mobile | **Сделано:** provider geometry projection, quality notice, L1 read-only offline snapshot и Active Route v0 (start/resume, stop completion, complete/cancel). Real 2ГИС map/attribution и Native SDK/handoff выбираются только после отдельной subscription/licence проверки; history/outbox остаются в работе |
 | Observability | Метрики latency/error/quota, redaction ключей, budget alert и health-check без утечки credentials |
 | Tests | Mock HTTP contract tests, timeout/fallback, key-redaction и iOS/Android map smoke tests |
 | Quality gate | Не принимать прямые линии: provider-result, stop-data и region-road-event gate блокируют отсутствующую geometry, противоречия режима, жёсткие закрытия/неподходящие точки; execution повторно блокирует актуальное closure; water crossing и полный terrain/access контур остаются отдельным release gate |
