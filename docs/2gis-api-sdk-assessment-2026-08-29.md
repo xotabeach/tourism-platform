@@ -62,7 +62,8 @@ GET /api/v1/maps/static/place/{place_id}?width=880&height=420&scale=2
 - route preview строится из утверждённой route revision/GeoJSON;
 - place preview строится из координат опубликованного места;
 - размеры, zoom и количество объектов ограничиваются сервером;
-- cache key включает объект, revision, width, height, scale и style;
+- на первом срезе кеширование выполняется через `Cache-Control`/`ETag` на клиенте
+  и CDN; серверный bounded-cache добавляется после измерения hit-rate;
 - `401/403/404/429` не раскрывают URL или ключ 2ГИС;
 - ambiguous/unpublished/closed объект не попадает в изображение;
 - в приложении при недоступности Static API остаётся локальный geometry-preview.
