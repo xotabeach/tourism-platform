@@ -27,6 +27,10 @@ x-backend-environment: &backend-environment
   # Optional FCM HTTP v1. Prefer FILE (mounted secret); JSON env is also supported.
   FCM_SERVICE_ACCOUNT_JSON: ${FCM_SERVICE_ACCOUNT_JSON:-}
   FCM_SERVICE_ACCOUNT_FILE: ${FCM_SERVICE_ACCOUNT_FILE:-}
+  # 2GIS HTTP Routing/Static API. ROUTING_PROVIDER stays "stub" until a
+  # sanitized production smoke (scripts/check_two_gis_routing.py) passes.
+  TWO_GIS_API_KEY: ${TWO_GIS_API_KEY:-}
+  ROUTING_PROVIDER: ${ROUTING_PROVIDER:-stub}
 
 services:
   caddy:

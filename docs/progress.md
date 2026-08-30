@@ -7,17 +7,49 @@
 **Текущая фаза:** Phase 9/9.5/9.6 — local HTTP smoke, OSM independent
 gate v2, GIS-06 catalog dry-run, retention wrapper, mobile Active Route v0,
 backend recommendations v1, mobile deck (R2) и L2 execution outbox
-(mobile + backend idempotent sync) сделаны; Static API preview proxy deployed,
-production 2GIS flag, interactive SDK map и coastline/SRTM ещё впереди.
+(mobile + backend idempotent sync) сделаны; Static API preview и
+`ROUTING_PROVIDER=2gis` теперь реально включены в production (2026-08-30);
+interactive SDK map и coastline/SRTM terrain/access gate ещё впереди.
 
 Единый детальный план текущего инкремента:
 [implementation-blueprint-2026-08.md](implementation-blueprint-2026-08.md).
 Расширение требований (2ГИС-квоты, enrichment, prompt, offline, hand-off и
 Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-offline-plan-2026-08-28.md).
 
-## Current snapshot — 2026-08-29
+## Current snapshot — 2026-08-30
 
 Этот блок имеет приоритет над более старыми changelog-записями ниже.
+
+- **2ГИС реально включён в production, не только задеплоен.** Причина, по
+  которой это не заработало раньше: `x-backend-environment` в
+  `tourism-platform/deploy/test/compose.yaml` — allow-list переменных,
+  прокидываемых в контейнер `backend`; 2ГИС-переменных там не было, поэтому
+  даже с ключом в `.env` backend его не видел (static-proxy всегда отвечал
+  `503`, `ROUTING_PROVIDER` оставался `stub`). Добавлены `TWO_GIS_API_KEY` и
+  `ROUTING_PROVIDER` в анкор; ключ добавлен в `/opt/crimeatrip-test/.env`
+  (права 600, значение не печаталось и не коммитилось).
+- **Найдены и исправлены два бага при первом реальном обращении к 2ГИС**
+  (backend `a1b198d`): (1) httpx логировал на INFO полный URL исходящего
+  запроса, включая ключ в query-параметре — попало в лог контейнера один раз
+  до фикса; `httpx`/`httpcore` логгеры теперь прибиты к `WARNING` в
+  `logging_config.py`. Скомпрометированный лог-файл удалён вместе со старым
+  контейнером при recreate, но **ключ стоит ротировать** в 2ГИС Platform
+  Manager при следующей возможности. (2) Static-map превью маршрута слало
+  на `pt`-маркеры произвольный HEX-цвет — 2ГИС принимает на `pt` только
+  предопределённые короткие коды (`be/rd/oe/yw/gn/pe/pk/gy/bk`), HEX валиден
+  только для `ls`. Оба фикса покрыты `tests/unit/test_static_map_params.py`.
+- **Production smoke пройден:** static-map endpoint отдаёт `200 image/png`
+  на реальном опубликованном маршруте; `check_two_gis_routing.py`
+  (configured-only + один полный walk/car прогон) вернул реальную geometry
+  (300/813 точек) и корректно сработавший quality gate v2 (`needs_review` на
+  пешем участке из-за `pedestrian_highway_filter_violated`,
+  `verified_with_warnings` на авто). `routing_provider=2gis` подтверждён на
+  живом контейнере. Demo-квота 2ГИС ограничена — не гонять smoke повторно
+  без необходимости.
+- **Осталось по 2ГИС (не блокирует включение):** segment-level terrain/access
+  gate (coastline/SRTM, тропы, переправы), bounded retry/circuit breaker и
+  cache/freshness для routing API, Flutter SDK Full (нужен отдельный
+  `dgissdk.key` по подписке — сейчас не получен).
 
 - **Backend route execution v0:** shipped in `f4f9774`; API, ownership/BOLA,
   stop snapshots и state machine работают. Миграции `0039`/`0040` добавляют
