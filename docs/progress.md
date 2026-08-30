@@ -67,6 +67,17 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   проверено статически (`flutter analyze` чисто, 292+ теста зелёные) и через
   прямой curl нового endpoint в проде.
 
+- **Настройки (FNC-12) закрыты:** «О сервисе» — реальный экран (версия
+  приложения из `package_info_plus`, ссылки на политику/условия/контакты);
+  «Оценить приложение» — открывает стор через `url_launcher`; оба новых
+  раздела FAQ («Вопросы по приложению», «Баллы ТревелПоинт и достижения»)
+  получили реальный контент через уже существующую generic FAQ-инфраструктуру.
+  Ссылки/стор-URL берутся из новых `AppConfig` полей
+  (`playStoreUrl`/`appStoreUrl`/`privacyPolicyUrl`/`termsUrl`/`supportEmail`,
+  `--dart-define`), сейчас не заданы ни для одной среды — соответствующий
+  контрол честно скрывается, а не показывает мёртвую ссылку. Понадобятся
+  реальные значения перед публикацией в сторы/юридические документы.
+
 - **Backend route execution v0:** shipped in `f4f9774`; API, ownership/BOLA,
   stop snapshots и state machine работают. Миграции `0039`/`0040` добавляют
   append-only routing revisions: execution фиксирует fingerprint, geometry,
