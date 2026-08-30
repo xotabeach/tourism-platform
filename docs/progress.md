@@ -50,6 +50,22 @@ Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-of
   gate (coastline/SRTM, тропы, переправы), bounded retry/circuit breaker и
   cache/freshness для routing API, Flutter SDK Full (нужен отдельный
   `dgissdk.key` по подписке — сейчас не получен).
+- **Меню маршрута (FNC-06) закрыто:** «...» на карточке маршрута
+  (`route_details_screen.dart`) был snackbar-заглушкой, теперь открывает
+  реальный bottom sheet: скачать/удалить офлайн (переиспользует уже рабочий
+  `_toggleOffline`), поделиться/скопировать текст (`share_plus`), пожаловаться
+  на маршрут (жалоба открывает существующую support-форму с предзаполненным
+  `route_id` — раньше `SupportRepository` его принимал, но mobile не
+  передавал), и для владельца — редактировать (draft/rejected, через
+  локальный publish-черновик, если он есть на этом устройстве) или снять с
+  публикации (pending_review/published). Снятие с публикации потребовало
+  новый backend endpoint `POST /routes/{id}/withdraw` (`18b624d`, задеплоен,
+  owner-only, тесты зелёные). Заодно форма «Ошибка на маршруте» в Настройках
+  перестала показывать четыре хардкод-маршрута и берёт реальный список из
+  `GET /route-executions`. Живая UI-проверка в этой сессии не выполнена —
+  нет разрешения Screen Recording для автоматизации нативного macOS-окна;
+  проверено статически (`flutter analyze` чисто, 292+ теста зелёные) и через
+  прямой curl нового endpoint в проде.
 
 - **Backend route execution v0:** shipped in `f4f9774`; API, ownership/BOLA,
   stop snapshots и state machine работают. Миграции `0039`/`0040` добавляют
