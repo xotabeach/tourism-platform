@@ -16,6 +16,53 @@ interactive SDK map и coastline/SRTM terrain/access gate ещё впереди.
 Расширение требований (2ГИС-квоты, enrichment, prompt, offline, hand-off и
 Apple surfaces): [2GIS / personalization / offline plan](2gis-personalization-offline-plan-2026-08-28.md).
 
+## Update — 2026-08-30 (позже в тот же день)
+
+- **2ГИС: закрыто всё, что не завязано на Flutter SDK.** Bounded retry (1
+  повтор на транспортных ошибках) + process-wide circuit breaker (открывается
+  после 3 подряд отказов, cooldown 60с, fail-fast без сети) + bounded
+  in-process кэш результатов routing (TTL 1ч, 64 записи) — всё в
+  `two_gis_routing.py`. `_route_places` при недоступности провайдера
+  (timeout/circuit-open/quota/unreachable/provider-error) откатывается на
+  `StubRoutingProvider`, честно помечая `synthetic=true`, а не роняет
+  генерацию; на невалидном запросе (`routing_request_invalid`/
+  `routing_unsupported_mode`) fallback не делает. Новый публичный
+  `GET /api/v1/maps/two-gis/status` — configured/provider/circuit/счётчики,
+  без секретов. Мягкий daily-budget warning в лог.
+- **Segment-level terrain gate:** новая таблица `route_terrain_features`
+  (`0044`) + `scripts/import_terrain_features.py` — тот же бесплатный
+  Overpass-источник и bbox, что и для каталога мест
+  (`CRIMEA_CANDIDATE_BBOX`), coastline + designated trails (`highway=path`).
+  На проде: 1251 coastline + 13709 trail ways (файл fetch'ился с Mac —
+  Overpass banit IP сервера на trail-запросах, локальный fetch + `--input`
+  на сервере сработал). `assess_route_quality` получил pure-Python
+  segment-level проверку: пересечение маршрута с coastline без ferry —
+  review; пеший маршрут далеко от известной тропы — warning. Независимая
+  elevation для driving и «актуальность дорог» сознательно не делались (см.
+  предыдущую запись).
+- **Найден и починен реальный баг с маркерами на static-map превью:**
+  `pt`-маркеры ставились на точки, сэмплированные из geometry (следуют
+  дороге), а не на реальные координаты остановок — на маршрутах с изгибом
+  дороги нумерованные точки визуально не совпадали с точками из списка
+  «Остановки». Плюс мобильный `RouteMapPreview` рисовал СВОИ pin+линию
+  (локально нормализованные, без связи с реальной проекцией 2ГИС) поверх
+  настоящей static-карты — два независимых набора точек одновременно.
+  Теперь backend ставит `pt` на реальные stop-координаты, а мобильный
+  оверлay рисуется только при отсутствии реального map-изображения.
+- **Обнаружено, не почищено:** уже опубликованные/сид-маршруты (например,
+  «Классика Южного берега») хранят старую synthetic-геометрию с ДО
+  включения 2ГИС — переключение `ROUTING_PROVIDER` не пересчитывает задним
+  числом уже сохранённые маршруты. Нужен отдельный backfill-прогон
+  генерации/пересчёта для опубликованного каталога, если это нужно — пока
+  не запускался.
+- Мобильные мелочи: список скачанных офлайн-маршрутов был визуально сжат
+  (`shrinkWrap` без `isScrollControlled`) — исправлено; отдельная кнопка
+  «Скачать» в хедере маршрута убрана (осталась в меню).
+- Recommendations: cron на сервере так и не установлен, из-за чего ни у
+  одного из 11 пользователей не было колоды на день — прогнал
+  `generate_route_recommendations.py --apply` вручную, `generated=11`.
+  Стоит всё же поставить host-cron, как для static-map/routing retention.
+
 ## Current snapshot — 2026-08-30
 
 Этот блок имеет приоритет над более старыми changelog-записями ниже.
