@@ -1,9 +1,15 @@
 # CI modes and runners
 
-How we avoid GitLab shared-runner usage while the August 2026 minute quota is
-low, and how to bring back automated checks with a self-hosted runner later.
+> **Обновлено 2026-09-02: режим экономии минут закончен.** Зарегистрирован свой
+> групповой раннер `crimeatrip-prod` (см. «Self-hosted runner» ниже), поэтому
+> пуши больше не тратят общую квоту GitLab. Правила `workflow` во всех четырёх
+> репозиториях выровнены, `tourism-backend` больше не исключение, а
+> `git push -o ci.skip` перестал быть обязательным ритуалом.
+>
+> Всё, что ниже описано в прошедшем времени про август 2026, оставлено как
+> история решения — оно объясняет, почему файлы устроены именно так.
 
-## Current low-minutes mode
+## Историческое: режим низких минут (август 2026)
 
 Backend push pipelines are disabled completely. A regular push therefore uses
 zero GitLab runner minutes and does not publish or deploy anything.
@@ -20,8 +26,10 @@ on a normal push, which is easy to miss:
 | `tourism-platform` | `CI_COMMIT_BRANCH == "main" \|\| "gamma"` | **да** |
 | `workspace` (корень) | **нет `workflow:` вообще** | **да, на любой пуш** |
 
-While the quota is low, always push with the GitLab push option that skips
-pipeline creation — in **every** repository, backend included:
+~~While the quota is low, always push with the GitLab push option that skips
+pipeline creation~~ — **не требуется с 2026-09-02**, джобы идут на свой раннер.
+Флаг остаётся полезным, когда пайплайн заведомо не нужен (правка только
+документации):
 
 ```bash
 git push -o ci.skip origin main
@@ -157,11 +165,48 @@ unless you intentionally isolate a **deploy** runner with tags.
 If automatic deploy returns later, its SSH job should use a **separate** runner
 tag and minimal privileges.
 
-### Until a runner exists
+### Что развёрнуто фактически (2026-09-02)
 
-Use local `./scripts/validate.sh` and the explicit local deploy command. Buy
-extra compute minutes only if a manual registry build is genuinely needed
-before a self-hosted runner is ready.
+Раннер поставлен **на прод-хост** `201.24.55.130` — вопреки рекомендации выше про
+отдельную VM. Решение осознанное: отдельный сервер под CI сейчас не окупается, а
+риски компенсированы настройками. Если сборки начнут мешать проду — выносить, это
+дешевле, чем отлаживать деградацию.
+
+| | |
+| --- | --- |
+| Имя / id | `crimeatrip-prod` / 55828564 |
+| Уровень | групповой (`travel-platform2`), обслуживает все четыре репозитория |
+| Executor | `docker`, образ по умолчанию `alpine:3.21` |
+| `concurrent` | `1` — одна сборка за раз, не конкурирует с Postgres |
+| `memory` / `cpus` | `2g` / `2` из 8ГБ и 4 ядер хоста |
+| `shm_size` | 64МБ (дефолтных 64КБ не хватает многим сборкам) |
+| `privileged` | `true` — нужен для `services: docker:27-dind` |
+| `volumes` | `["/certs/client", "/cache"]` |
+
+**Сокет docker хоста намеренно не смонтирован.** Это было бы быстрее (нет вложенного
+docker, переиспользуется кеш слоёв), но тогда сборка управляет демоном хоста и
+случайная команда в скрипте способна снести прод-контейнеры на этом же сервере.
+С dind у сборки свой демон, случайное разрушение локализовано; намеренный побег из
+privileged всё равно возможен — это принятая цена.
+
+### Как включить полный пайплайн
+
+Все четыре репозитория подключают `.gitlab-ci.full.yml` через `include` с правилом
+`$CI_PIPELINE_MODE == "full"`. Значит **одна групповая переменная включает полный
+режим везде сразу**: GitLab → группа `travel-platform2` → Settings → CI/CD →
+Variables → `CI_PIPELINE_MODE` = `full`.
+
+В lean-режиме джобы `ci-lean-notice` и `backend-publish-manual` гасятся правилом
+`if: $CI_PIPELINE_MODE == "full" → when: never`, чтобы не дублировать стадии
+полного пайплайна.
+
+### Чтобы джобы шли именно на свой раннер
+
+Раннер без тегов подхватывает untagged-джобы, но их же могут перехватить общие
+раннеры GitLab. Надёжный способ — отключить общие: GitLab → группа → Settings →
+CI/CD → Runners → выключить **Enable instance runners for this group**.
+Альтернатива — повесить раннеру тег и проставить `tags:` на джобах, но тогда
+любая забытая джоба без тега зависнет навсегда.
 
 ## Related docs
 
