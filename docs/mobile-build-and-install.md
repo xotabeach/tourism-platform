@@ -12,7 +12,20 @@ flutter pub get
 flutter devices   # список телефонов / симуляторов / Chrome
 ```
 
-Текущий тестовый API (пример): `https://86-106-20-132.sslip.io`.
+Текущий тестовый API: **`https://201-24-55-130.sslip.io`** (новый сервер, 8ГБ, Москва).
+
+> **Сменился 2026-09-02.** Раньше был `https://86-106-20-132.sslip.io`. Адрес
+> **вшивается в сборку** через `--dart-define=API_BASE_URL`, а `sslip.io` кодирует IP
+> прямо в имени — поэтому уже установленные сборки продолжают ходить на старый сервер,
+> пока их не пересоберут с новым адресом. Старый контур для этого пока оставлен живым.
+> Ход переезда — [server-migration-runbook-2026-09-02.md](server-migration-runbook-2026-09-02.md).
+>
+> На неделе покупается нормальный домен — после перехода на него адрес перестанет быть
+> привязан к IP, и следующий переезд будет сменой A-записи без пересборки приложения.
+> Значение по умолчанию здесь и в `build-signed-apk.sh` тогда меняется один раз.
+
+Адрес одинаково задаётся и для Android, и для iOS — это обычный `--dart-define`,
+отдельной iOS-настройки нет (см. §«Сборка iOS» ниже, там тот же флаг).
 
 ---
 
@@ -43,7 +56,7 @@ flutter devices   # список телефонов / симуляторов / C
 # Тестовый контур (то, чем обычно пользуемся на iPhone)
 --dart-define=APP_ENV=test \
 --dart-define=DATA_SOURCE=api \
---dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+--dart-define=API_BASE_URL=https://201-24-55-130.sslip.io
 
 # Staging / production — тот же набор, другой URL и APP_ENV
 --dart-define=APP_ENV=staging \
@@ -110,7 +123,7 @@ flutter devices
 flutter run -d 00008140-001A7D0C2668801C \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+  --dart-define=API_BASE_URL=https://201-24-55-130.sslip.io
 ```
 
 В терминале: `r` hot reload, `R` hot restart, `q` выход.
@@ -135,7 +148,7 @@ cd tourism-mobile
 flutter run -d 00008140-001A7D0C2668801C --release \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+  --dart-define=API_BASE_URL=https://201-24-55-130.sslip.io
 ```
 
 ### Вариант B — `build` + `devicectl` (как в агентских сессиях)
@@ -146,7 +159,7 @@ cd tourism-mobile
 flutter build ios --release \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+  --dart-define=API_BASE_URL=https://201-24-55-130.sslip.io
 
 # DEVICE = UDID из `xcrun devicectl list devices` или `flutter devices`
 DEVICE=00008140-001A7D0C2668801C
@@ -177,7 +190,7 @@ flutter devices
 flutter run -d <android-device-id> \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+  --dart-define=API_BASE_URL=https://201-24-55-130.sslip.io
 ```
 
 Application id: `com.crimeatravel.tourism_mobile`.
@@ -280,7 +293,7 @@ cd tourism-mobile
 flutter build apk --release \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+  --dart-define=API_BASE_URL=https://201-24-55-130.sslip.io
 
 adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
@@ -293,7 +306,7 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 flutter build apk --release --split-per-abi \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+  --dart-define=API_BASE_URL=https://201-24-55-130.sslip.io
 ```
 
 ### 6.3. App Bundle для Google Play (AAB)
@@ -304,7 +317,7 @@ flutter build apk --release --split-per-abi \
 flutter build appbundle --release \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+  --dart-define=API_BASE_URL=https://201-24-55-130.sslip.io
 ```
 
 Артефакт: `build/app/outputs/bundle/release/app-release.aab`.
@@ -328,7 +341,7 @@ cd tourism-mobile
 flutter build ios --release \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io \
+  --dart-define=API_BASE_URL=https://201-24-55-130.sslip.io \
 && xcrun devicectl device install app \
   --device 00008140-001A7D0C2668801C \
   build/ios/iphoneos/Runner.app \
@@ -351,7 +364,7 @@ cd tourism-mobile
 flutter run -d 00008140-001A7D0C2668801C \
   --dart-define=APP_ENV=test \
   --dart-define=DATA_SOURCE=api \
-  --dart-define=API_BASE_URL=https://86-106-20-132.sslip.io
+  --dart-define=API_BASE_URL=https://201-24-55-130.sslip.io
 # затем r / R в терминале
 ```
 

@@ -31,6 +31,23 @@ x-backend-environment: &backend-environment
   # sanitized production smoke (scripts/check_two_gis_routing.py) passes.
   TWO_GIS_API_KEY: ${TWO_GIS_API_KEY:-}
   ROUTING_PROVIDER: ${ROUTING_PROVIDER:-stub}
+  # AI planning. The admin runtime-config page can switch AI_PROVIDER
+  # without a redeploy, but GEMINI_API_KEY can only come from here and is
+  # required at startup when AI_PROVIDER=gemini and AI_PLANNING_ENABLED=true.
+  AI_PLANNING_ENABLED: ${AI_PLANNING_ENABLED:-false}
+  AI_PROVIDER: ${AI_PROVIDER:-mock}
+  AI_REQUEST_TIMEOUT_SECONDS: ${AI_REQUEST_TIMEOUT_SECONDS:-60}
+  AI_MAX_REPAIR_ATTEMPTS: ${AI_MAX_REPAIR_ATTEMPTS:-1}
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  # Must be listed here, not only in .env: without this line the value never
+  # reaches the container and the app silently falls back to the config.py
+  # default. The Moscow host cannot reach Google directly (400
+  # FAILED_PRECONDITION, "User location is not supported"), so it points at
+  # the relay on the previous server.
+  GEMINI_BASE_URL: ${GEMINI_BASE_URL:-https://generativelanguage.googleapis.com/v1beta}
+  # 2GIS TSP / Distance Matrix stay "stub" until deliberately switched on.
+  TSP_PROVIDER: ${TSP_PROVIDER:-stub}
+  DISTANCE_MATRIX_PROVIDER: ${DISTANCE_MATRIX_PROVIDER:-stub}
 
 services:
   caddy:
