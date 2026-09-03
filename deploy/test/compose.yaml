@@ -276,6 +276,26 @@ services:
       - no-new-privileges:true
     logging: *default-logging
 
+  # Knowledge-base and photo enrichment: one-off, run by hand. Needs `edge`
+  # (unlike retention/recommendations) because it calls Wikimedia/Wikidata —
+  # the private network alone has no route out and every call fails DNS.
+  enrichment:
+    image: ${BACKEND_IMAGE}
+    profiles:
+      - tools
+    mem_limit: 1024m
+    pids_limit: 128
+    environment: *backend-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private
+      - edge
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
 volumes:
   caddy-data:
   caddy-config:
