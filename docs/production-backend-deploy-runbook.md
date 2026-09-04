@@ -15,8 +15,20 @@ registry.gitlab.com/travel-platform2/tourism-backend:<full-git-sha>
 
 The server then updates `BACKEND_IMAGE`, starts PostgreSQL and Redis, runs the
 Alembic migrations once, recreates only the backend container, and waits for
-container health. The SSH alias `crimeatrip-test` in `~/.ssh/config` pins the
-host, non-standard port `6579`, user and identity file.
+container health.
+
+## Which host is production
+
+Since the migration on 2026-09-02 production is the Moscow host, reached
+through the SSH alias `crimeatrip-prod` (`201.24.55.130`), and the app talks to
+`https://201-24-55-130.sslip.io`. The old host (`crimeatrip-test`,
+`86.106.20.132`, port `6579`) is still alive **only as the Gemini relay**: its
+ports 80/443 belong to the relay container, so its own Caddy cannot start and
+nothing it runs is published. A deploy pointed there finishes with exit code 0
+and updates nothing anyone can reach — that happened on 2026-09-04, because the
+scripts defaulted to it. The scripts now default to `crimeatrip-prod`; override
+`DEPLOY_SSH_TARGET`/`DEPLOY_HEALTH_URL` only to deploy somewhere else on
+purpose.
 
 ## Preflight
 
@@ -26,7 +38,7 @@ git status --short --branch
 git rev-parse HEAD
 ./scripts/validate.sh
 docker info
-ssh crimeatrip-test 'true'
+ssh crimeatrip-prod 'true'
 ```
 
 Deploy only a reviewed clean commit that has already been pushed. Do not deploy
@@ -61,7 +73,7 @@ cd /Users/nikita/mobile_travel_app/tourism-backend
 The script:
 
 1. builds `linux/amd64` with Docker Buildx and `--load`;
-2. streams `docker save | gzip` over the pinned `crimeatrip-test` SSH alias;
+2. streams `docker save | gzip` over the pinned `crimeatrip-prod` SSH alias;
 3. makes the server verify that the exact image exists locally;
 4. runs the same migration, recreate and readiness sequence with pull skipped.
 
@@ -71,8 +83,8 @@ that infrastructure script changes, install the reviewed source-of-truth copy:
 ```bash
 cd /Users/nikita/mobile_travel_app
 scp tourism-platform/deploy/test/deploy-remote.sh \
-  crimeatrip-test:/opt/crimeatrip-test/deploy-remote.sh
-ssh crimeatrip-test 'chmod 755 /opt/crimeatrip-test/deploy-remote.sh'
+  crimeatrip-prod:/opt/crimeatrip-test/deploy-remote.sh
+ssh crimeatrip-prod 'chmod 755 /opt/crimeatrip-test/deploy-remote.sh'
 ```
 
 Do not use `DEPLOY_SKIP_PULL=true` unless the image was transferred immediately
@@ -84,9 +96,9 @@ After either flow, all checks must pass:
 
 ```bash
 curl --fail --silent --show-error \
-  https://86-106-20-132.sslip.io/health/live
+  https://201-24-55-130.sslip.io/health/live
 curl --fail --silent --show-error \
-  https://86-106-20-132.sslip.io/health/ready
+  https://201-24-55-130.sslip.io/health/ready
 ```
 
 Also smoke-test at least one endpoint introduced or changed by the deployed
@@ -98,7 +110,7 @@ On the server, the active immutable image can be checked without exposing
 secrets:
 
 ```bash
-ssh crimeatrip-test \
+ssh crimeatrip-prod \
   "docker inspect --format='{{.Config.Image}}' crimeatrip-test-backend-1"
 ```
 
