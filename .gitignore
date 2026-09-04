@@ -22,3 +22,29 @@ node_modules/
 # Local coverage and generated reports
 coverage/
 reports/
+
+# Внутренняя документация не публикуется.
+#
+# Репозиторий зеркалится на GitHub, а планы, ранбуки, ревью, заметки по
+# безопасности и разборы инцидентов описывают конкретные серверы, ключи и
+# процессы команды. В репозитории остаётся общее описание продукта, модели
+# данных и правил работы — всё остальное лежит на машинах разработчиков.
+docs/*
+!docs/decisions/
+!docs/product-vision.md
+!docs/system-context.md
+!docs/application-business-logic.md
+!docs/domain-model.md
+!docs/data-model-geography-places.md
+!docs/data-model-routes.md
+!docs/stack.md
+!docs/repository-strategy.md
+!docs/development-conventions.md
+!docs/development-environment.md
+!docs/local-development.md
+!docs/python-code-style.md
+!docs/python-testing-guide.md
+!docs/flutter-app-architecture.md
+!docs/flutter-code-style.md
+!docs/flutter-design-system.md
+!docs/flutter-testing-guide.md

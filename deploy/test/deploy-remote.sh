@@ -15,7 +15,9 @@ if [[ "${#}" -ne 1 ]]; then
 fi
 
 IMAGE="$1"
-DEPLOY_DIR="${DEPLOY_DIR:-/opt/crimeatrip-test}"
+# По умолчанию — каталог самого скрипта: путь на сервере в репозитории не
+# хранится, а лежать рядом с compose.yaml он и так обязан.
+DEPLOY_DIR="${DEPLOY_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}"
 ENV_FILE="${TEST_ENV_FILE:-${DEPLOY_DIR}/.env}"
 COMPOSE=(docker compose --env-file "${ENV_FILE}" --file "${DEPLOY_DIR}/compose.yaml")
 

@@ -19,8 +19,11 @@ Unsloth Gemma 4 26B A4B it UD-IQ4_XS; transport/probe подключены. В �
 и серверном PostGIS импортировано по 1000 OSM drafts для quality gate.
 
 - Стек: [docs/stack.md](docs/stack.md)
-- Прогресс: [docs/progress.md](docs/progress.md)
-- Единый план текущего инкремента: [implementation blueprint](docs/implementation-blueprint-2026-08.md)
+
+Планы, ранбуки, ревью и заметки по инфраструктуре в репозиторий не входят:
+они описывают конкретные серверы и процессы команды и лежат у разработчиков
+локально (см. `.gitignore`). Здесь остаётся общее описание продукта, модели
+данных и правил работы.
 
 ## Архитектурное направление
 
@@ -35,15 +38,13 @@ Unsloth Gemma 4 26B A4B it UD-IQ4_XS; transport/probe подключены. В �
   deterministic stub с коэффициентом расстояния, первым внешним test-contour
   provider выбран 2ГИС HTTP Routing API. Public synthetic geometry не считается
   навигацией; OSRM остаётся будущим self-hosted вариантом.
-- AI: port `AIPlanningProvider` → mock / Gemini / **LM Studio Gemma 4**
-  ([ai-self-hosted-home-lab.md](docs/ai-self-hosted-home-lab.md)).
+- AI: port `AIPlanningProvider` → mock / Gemini / DeepSeek / LM Studio.
 - Kafka — только после ADR-005. Helm — позже в этом repo.
 
 Ключевые решения: [docs/decisions](docs/decisions).
 
-Продуктовая логика и план:
+Продуктовая логика и правила работы:
 [application-business-logic.md](docs/application-business-logic.md),
-[implementation-plan.md](docs/implementation-plan.md),
 [development-conventions.md](docs/development-conventions.md).
 
 ## Репозитории
@@ -108,7 +109,7 @@ Image Postgres: `postgis/postgis:16-3.4` (linux/arm64 + amd64).
 `make clean` без `CONFIRM=yes` никогда не удаляет volumes.
 
 Перед commit: `./scripts/validate.sh`. GitLab CI по умолчанию lean —
-[ci-and-runners.md](docs/ci-and-runners.md).
+во внутренней документации.
 
 ## Структура
 
@@ -117,7 +118,7 @@ Image Postgres: `postgis/postgis:16-3.4` (linux/arm64 + amd64).
 ├── .gitlab-ci.yml      # lean CI
 ├── .gitlab-ci.full.yml # полный DevSecOps
 ├── deploy/test/        # Caddy + backend + PostGIS + Redis
-├── docs/               # канон: стек, ADR, фазы, security
+├── docs/               # общее: стек, ADR, модели данных, правила работы
 ├── scripts/
 ├── compose.yaml        # local DX: PostGIS, Redis, MinIO, Mailpit
 ├── Makefile
@@ -142,30 +143,30 @@ workspace/
 
 Старые Java-классы, Android UI, ресурсы, изображения, тексты, API-ключи,
 структура и технические решения не переносятся. Новая система создаётся с нуля.
-Подробности:
-[legacy-project-analysis.md](docs/legacy-project-analysis.md).
 
 ## Документация
 
 - [Стек](docs/stack.md)
-- [Progress](docs/progress.md)
-- [Business logic](docs/application-business-logic.md)
-- [Implementation plan](docs/implementation-plan.md)
-- [Implementation blueprint 2026-08](docs/implementation-blueprint-2026-08.md)
-- [Implementation readiness review 2026-08-28](docs/implementation-readiness-review-2026-08-28.md)
-- [Development conventions](docs/development-conventions.md)
 - [Product vision](docs/product-vision.md)
 - [System context](docs/system-context.md)
+- [Business logic](docs/application-business-logic.md)
 - [Domain model](docs/domain-model.md)
-- [Repository strategy](docs/repository-strategy.md)
-- [Local development](docs/local-development.md)
-- [Home lab Gemma 4](docs/ai-self-hosted-home-lab.md)
-- [Windows LM Studio + Gemma 4 26B](docs/ai-lm-studio-windows-gemma4.md)
-- [PostGIS bulk import 1000+](docs/crimea-places-bulk-import-plan.md)
-- [AI-чат и генерация маршрута](docs/ai-route-chat-mobile-implementation.md)
+- [Модель данных: география и места](docs/data-model-geography-places.md)
+- [Модель данных: маршруты](docs/data-model-routes.md)
 - [Architecture decisions](docs/decisions)
-- [CI / runners](docs/ci-and-runners.md)
-- [Production backend deploy runbook](docs/production-backend-deploy-runbook.md)
+- [Development conventions](docs/development-conventions.md)
+- [Development environment](docs/development-environment.md)
+- [Local development](docs/local-development.md)
+- [Repository strategy](docs/repository-strategy.md)
+- Python: [code style](docs/python-code-style.md), [testing](docs/python-testing-guide.md)
+- Flutter: [архитектура](docs/flutter-app-architecture.md),
+  [code style](docs/flutter-code-style.md),
+  [дизайн-система](docs/flutter-design-system.md),
+  [testing](docs/flutter-testing-guide.md)
+
+Внутренние документы — планы, ранбуки деплоя, ревью, разборы инцидентов,
+заметки по безопасности и всё, что описывает конкретные серверы, — в
+репозиторий не входят и лежат локально.
 
 ## Дальнейшие шаги
 

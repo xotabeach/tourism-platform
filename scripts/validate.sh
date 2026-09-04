@@ -6,6 +6,9 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
 REQUIRED_FILES=(
+  # Только то, что действительно лежит в репозитории. Внутренние документы
+  # (планы, ранбуки, ревью, security-заметки) вынесены в .gitignore, и
+  # требовать их здесь значило бы ломать проверку на чистом клоне.
   .editorconfig
   .env.example
   .gitignore
@@ -16,42 +19,32 @@ REQUIRED_FILES=(
   .github/pull_request_template.md
   .gitlab-ci.yml
   .gitlab-ci.full.yml
-  docs/ci-and-runners.md
   README.md
   CONTRIBUTING.md
   SECURITY.md
   LICENSE
   Makefile
   compose.yaml
-  docs/legacy-project-analysis.md
+  deploy/test/.env.example
+  deploy/test/Caddyfile
+  deploy/test/compose.yaml
   docs/product-vision.md
   docs/system-context.md
   docs/domain-model.md
-  docs/repository-strategy.md
-  docs/local-development.md
   docs/application-business-logic.md
-  docs/implementation-plan.md
-  docs/implementation-blueprint-2026-08.md
-  docs/implementation-readiness-review-2026-08-28.md
-  docs/2gis-personalization-offline-plan-2026-08-28.md
-  docs/development-conventions.md
-  docs/progress.md
-  docs/stack.md
   docs/data-model-geography-places.md
   docs/data-model-routes.md
-  docs/ai-route-planning-architecture.md
-  docs/ai-self-hosted-home-lab.md
-  docs/ai-route-system-end-to-end.md
+  docs/repository-strategy.md
+  docs/local-development.md
+  docs/development-conventions.md
+  docs/development-environment.md
+  docs/stack.md
   docs/python-code-style.md
   docs/python-testing-guide.md
   docs/flutter-code-style.md
   docs/flutter-testing-guide.md
   docs/flutter-app-architecture.md
-  docs/development-environment.md
-  docs/environment-and-backend-deployment.md
-  deploy/test/.env.example
-  deploy/test/Caddyfile
-  deploy/test/compose.yaml
+  docs/flutter-design-system.md
   docs/decisions/ADR-001-modular-monolith-first.md
   docs/decisions/ADR-002-separate-mobile-backend-infrastructure-repositories.md
   docs/decisions/ADR-003-postgresql-postgis.md
@@ -61,38 +54,6 @@ REQUIRED_FILES=(
   docs/decisions/ADR-007-authentication-and-session-strategy.md
   docs/decisions/ADR-010-2gis-routing-and-map-provider.md
   docs/decisions/ADR-011-personalized-route-recommendations.md
-  docs/security/security-baseline.md
-  docs/security/threat-model.md
-  docs/security/data-classification-and-retention.md
-  docs/security/authentication-and-token-security.md
-  docs/security/backend-api-security.md
-  docs/security/mobile-security.md
-  docs/security/database-cache-storage-security.md
-  docs/security/file-and-media-security.md
-  docs/security/secrets-management.md
-  docs/security/secure-development-lifecycle.md
-  docs/security/security-testing-guide.md
-  docs/security/security-incident-response.md
-  docs/security/security-checklist.md
-  docs/security/exceptions/README.md
-  docs/security/audits/2026-07-23-security-audit.md
-  docs/diagrams/container-diagram.md
-  docs/diagrams/future-domain-services.md
-  docs/diagrams/route-generation-flow.md
-  docs/diagrams/phase-and-screens-map.md
-  docs/events/event-catalog.md
-  docs/repositories/tourism-platform.md
-  docs/repositories/tourism-mobile.md
-  docs/repositories/tourism-backend.md
-  docs/repositories/tourism-infrastructure.md
-  docs/repositories/tourism-documentation.md
-  docs/services/identity.md
-  docs/services/users.md
-  docs/services/geography.md
-  docs/services/places.md
-  docs/services/routes.md
-  docs/services/route-builder.md
-  docs/services/media.md
   scripts/bootstrap.sh
   scripts/bootstrap.ps1
   scripts/clone-repositories.sh
@@ -131,10 +92,24 @@ printf 'Test deployment Compose config: OK\n'
 
 # CI runs both linters unconditionally; skipping them locally would hide
 # failures until the pipeline.
+# Проверяем только то, что лежит в репозитории: внутренние документы вынесены
+# в .gitignore, но остаются на диске у разработчика, и линтер спотыкался бы о
+# файлы, которых в чистом клоне нет.
+markdown_files=()
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  while IFS= read -r file; do
+    markdown_files+=("${file}")
+  done < <(git ls-files '*.md')
+else
+  while IFS= read -r file; do
+    markdown_files+=("${file}")
+  done < <(find . -name '*.md' -not -path './node_modules/*')
+fi
+
 if command -v markdownlint-cli2 >/dev/null 2>&1; then
-  markdownlint-cli2 "**/*.md"
+  markdownlint-cli2 "${markdown_files[@]}"
 elif command -v npx >/dev/null 2>&1; then
-  npx --yes markdownlint-cli2@0.18.1 "**/*.md"
+  npx --yes markdownlint-cli2@0.18.1 "${markdown_files[@]}"
 else
   printf 'Ошибка: нужен markdownlint-cli2 или npx.\n' >&2
   exit 1
