@@ -70,6 +70,29 @@ chmod 600 "${tmp_env}"
 mv "${tmp_env}" "${ENV_FILE}"
 trap - EXIT
 
+# Sync AI-provider secrets from CI/CD variables into the server .env, so they
+# are edited once in GitLab (Settings → CI/CD → Variables, masked+protected)
+# rather than by hand over SSH. Each key syncs only when the caller actually
+# passed it in the environment — an unset key here leaves the existing .env
+# line untouched instead of blanking it. Value is read via ENVIRON, not -v,
+# so the secret never appears in this process's argv.
+SYNCED_ENV_KEYS=(DEEPSEEK_API_KEY GEMINI_API_KEY LM_STUDIO_API_KEY AI_PROVIDER)
+for sync_key in "${SYNCED_ENV_KEYS[@]}"; do
+  if [[ -n "${!sync_key:-}" ]]; then
+    tmp_env="$(mktemp)"
+    trap 'rm -f "${tmp_env}"' EXIT
+    awk -v k="${sync_key}" '
+      BEGIN { updated=0; pat="^" k "="; v=ENVIRON[k] }
+      $0 ~ pat { print k "=" v; updated=1; next }
+      { print }
+      END { if (!updated) print k "=" v }
+    ' "${ENV_FILE}" > "${tmp_env}"
+    chmod 600 "${tmp_env}"
+    mv "${tmp_env}" "${ENV_FILE}"
+    trap - EXIT
+  fi
+done
+
 # Ensure media volume is writable by appuser (uid 10001).
 if docker volume inspect crimeatrip-test_media-data >/dev/null 2>&1; then
   docker run --rm -v crimeatrip-test_media-data:/data alpine:3.21 \
