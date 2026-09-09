@@ -70,13 +70,23 @@ chmod 600 "${tmp_env}"
 mv "${tmp_env}" "${ENV_FILE}"
 trap - EXIT
 
+# Mirror of SYNCED_SECRET_ENV_VARS in the backend repo's
+# scripts/ci-deploy-production.sh. A key present there but missing here
+# reaches the host and is then silently dropped — keep both in step.
+#
 # Sync AI-provider secrets from CI/CD variables into the server .env, so they
 # are edited once in GitLab (Settings → CI/CD → Variables, masked+protected)
 # rather than by hand over SSH. Each key syncs only when the caller actually
 # passed it in the environment — an unset key here leaves the existing .env
 # line untouched instead of blanking it. Value is read via ENVIRON, not -v,
 # so the secret never appears in this process's argv.
-SYNCED_ENV_KEYS=(DEEPSEEK_API_KEY GEMINI_API_KEY LM_STUDIO_API_KEY AI_PROVIDER)
+SYNCED_ENV_KEYS=(
+  DEEPSEEK_API_KEY GEMINI_API_KEY LM_STUDIO_API_KEY AI_PROVIDER
+  RAG_ENABLED RAG_EMBEDDING_MODEL
+  SUPPORT_HELP_SEMANTIC_ENABLED SUPPORT_HELP_SEMANTIC_MIN_SCORE
+  SUPPORT_HELP_SEMANTIC_TIMEOUT_SECONDS SUPPORT_HELP_SEMANTIC_QUEUE_SECONDS
+  SUPPORT_HELP_SEMANTIC_MAX_WAITING
+)
 for sync_key in "${SYNCED_ENV_KEYS[@]}"; do
   if [[ -n "${!sync_key:-}" ]]; then
     tmp_env="$(mktemp)"
