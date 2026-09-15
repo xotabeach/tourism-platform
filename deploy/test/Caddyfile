@@ -22,3 +22,39 @@
 		format json
 	}
 }
+
+# Public landing. Keep the Unicode domain in DNS/UI and its ASCII form here,
+# where Caddy and certificate automation handle it consistently.
+xn--h1adgncbn4e.xn--p1ai, www.xn--h1adgncbn4e.xn--p1ai {
+	encode zstd gzip
+
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "same-origin"
+	}
+
+	# Preserve the backend media path and filename behind the landing origin.
+	handle /download {
+		rewrite * /media/app/crimeatrip-latest.apk
+		reverse_proxy backend:8000
+		header Content-Disposition "attachment; filename=\"crimeatrip.apk\""
+	}
+
+	handle {
+		root * /srv/site
+		file_server
+	}
+
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}
