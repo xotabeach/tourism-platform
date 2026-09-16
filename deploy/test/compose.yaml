@@ -39,13 +39,15 @@ x-backend-environment: &backend-environment
   TWO_GIS_API_KEY: ${TWO_GIS_API_KEY:-}
   ROUTING_PROVIDER: ${ROUTING_PROVIDER:-stub}
   # AI planning. The admin runtime-config page can switch AI_PROVIDER
-  # without a redeploy, but GEMINI_API_KEY can only come from here and is
-  # required at startup when AI_PROVIDER=gemini and AI_PLANNING_ENABLED=true.
+  # without a redeploy, but provider credentials can only come from here.
+  # Keep every supported remote provider explicit: values present only in
+  # the host .env are not inherited by a Compose service automatically.
   AI_PLANNING_ENABLED: ${AI_PLANNING_ENABLED:-false}
   AI_PROVIDER: ${AI_PROVIDER:-mock}
   AI_REQUEST_TIMEOUT_SECONDS: ${AI_REQUEST_TIMEOUT_SECONDS:-60}
   AI_MAX_REPAIR_ATTEMPTS: ${AI_MAX_REPAIR_ATTEMPTS:-1}
   GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
   # Must be listed here, not only in .env: without this line the value never
   # reaches the container and the app silently falls back to the config.py
   # default. The Moscow host cannot reach Google directly (400
