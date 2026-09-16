@@ -1,0 +1,45 @@
+{
+  "spec": "spec-beta-ai-access.md",
+  "status": "implemented",
+  "updated_at": "2026-09-16",
+  "decisions": [
+    {
+      "topic": "beta_ai_access",
+      "decision": "AI route planning is available to all authenticated users during beta."
+    },
+    {
+      "topic": "generation_limit",
+      "decision": "All users receive 5 successful route generations per UTC day."
+    },
+    {
+      "topic": "reply_limit",
+      "decision": "All users receive 30 assistant replies per UTC day across sessions."
+    },
+    {
+      "topic": "existing_subscriptions",
+      "decision": "Keep existing subscriptions unchanged; preserve admin grants."
+    },
+    {
+      "topic": "purchase_ui",
+      "decision": "Keep Travel+ as a Soon preview and show a beta-unavailable notice instead of activating."
+    },
+    {
+      "topic": "post_beta",
+      "decision": "Restore tiered AI limits and real verified billing before commercial launch."
+    }
+  ],
+  "red_team": {
+    "completed": true,
+    "findings": [
+      "Direct API activation bypasses a mobile-only purchase lock.",
+      "APP_ENV is not a reliable security boundary for mock checkout.",
+      "Per-session chat limits can be bypassed by opening another session.",
+      "Concurrent quota checks require serialization."
+    ]
+  },
+  "verification": {
+    "backend": "808 passed, 138 skipped; Ruff, formatting, MyPy and audit passed. Local coverage was 71.33% because service-backed integration suites were skipped.",
+    "mobile": "Flutter analyze and all 540 tests passed; Travel+ goldens updated and visually inspected.",
+    "android": "Release APK built successfully with the CI-safe Gradle profile."
+  }
+}
