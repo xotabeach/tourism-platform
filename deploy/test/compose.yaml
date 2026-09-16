@@ -20,6 +20,13 @@ x-backend-environment: &backend-environment
   JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
   AUTH_OTP_ACCEPT_ANY: ${AUTH_OTP_ACCEPT_ANY:-false}
   AUTH_OTP_STORE_DEBUG_CODE: ${AUTH_OTP_STORE_DEBUG_CODE:-true}
+  # OTP delivery. Credentials are synced from protected GitLab variables;
+  # provider stays stub until explicitly enabled in the admin or environment.
+  SMS_PROVIDER: ${SMS_PROVIDER:-stub}
+  SMSAERO_EMAIL: ${SMSAERO_EMAIL:-}
+  SMSAERO_API_KEY: ${SMSAERO_API_KEY:-}
+  SMSAERO_BASE_URL: ${SMSAERO_BASE_URL:-https://gate.smsaero.ru/v2}
+  SMS_SENDER: ${SMS_SENDER:-КРЫМТРИП}
   ADMIN_ENABLED: ${ADMIN_ENABLED:-true}
   ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET}
   ADMIN_BOOTSTRAP_LOGIN: ${ADMIN_BOOTSTRAP_LOGIN:-ops}
