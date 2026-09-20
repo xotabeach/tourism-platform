@@ -22,6 +22,7 @@ set -Eeuo pipefail
 CONTAINER="${APK_RECEIVE_CONTAINER:-crimeatrip-test-backend-1}"
 MEDIA_DIR="/app/data/media/app"
 LATEST_NAME="crimeatrip-latest.apk"
+MANIFEST_NAME="latest.json"
 # A release APK is ~70MB. The ceiling is here so a key that leaks cannot be
 # used to fill the disk.
 MAX_BYTES=$((300 * 1024 * 1024))
@@ -63,11 +64,21 @@ if [[ "${landed}" != "${size}" ]]; then
   deny "landed ${landed} bytes, expected ${size} — not publishing"
 fi
 
+# The download counter reads the version of "latest" from this manifest, since
+# the file name carries none. Every field is ours: the version passed the
+# strict pattern above, the hash and the time come from this host.
+sha256="$(sha256sum "${staging}" | cut -d' ' -f1)"
+published_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+manifest="{\"version\":\"${version}\",\"sha256\":\"${sha256}\",\"published_at\":\"${published_at}\"}"
+docker exec -i "${CONTAINER}" sh -c "cat > '${MEDIA_DIR}/.incoming.json'" <<< "${manifest}"
+
 # Renamed into place only once it is whole: the previous build stays
 # downloadable until then, because a half-written APK installs as a corrupt
-# package.
+# package. The manifest moves in the same command so "latest" and its version
+# never disagree for longer than the gap between two renames.
 docker exec "${CONTAINER}" sh -c \
   "cp '${MEDIA_DIR}/.incoming.apk' '${MEDIA_DIR}/${versioned_name}' \
+   && mv '${MEDIA_DIR}/.incoming.json' '${MEDIA_DIR}/${MANIFEST_NAME}' \
    && mv '${MEDIA_DIR}/.incoming.apk' '${MEDIA_DIR}/${LATEST_NAME}'"
 
 printf 'apk-receive: published %s (%s bytes) as %s and %s\n' \

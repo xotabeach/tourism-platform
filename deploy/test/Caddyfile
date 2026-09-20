@@ -15,7 +15,11 @@
 		Referrer-Policy "same-origin"
 	}
 
-	reverse_proxy backend:8000
+	# Only the landing may claim a download came from it: a client-supplied
+	# X-Download-Source is dropped here so the counter's source can't be forged.
+	reverse_proxy backend:8000 {
+		header_up -X-Download-Source
+	}
 
 	log {
 		output stdout
@@ -39,7 +43,10 @@ xn--h1adgncbn4e.xn--p1ai, www.xn--h1adgncbn4e.xn--p1ai {
 	# Preserve the backend media path and filename behind the landing origin.
 	handle /download {
 		rewrite * /media/app/crimeatrip-latest.apk
-		reverse_proxy backend:8000
+		# header_up overwrites whatever the visitor sent.
+		reverse_proxy backend:8000 {
+			header_up X-Download-Source landing
+		}
 		header Content-Disposition "attachment; filename=\"crimeatrip.apk\""
 	}
 

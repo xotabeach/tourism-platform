@@ -10,6 +10,8 @@ x-backend-environment: &backend-environment
   APP_ENV: test
   LOG_LEVEL: INFO
   MEDIA_ROOT: /app/data/media
+  # Salt for the 30-minute APK download dedupe hash; set a real one in .env.
+  APK_STATS_SALT: ${APK_STATS_SALT:-change-me-apk-stats-salt}
   DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
   DATABASE_URL_SYNC: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
   REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
@@ -295,6 +297,28 @@ services:
     command:
       - python
       - scripts/purge_notifications.py
+      - --apply
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  # App-version retention: rolls per-user version rows into daily aggregates and
+  # drops rows older than 35 days. Database-only.
+  app_version_retention:
+    image: ${BACKEND_IMAGE}
+    profiles:
+      - maintenance
+    mem_limit: 192m
+    pids_limit: 128
+    environment: *backend-environment
+    command:
+      - python
+      - scripts/purge_app_version_rows.py
       - --apply
     depends_on:
       postgres:
