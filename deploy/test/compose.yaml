@@ -262,6 +262,28 @@ services:
       - no-new-privileges:true
     logging: *default-logging
 
+  # Anti-fraud event log retention (90 days; keeps events of open holds).
+  # Database-only, so it is safe to run unattended from host cron.
+  antifraud_retention:
+    image: ${BACKEND_IMAGE}
+    profiles:
+      - maintenance
+    mem_limit: 192m
+    pids_limit: 128
+    environment: *backend-environment
+    command:
+      - python
+      - scripts/purge_antifraud_events.py
+      - --apply
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
   # Daily recommendation decks. Database-only: calls no vendor API, so it is
   # safe to run unattended on a schedule.
   recommendations:
