@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-# Host-level cron entrypoint for the hourly achievement catch-up.
+# Host-level cron entrypoint for the nightly achievement catch-up.
 # The job is a short-lived Compose task, not a resident scheduler process.
 # Newly earned achievements can send FCM push after their transaction commits.
 

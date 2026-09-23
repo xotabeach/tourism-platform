@@ -307,7 +307,8 @@ services:
       - no-new-privileges:true
     logging: *default-logging
 
-  # Hourly achievement catch-up. FCM needs outbound access via edge.
+  # Nightly achievement catch-up: users active in the last 26 hours, so a
+  # daily run overlaps the previous one. FCM needs outbound access via edge.
   achievements:
     image: ${BACKEND_IMAGE}
     profiles:
@@ -320,7 +321,7 @@ services:
       - scripts/recalculate_achievements.py
       - --apply
       - --recent-hours
-      - "2"
+      - "26"
     depends_on:
       postgres:
         condition: service_healthy
