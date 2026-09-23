@@ -42,6 +42,8 @@ x-backend-environment: &backend-environment
   ROUTING_PROVIDER: ${ROUTING_PROVIDER:-stub}
   # Our own routing and maps on OSM (spec 12a); 2GIS is only a fallback (D1).
   VALHALLA_BASE_URL: http://valhalla:8002
+  # Data build behind the graph and tiles, written into routing snapshots (D25).
+  OSM_DATA_VERSION: ${OSM_DATA_VERSION:-osm20260922}
   MAP_PROVIDER: ${MAP_PROVIDER:-osm}
   TILESERVER_BASE_URL: http://tileserver:8080
   MAP_SOURCE_VERSION: ${MAP_SOURCE_VERSION:-osm1}
