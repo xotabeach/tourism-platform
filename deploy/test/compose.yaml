@@ -307,6 +307,30 @@ services:
       - no-new-privileges:true
     logging: *default-logging
 
+  # Hourly achievement catch-up. FCM needs outbound access via edge.
+  achievements:
+    image: ${BACKEND_IMAGE}
+    profiles:
+      - maintenance
+    mem_limit: 192m
+    pids_limit: 128
+    environment: *backend-environment
+    command:
+      - python
+      - scripts/recalculate_achievements.py
+      - --apply
+      - --recent-hours
+      - "2"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private
+      - edge
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
   # App-version retention: rolls per-user version rows into daily aggregates and
   # drops rows older than 35 days. Database-only.
   app_version_retention:

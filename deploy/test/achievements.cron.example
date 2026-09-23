@@ -1,0 +1,4 @@
+# Install after deploying the BACKEND-8 backend and applying its migration.
+# Set the checkout path for this host before installing in /etc/cron.d/.
+# The command is idempotent and processes activity from the preceding 2 hours.
+7 * * * * root /opt/crimeatrip/tourism-platform/scripts/run-achievements.sh >> /var/log/crimeatrip-achievements.log 2>&1
