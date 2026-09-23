@@ -1,0 +1,23 @@
+{
+ "options": {
+  "paths": {
+   "root": "/data",
+   "styles": "styles",
+   "mbtiles": "tiles",
+   "fonts": "/usr/src/app/node_modules/tileserver-gl-styles/fonts"
+  },
+  "serveStaticMaps": true,
+  "maxScaleFactor": 2,
+  "maxSize": 2048
+ },
+ "styles": {
+  "crimeatrip": {
+   "style": "crimeatrip.json"
+  }
+ },
+ "data": {
+  "openmaptiles": {
+   "mbtiles": "crimea.mbtiles"
+  }
+ }
+}
