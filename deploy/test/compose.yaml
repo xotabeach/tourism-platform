@@ -183,7 +183,8 @@ services:
     expose:
       - "8080"
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      # The image has node but no curl.
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8080/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3
