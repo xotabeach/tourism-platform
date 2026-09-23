@@ -1,4 +1,4 @@
 # Install after deploying the BACKEND-8 backend and applying its migration.
 # Set the checkout path for this host before installing in /etc/cron.d/.
-# Once a night at 03:30 MSK (00:30 UTC); idempotent, covers the preceding 26 hours.
-30 0 * * * root /opt/crimeatrip/tourism-platform/scripts/run-achievements.sh >> /var/log/crimeatrip-achievements.log 2>&1
+# Once a night at 03:50 MSK (00:50 UTC), after the anti-fraud and decks jobs; idempotent, covers the preceding 26 hours.
+50 0 * * * root /opt/crimeatrip/tourism-platform/scripts/run-achievements.sh >> /var/log/crimeatrip-achievements.log 2>&1
