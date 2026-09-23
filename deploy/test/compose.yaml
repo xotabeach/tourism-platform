@@ -46,7 +46,7 @@ x-backend-environment: &backend-environment
   OSM_DATA_VERSION: ${OSM_DATA_VERSION:-osm20260922}
   MAP_PROVIDER: ${MAP_PROVIDER:-osm}
   TILESERVER_BASE_URL: http://tileserver:8080
-  MAP_SOURCE_VERSION: ${MAP_SOURCE_VERSION:-osm1}
+  MAP_SOURCE_VERSION: ${MAP_SOURCE_VERSION:-osm2}
   # AI planning. The admin runtime-config page can switch AI_PROVIDER
   # without a redeploy, but provider credentials can only come from here.
   # Keep every supported remote provider explicit: values present only in
