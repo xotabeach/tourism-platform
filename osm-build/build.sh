@@ -18,6 +18,8 @@ PBF_URL="https://download.geofabrik.de/russia/crimean-fed-district-latest.osm.pb
 BBOX="32.4,44.3,36.7,46.3"
 VALHALLA_IMAGE="ghcr.io/valhalla/valhalla:latest"
 PLANETILER_IMAGE="ghcr.io/onthegomap/planetiler:latest"
+# The full image: pyosmium needs libexpat, which slim does not ship.
+PYTHON_IMAGE="python:3.13"
 
 mkdir -p "${WORK}"
 if [[ "${1:-}" != "--keep" || ! -f "${WORK}/crimea.osm.pbf" || ! -f "${WORK}/source.txt" ]]; then
@@ -58,6 +60,14 @@ docker run --rm -e JAVA_TOOL_OPTIONS="-Xmx3g" -v "${WORK}:/data" \
   --bounds="${BBOX}" \
   --languages=ru,uk,en \
   --output="/data/out/${VERSION}/tiles/crimea.mbtiles" --force
+
+# Public car parks for the walk from the car to a stop the car cannot reach
+# (spec 14b); the backend loads them from this file.
+docker run --rm -v "${HERE}:/build:ro" -v "${WORK}:/work" \
+  "${PYTHON_IMAGE}" sh -c "
+    pip install -q --root-user-action=ignore osmium==4.0.2
+    python /build/parkings.py /work/crimea.osm.pbf /work/out/${VERSION}/parkings.geojson
+  "
 
 echo "${VERSION}" > "${OUT}/VERSION"
 du -sh "${OUT}"/* | sed 's|'"${OUT}"'/||'
