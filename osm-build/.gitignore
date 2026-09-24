@@ -1,2 +1,3 @@
 # Downloads and build outputs; only the scripts and the map style are tracked.
 work/
+__pycache__/
