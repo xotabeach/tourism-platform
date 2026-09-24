@@ -67,6 +67,8 @@ docker run --rm -v "${HERE}:/build:ro" -v "${WORK}:/work" \
   "${PYTHON_IMAGE}" sh -c "
     pip install -q --root-user-action=ignore osmium==4.0.2
     python /build/parkings.py /work/crimea.osm.pbf /work/out/${VERSION}/parkings.geojson
+    # Public transport lines and stops (spec 12b): the backend imports them.
+    python /build/transit.py /work/crimea.osm.pbf /work/out/${VERSION}/transit.json
   "
 
 echo "${VERSION}" > "${OUT}/VERSION"
