@@ -204,7 +204,9 @@ services:
   tileserver:
     image: maptiler/tileserver-gl@sha256:3a9ccdb24820b6814c8119bcc8a4376c39867cb0ffe69d62919ef898b90c2427
     restart: unless-stopped
-    command: ["--config", "/data/config.json", "--port", "8080"]
+    # Style and tile URLs point at the public /map/ path Caddy serves for
+    # the app's interactive map (spec 12a-9); rendering stays internal.
+    command: ["--config", "/data/config.json", "--port", "8080", "--public_url", "https://${API_HOST}/map/"]
     mem_limit: 600m
     pids_limit: 256
     tmpfs:

@@ -17,6 +17,22 @@
 
 	# Only the landing may claim a download came from it: a client-supplied
 	# X-Download-Source is dropped here so the counter's source can't be forged.
+	# Interactive map in the app (spec 12a-9): our style, vector tiles and
+	# fonts from tileserver-gl, cached a day. Only these paths: server-side
+	# rendering (/styles/*/static) is heavy and stays internal.
+	@map_public path /map/styles/crimeatrip/style.json /map/data/openmaptiles.json /map/data/openmaptiles/* /map/fonts/*
+	handle @map_public {
+		uri strip_prefix /map
+		header {
+			Cache-Control "public, max-age=86400"
+			defer
+		}
+		reverse_proxy tileserver:8080
+	}
+	handle /map/* {
+		respond 404
+	}
+
 	reverse_proxy backend:8000 {
 		header_up -X-Download-Source
 	}
