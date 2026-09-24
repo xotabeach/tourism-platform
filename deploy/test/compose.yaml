@@ -68,6 +68,35 @@ x-backend-environment: &backend-environment
   # set, and switching AI_PROVIDER to lmstudio would have failed at startup
   # because the base URL and model were missing.
   RAG_ENABLED: ${RAG_ENABLED:-false}
+  # Everything else config.py reads (BACKEND-27): a value set only in .env
+  # never reaches the container, and the code silently used its default —
+  # the semantic help search stayed off and on the hash-v1 stub that way.
+  # Defaults mirror config.py. Not listed on purpose: AI_MODEL (empty would
+  # override «none»), TWO_GIS_HTTP_API_KEY (2GIS is off, spec 12) and
+  # SMS_OTP_TEMPLATE (its {code} clashes with Compose interpolation).
+  RAG_TOP_K: ${RAG_TOP_K:-4}
+  RAG_EMBEDDING_MODEL: ${RAG_EMBEDDING_MODEL:-hash-v1}
+  RAG_FAQ_CACHE_TTL_SECONDS: ${RAG_FAQ_CACHE_TTL_SECONDS:-86400}
+  SUPPORT_HELP_SEMANTIC_ENABLED: ${SUPPORT_HELP_SEMANTIC_ENABLED:-false}
+  SUPPORT_HELP_SEMANTIC_MIN_SCORE: ${SUPPORT_HELP_SEMANTIC_MIN_SCORE:-0.55}
+  SUPPORT_HELP_SEMANTIC_TIMEOUT_SECONDS: ${SUPPORT_HELP_SEMANTIC_TIMEOUT_SECONDS:-1.5}
+  SUPPORT_HELP_SEMANTIC_QUEUE_SECONDS: ${SUPPORT_HELP_SEMANTIC_QUEUE_SECONDS:-6.0}
+  SUPPORT_HELP_SEMANTIC_MAX_WAITING: ${SUPPORT_HELP_SEMANTIC_MAX_WAITING:-12}
+  AI_TURN_BUDGET_SECONDS: ${AI_TURN_BUDGET_SECONDS:-40}
+  AI_CHAT_MESSAGE_LIMIT: ${AI_CHAT_MESSAGE_LIMIT:-40}
+  AI_CHAT_SESSION_TTL_HOURS: ${AI_CHAT_SESSION_TTL_HOURS:-72}
+  AI_PROMPT_VERSION: ${AI_PROMPT_VERSION:-v1}
+  GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.7-flash}
+  GEMINI_FALLBACK_MODELS: ${GEMINI_FALLBACK_MODELS:-gemini-3.6-flash,gemini-3.5-flash,gemini-3.1-flash-lite}
+  DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-flash}
+  DEEPSEEK_FALLBACK_MODELS: ${DEEPSEEK_FALLBACK_MODELS:-deepseek-v4-pro}
+  DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+  ROUTING_TIMEOUT_SECONDS: ${ROUTING_TIMEOUT_SECONDS:-10}
+  SMSAERO_TIMEOUT_SECONDS: ${SMSAERO_TIMEOUT_SECONDS:-10}
+  SMS_POLL_INTERVAL_SECONDS: ${SMS_POLL_INTERVAL_SECONDS:-20}
+  SMS_MAX_ATTEMPTS: ${SMS_MAX_ATTEMPTS:-3}
+  SMS_DAILY_SOFT_BUDGET: ${SMS_DAILY_SOFT_BUDGET:-500}
+  APK_STATS_ENABLED: ${APK_STATS_ENABLED:-true}
   LM_STUDIO_BASE_URL: ${LM_STUDIO_BASE_URL:-}
   LM_STUDIO_MODEL: ${LM_STUDIO_MODEL:-}
   LM_STUDIO_API_KEY: ${LM_STUDIO_API_KEY:-}
@@ -105,7 +134,9 @@ services:
   backend:
     image: ${BACKEND_IMAGE}
     restart: unless-stopped
-    mem_limit: 192m
+    # The help search model (MiniLM, ~500 MB with torch) loads at start;
+    # 1 GB was OOM-killed by it (BACKEND-27).
+    mem_limit: 2g
     pids_limit: 128
     environment: *backend-environment
     expose:
