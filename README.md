@@ -1,7 +1,6 @@
 # Crimea Travel Platform
 
-Crimea Travel Platform — рабочее название мобильной туристической платформы
-(CrimeaTrip). Первый контентный контур — Республика Крым; доменная модель
+КРЫМТРИП — мобильная туристическая платформа. Первый контентный контур — Республика Крым; доменная модель
 для нескольких стран и регионов.
 
 Проект не является официальным государственным приложением и не заявляет об
@@ -9,16 +8,10 @@ Crimea Travel Platform — рабочее название мобильной т
 
 ## Текущий статус
 
-Канонические docs, ADR, local Compose и test-deploy (`deploy/test`) живут
-здесь. Backend и mobile — отдельные submodules, не skeleton.
-
-As-built: каталог, auth, избранное, публикация маршрутов + SQLAdmin,
-профиль (тп/звания), отзывы, inbox/FCM, Route Builder и экспериментальный
-Phase 8B AI-чат с planning sessions. Выбранный home lab — Windows LM Studio +
-Unsloth Gemma 4 26B A4B it UD-IQ4_XS; transport/probe подключены. В локальном
-и серверном PostGIS импортировано по 1000 OSM drafts для quality gate.
-
-- Стек: [docs/stack.md](docs/stack.md)
+Здесь находятся общая документация, ADR, локальный Compose и конфигурация
+развёртывания (`deploy/test`). Актуальный срез реализованных функций и
+ограничений: [docs/current-status.md](docs/current-status.md). Детали стека:
+[docs/stack.md](docs/stack.md).
 
 Планы, ранбуки, ревью и заметки по инфраструктуре в репозиторий не входят:
 они описывают конкретные серверы и процессы команды и лежат у разработчиков
@@ -31,13 +24,10 @@ Unsloth Gemma 4 26B A4B it UD-IQ4_XS; transport/probe подключены. В �
 - Python 3.13, FastAPI, modular monolith.
 - PostgreSQL/PostGIS, Redis; MinIO + Mailpit локально.
 - Test host: Caddy + backend + PostGIS + Redis.
-- Границы модулей: `identity`, `geography`, `places`, `routes`, `favorites`,
-  `support`, `notifications`, `admin`, `media`, `route_execution`; backend
-  route-execution v0 уже доступен, mobile journey ещё в работе.
-- `RoutingProvider` — абстракция (ADR-004/010); текущая реализация для local —
-  deterministic stub с коэффициентом расстояния, первым внешним test-contour
-  provider выбран 2ГИС HTTP Routing API. Public synthetic geometry не считается
-  навигацией; OSRM остаётся будущим self-hosted вариантом.
+- Границы модулей включают `identity`, `geography`, `places`, `routes`, `content`,
+  `support`, `admin`, `route_builder` и `route_execution`.
+- `RoutingProvider` поддерживает локальную заглушку, 2ГИС и Valhalla; выбор
+  провайдера зависит от конфигурации окружения.
 - AI: port `AIPlanningProvider` → mock / Gemini / DeepSeek / LM Studio.
 - Kafka — только после ADR-005. Helm — позже в этом repo.
 
@@ -55,6 +45,7 @@ Unsloth Gemma 4 26B A4B it UD-IQ4_XS; transport/probe подключены. В �
 | `tourism-platform` | Документация, local Compose, `deploy/test` |
 | `tourism-mobile` | Flutter Android и iOS |
 | `tourism-backend` | Модульный Python backend |
+| `tourism-landing` | Публичный сайт и ссылка на APK |
 
 Дополнительные repositories не создаются. Superproject фиксирует совместимые
 commits submodules.
@@ -132,7 +123,8 @@ workspace/
 ├── docs/
 ├── tourism-platform/
 ├── tourism-mobile/
-└── tourism-backend/
+├── tourism-backend/
+└── tourism-landing/
 ```
 
 ## Legacy reference
@@ -147,6 +139,7 @@ workspace/
 ## Документация
 
 - [Стек](docs/stack.md)
+- [Текущий статус](docs/current-status.md)
 - [Product vision](docs/product-vision.md)
 - [System context](docs/system-context.md)
 - [Business logic](docs/application-business-logic.md)
@@ -167,11 +160,3 @@ workspace/
 Внутренние документы — планы, ранбуки деплоя, ревью, разборы инцидентов,
 заметки по безопасности и всё, что описывает конкретные серверы, — в
 репозиторий не входят и лежат локально.
-
-## Дальнейшие шаги
-
-1. B0/B1 — 2ГИС HTTP contract, adapter и test-contour smoke.
-2. B2 — routing snapshots и route quality gate.
-3. M1/M2 — карта, активное прохождение, resume и history.
-4. R1/R2 — recommendations v1 с preferences, diversity и feedback.
-5. Rewards и production hardening после выполнения release gates.
