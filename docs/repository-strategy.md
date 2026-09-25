@@ -2,7 +2,7 @@
 
 ## Управляющий репозиторий
 
-Фактическая модель группы GitLab `travel-platform2` — **четыре** repository:
+Фактическая модель группы GitLab `travel-platform2` — **пять** репозиториев:
 
 ```text
 workspace/                         # Git superproject
@@ -12,7 +12,8 @@ workspace/                         # Git superproject
 ├── docs/                          # индекс-ссылки на канонические docs
 ├── tourism-platform/              # docs, Compose, будущие Helm/K8s
 ├── tourism-backend/               # FastAPI modular monolith
-└── tourism-mobile/                # Flutter app
+├── tourism-mobile/                # Flutter app
+└── tourism-landing/               # публичный сайт
 ```
 
 | Repository | Назначение |
@@ -21,6 +22,7 @@ workspace/                         # Git superproject
 | `tourism-platform` | Документация, ADR, local Compose, staging/prod infra assets |
 | `tourism-backend` | API, бизнес-логика, PostgreSQL/PostGIS, Redis |
 | `tourism-mobile` | Flutter Android/iOS |
+| `tourism-landing` | Статический сайт и загрузка APK |
 
 Дополнительные repositories (`tourism-infrastructure`, `tourism-documentation`)
 **не создаются**. Kubernetes/Helm и расширенная документация живут в

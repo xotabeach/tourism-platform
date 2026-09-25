@@ -1,14 +1,14 @@
 # Стек платформы
 
-Канонический обзор технологий **как есть** и **как планируется**. Живой статус
-фич — [progress.md](progress.md). Инференс Gemma — подробно в
-[ai-self-hosted-home-lab.md](ai-self-hosted-home-lab.md).
+Обзор технологий **как есть** и **как планируется**. Реализованные функции и
+ограничения — в [current-status.md](current-status.md). Подробные планы и
+заметки по AI-инфраструктуре ведутся внутри команды.
 
-**Последнее обновление:** 2026-08-19.
+**Последнее обновление:** 2026-09-26.
 
 ## Репозитории
 
-Четыре GitLab-репозитория, workspace — superproject. Отдельных
+Пять GitLab-репозиториев, workspace — superproject. Отдельных
 `tourism-infrastructure` / `tourism-documentation` нет.
 
 | Репозиторий | Роль |
@@ -17,6 +17,7 @@
 | `tourism-platform` | Docs, ADR, local Compose, `deploy/test` |
 | `tourism-backend` | FastAPI modular monolith, Alembic, SQLAdmin |
 | `tourism-mobile` | Flutter Android/iOS |
+| `tourism-landing` | Статический публичный сайт |
 
 ## Что крутится сегодня
 
@@ -34,14 +35,15 @@
 | Mailpit | SMTP catcher | `127.0.0.1:1025` / `:8025` |
 
 Backend: Python 3.13, FastAPI, Pydantic v2, SQLAlchemy 2, Alembic, `uv`,
-Ruff, MyPy, Pytest. Модули: `identity`, `geography`, `places`, `routes`,
-`favorites`, `support`, `notifications`, `admin`, `media`. Пакеты-заглушки
-(ещё без API): `route_builder`, `route_execution`, `subscriptions`, `users`.
+Ruff, MyPy, Pytest. Модули включают `identity`, `geography`, `places`,
+`routes`, `content`, `favorites`, `support`, `notifications`, `admin`, `media`,
+`route_builder`, `route_execution`, `subscriptions` и `users`.
 
 Mobile: Flutter, Riverpod, GoRouter, Dio, `flutter_secure_storage`.
 `DATA_SOURCE=mock` по умолчанию; `api` — к локальному/test backend.
 
-Ops-admin: SQLAdmin на `/admin` (cookie session, не mobile JWT).
+Ops-admin: SQLAdmin/Jinja на `/admin` (cookie session, не mobile JWT),
+адаптивные экраны, дашборд и настраиваемые права сотрудников.
 
 Push: in-app inbox всегда; FCM HTTP v1 опционально (Android tray).
 
@@ -61,16 +63,13 @@ Internet → Caddy (TLS)
 Нет на этом хосте: MinIO, Mailpit, Ollama, Qdrant, Kafka. Медиа — в image /
 volume backend. FCM требует исходящий HTTPS с backend (сеть `edge`).
 
-Детали без IP/секретов:
-[environment-and-backend-deployment.md](environment-and-backend-deployment.md).
+Развёртывание описано конфигурацией `deploy/test/` и скриптами backend.
 
 ### 3. CI
 
-Backend push pipelines временно отключены полностью для экономии GitLab
-minutes. Стиль, типы, тесты — локально `./scripts/validate.sh`, production
-deploy — `tourism-backend/scripts/deploy-production-local.sh`. Mobile APK
-остаётся отдельным manual job.
-См. [ci-and-runners.md](ci-and-runners.md).
+На `main` и `gamma` запускается lean CI. Полный backend pipeline со стилем,
+тестами, сканерами и деплоем запускается с `CI_PIPELINE_MODE=full`; локально
+проверки выполняет `./scripts/validate.sh`. Мобильный APK публикуется отдельно.
 
 ---
 
@@ -170,7 +169,5 @@ Compose-фрагмент Ollama/Qdrant, PostGIS vs RAG, Lab-0…5:
 ## Связанные документы
 
 - [local-development.md](local-development.md) — `make up`, порты
-- [environment-and-backend-deployment.md](environment-and-backend-deployment.md)
-- [ci-and-runners.md](ci-and-runners.md)
-- [diagrams/container-diagram.md](diagrams/container-diagram.md)
+- [current-status.md](current-status.md)
 - [decisions/ADR-006-ai-assisted-route-planning.md](decisions/ADR-006-ai-assisted-route-planning.md)
