@@ -10,7 +10,20 @@
 
 ## Ветки и изменения
 
-Создавайте короткоживущие ветки от `main`. Предпочтительные префиксы:
+В `tourism-backend` и `tourism-mobile` ветки создаются от свежей `gamma`, а
+не от `main`, и MR открываются в `gamma`:
+
+```bash
+git fetch origin && git switch -c BACKEND-10 origin/gamma
+glab mr create --source-branch BACKEND-10 --target-branch gamma
+```
+
+`gamma` сливается в `main` пачкой, когда выпускаем версию или выкатываем
+бэкенд. Ветка задачи называется по ключу из трекера, порядок описан в
+`docs/agent-tracker-workflow.md` суперпроекта.
+
+В остальных репозиториях короткоживущие ветки от `main`. Предпочтительные
+префиксы:
 
 - `feat/`;
 - `fix/`;
