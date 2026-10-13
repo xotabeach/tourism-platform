@@ -55,9 +55,20 @@ repositories. Не хранить secrets в Git.
 
 ## Ветки
 
-Базовая ветка: `main`.
+Базовая ветка для работы в `tourism-backend` и `tourism-mobile`: `gamma`
+(с 2026-10-13). Ветка задачи создаётся от свежей `origin/gamma`, MR идёт в
+`gamma`, а `gamma` сливается в `main` пачкой при выпуске версии или выкатке
+бэкенда. На `gamma` быстрый пайплайн (линтер), полный только на `main`,
+поэтому полный набор тестов перед MR гоняется локально. Ветка задачи
+называется по ключу трекера (`BACKEND-10`), см.
+`docs/agent-tracker-workflow.md` суперпроекта.
 
-Короткоживущие ветки от `main`:
+```bash
+git fetch origin && git switch -c BACKEND-10 origin/gamma
+```
+
+В `tourism-platform`, `tourism-landing` и суперпроекте базовая ветка `main`,
+короткоживущие ветки от неё:
 
 - `feat/<short-name>` — функциональность;
 - `fix/<short-name>` — исправления;
