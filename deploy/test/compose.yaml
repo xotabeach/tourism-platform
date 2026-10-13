@@ -231,10 +231,12 @@ services:
     logging: *default-logging
 
   postgres:
+    # Production keeps the image built in August (Debian bullseye, PostGIS
+    # 3.4). No build section on purpose: docker/postgres now builds a newer
+    # base, and a rebuild under this tag would swap the database binaries
+    # and collation under live data. Moving is a planned step:
+    # docs/postgres-image-upgrade.md (BACKEND-45).
     image: ${POSTGRES_IMAGE:-crimeatrip/postgis-pgvector:16-3.4}
-    build:
-      context: ../../docker/postgres
-      dockerfile: Dockerfile
     restart: unless-stopped
     mem_limit: 224m
     pids_limit: 100

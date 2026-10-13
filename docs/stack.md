@@ -29,7 +29,7 @@
 
 | Сервис | Образ / стек | Host port (default) |
 | --- | --- | --- |
-| PostgreSQL + PostGIS + pgvector | `crimeatrip/postgis-pgvector:16-3.4` (build: `docker/postgres`) | `127.0.0.1:5433` |
+| PostgreSQL + PostGIS + pgvector | локально `crimeatrip/postgis-pgvector:16-bookworm` (build: `docker/postgres`), на проде пока `16-3.4` | `127.0.0.1:5433` |
 | Redis | `redis:8.2-alpine` | `127.0.0.1:6380` |
 | MinIO | S3-compatible media | `127.0.0.1:9000` / `:9001` |
 | Mailpit | SMTP catcher | `127.0.0.1:1025` / `:8025` |
